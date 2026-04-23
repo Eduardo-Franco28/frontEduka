@@ -4,17 +4,80 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from "react-native";
+import { useState } from "react";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import mainStyles from "../styles/theme";
 import useAppNavigation from "../hooks/useNavigation";
+import useAuth from "../hooks/useAuth";
 
 export default function AuthScreen() {
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+
+  const {login, register, userLogin, userRegister, error, loading} = useAuth();
+
   const route = useRoute<RouteProp<RootStackParamList, "AuthScreen">>();
   const navigation = useAppNavigation();
 
   const isLogin = route.params.isLogin;
+
+  const handleSubmit = async () => {
+    if (error != null) {
+      Alert.alert("Ops", error)
+      return;
+    }
+    if (!validar()) return;
+
+    if(isLogin){
+      await login({
+        email,
+        password
+      })
+    } else {
+      await register({
+        name,
+        email,
+        password
+      })
+    }
+
+    navigation.navigate("HomeScreen")
+  }
+
+  const validar = () => {
+    if (name.trim() == "") {
+      Alert.alert("Nome não pode ser vazio")
+      return false
+    } 
+
+    if (email.trim() == "") {
+      Alert.alert("E-mail não pode ser vazio")
+      return false
+    } 
+
+    if(!isLogin) {
+      if (password.trim() == "") {
+        Alert.alert("Senha não pode ser vazia")
+        return false
+      }
+
+      if (password.length <= 3) {
+        Alert.alert("Senha Fraca")
+        return false
+      }
+
+      if (password.trim() !== confirmPassword.trim()) {
+        Alert.alert("As senhas não batem")
+        return false
+      }
+    }
+    return true
+  }
 
   return (
     <View style={mainStyles.component}>
@@ -34,6 +97,7 @@ export default function AuthScreen() {
             <TextInput 
             style={styles.input} 
             placeholder="Digite seu nome de usuário"
+            onChangeText={setName}
             />
           </>
         )}
@@ -42,6 +106,7 @@ export default function AuthScreen() {
         <TextInput 
         style={styles.input}
         placeholder="Digite seu e-mail"
+        onChangeText={setEmail}
         />
         <Text style={styles.inputHint}>Use o e-mail que você cadastrou</Text>
 
@@ -49,6 +114,7 @@ export default function AuthScreen() {
         <TextInput 
         style={styles.input}
         placeholder="Digite sua senha"
+        onChangeText={setPassword}
         />
 
         {!isLogin && (
@@ -57,6 +123,7 @@ export default function AuthScreen() {
             <TextInput 
             style={styles.input} 
             placeholder="Confirme sua senha"
+            onChangeText={setConfirmPassword}
             />
           </>
         )}
@@ -68,7 +135,7 @@ export default function AuthScreen() {
 
         <TouchableOpacity
           style={styles.primaryButton}
-          onPress={() => navigation.navigate("HomeScreen")}
+          onPress={handleSubmit}
         >
           <Text style={styles.primaryButtonText}>
             {isLogin ? "Entrar" : "Criar Conta"} →
