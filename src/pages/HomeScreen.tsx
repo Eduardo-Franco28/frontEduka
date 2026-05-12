@@ -1,5 +1,6 @@
-import { View, Text, ScrollView, StyleSheet, StatusBar } from "react-native";
+import { View, Text, ScrollView, StyleSheet, StatusBar, TouchableOpacity } from "react-native";
 import mainStyles from "../styles/theme";
+import TabBar from "../components/TabBar";
 
 export default function HomeScreen() {
   return (
@@ -139,20 +140,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* Bottom Tab Bar */}
-      <View style={styles.tabBar}>
-        <View style={styles.tabItem}>
-          <Text style={styles.tabIconActive}>🏠</Text>
-          <Text style={styles.tabLabelActive}>Início</Text>
-        </View>
-        <View style={styles.tabItem}>
-          <Text style={styles.tabIcon}>📋</Text>
-          <Text style={styles.tabLabel}>Trajetória</Text>
-        </View>
-        <View style={styles.tabItem}>
-          <Text style={styles.tabIcon}>👤</Text>
-          <Text style={styles.tabLabel}>Perfil</Text>
-        </View>
-      </View>
+      <TabBar />
     </View>
   );
 }
@@ -318,36 +306,5 @@ const styles = StyleSheet.create({
   subjectBarFill: {
     height: "100%",
     borderRadius: 100,
-  },
-
-  // Tab bar
-  tabBar: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    borderTopWidth: 0.5,
-    borderTopColor: "#e0ddd7",
-    paddingVertical: 10,
-    paddingBottom: 16,
-  },
-  tabItem: {
-    flex: 1,
-    alignItems: "center",
-    gap: 4,
-  },
-  tabIcon: {
-    fontSize: 20,
-    opacity: 0.45,
-  },
-  tabIconActive: {
-    fontSize: 20,
-  },
-  tabLabel: {
-    fontSize: 11,
-    color: "#9a9a8e",
-  },
-  tabLabelActive: {
-    fontSize: 11,
-    color: "#5b82b5",
-    fontWeight: "600",
-  },
+  }
 });

@@ -22,3 +22,4 @@ Este projeto foi desenvolvido como Trabalho de Conclusão de Curso (TCC) pelos a
 - npx expo install @react-navigation/native-stack
 
 - npm install axios
+- npx expo install expo-secure-store

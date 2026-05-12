@@ -1,0 +1,10 @@
+export enum Escolaridade {
+  SEXTO_ANO,
+  SETIMO_ANO,
+  OITAVO_ANO,
+  NONO_ANO,
+
+  PRIMEIRO_MEDIO,
+  SEGUNDO_MEDIO,
+  TERCEIRO_MEDIO
+}

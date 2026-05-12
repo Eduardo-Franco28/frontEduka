@@ -11,73 +11,80 @@ import { useRoute, RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import mainStyles from "../styles/theme";
 import useAppNavigation from "../hooks/useNavigation";
+import { saveStore } from "../services/storageService";
 import useAuth from "../hooks/useAuth";
 
 export default function AuthScreen() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-
-  const {login, register, userLogin, userRegister, error, loading} = useAuth();
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(true);
 
   const route = useRoute<RouteProp<RootStackParamList, "AuthScreen">>();
   const navigation = useAppNavigation();
 
+  const { login, userLogin, error, loading } = useAuth();
+
   const isLogin = route.params.isLogin;
 
   const handleSubmit = async () => {
-    if (error != null) {
-      Alert.alert("Ops", error)
-      return;
-    }
     if (!validar()) return;
 
+    const passwordFormat = password.trim();
+
     if(isLogin){
-      await login({
-        email,
-        password
-      })
-    } else {
-      await register({
-        name,
-        email,
-        password
-      })
+    let response;
+
+    response = await login({ email, password: passwordFormat });
+
+    if (!response) {
+      Alert.alert("Erro", error || "Erro desconhecido");
+      return;
     }
 
-    navigation.navigate("HomeScreen")
-  }
+    await saveStore("token", response.token);
+
+    console.log(response);
+    navigation.navigate("HomeScreen");
+    } else {
+      navigation.navigate("SchoolYearScreen", {
+        name,
+        email,
+        passwordFormat: passwordFormat,
+      });
+    }
+  };
 
   const validar = () => {
-    if (name.trim() == "") {
-      Alert.alert("Nome não pode ser vazio")
-      return false
-    } 
-
     if (email.trim() == "") {
-      Alert.alert("E-mail não pode ser vazio")
-      return false
-    } 
+      Alert.alert("E-mail não pode ser vazio");
+      return false;
+    }
 
-    if(!isLogin) {
-      if (password.trim() == "") {
-        Alert.alert("Senha não pode ser vazia")
-        return false
+    if (password.trim() == "") {
+      Alert.alert("Senha não pode ser vazia");
+      return false;
+    }
+
+    if (!isLogin) {
+      if (password.trim() !== confirmPassword.trim()) {
+        Alert.alert("As senhas não batem");
+        return false;
       }
 
       if (password.length <= 3) {
-        Alert.alert("Senha Fraca")
-        return false
+        Alert.alert("Senha Fraca");
+        return false;
       }
 
-      if (password.trim() !== confirmPassword.trim()) {
-        Alert.alert("As senhas não batem")
-        return false
+      if (name.trim() == "") {
+        Alert.alert("Nome não pode ser vazio");
+        return false;
       }
     }
-    return true
-  }
+    return true;
+  };
 
   return (
     <View style={mainStyles.component}>
@@ -86,57 +93,66 @@ export default function AuthScreen() {
 
         <View style={styles.dica}>
           <Text style={styles.dicaTexto}>
-            {isLogin ? "🦁 Olá! Digite seu e-mail e senha para entrar." 
-            : "🦁Vamos criar sua conta juntos! Preencha cada campo com calma, sem pressa."}
+            {isLogin
+              ? "🦁 Olá! Digite seu e-mail e senha para entrar."
+              : "🦁Vamos criar sua conta juntos! Preencha cada campo com calma, sem pressa."}
           </Text>
         </View>
 
         {!isLogin && (
           <>
             <Text style={styles.label}>Seu nome</Text>
-            <TextInput 
-            style={styles.input} 
-            placeholder="Digite seu nome de usuário"
-            onChangeText={setName}
+            <TextInput
+              style={styles.input}
+              placeholder="Digite seu nome de usuário"
+              onChangeText={setName}
             />
           </>
         )}
 
         <Text style={styles.label}>E-mail</Text>
-        <TextInput 
-        style={styles.input}
-        placeholder="Digite seu e-mail"
-        onChangeText={setEmail}
+        <TextInput
+          style={styles.input}
+          placeholder="Digite seu e-mail"
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          autoCorrect={false}
         />
         <Text style={styles.inputHint}>Use o e-mail que você cadastrou</Text>
 
         <Text style={styles.label}>Senha</Text>
-        <TextInput 
-        style={styles.input}
-        placeholder="Digite sua senha"
-        onChangeText={setPassword}
+        <TextInput
+          style={styles.input}
+          placeholder="Digite sua senha"
+          onChangeText={setPassword}
+          autoCapitalize="none"
+          autoCorrect={false}
+          secureTextEntry={showPassword}
         />
 
         {!isLogin && (
           <>
             <Text style={styles.label}>Confimar senha</Text>
-            <TextInput 
-            style={styles.input} 
-            placeholder="Confirme sua senha"
-            onChangeText={setConfirmPassword}
+            <TextInput
+              style={styles.input}
+              placeholder="Confirme sua senha"
+              onChangeText={setConfirmPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              secureTextEntry={showPassword}
             />
           </>
         )}
 
-        <View style={styles.checkboxRow}>
-          <View style={styles.checkbox} />
-          <Text style={styles.checkboxLabel}>Mostrar senha</Text>
-        </View>
-
         <TouchableOpacity
-          style={styles.primaryButton}
-          onPress={handleSubmit}
+          style={styles.checkboxRow}
+          onPress={() => setShowPassword(!showPassword)}
         >
+          <View style={styles.checkbox}></View>
+          <Text style={styles.checkboxLabel}>Mostrar senha</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.primaryButton} onPress={handleSubmit}>
           <Text style={styles.primaryButtonText}>
             {isLogin ? "Entrar" : "Criar Conta"} →
           </Text>
