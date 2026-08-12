@@ -12,7 +12,8 @@ import { useRoute, RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import useAuth from "../hooks/useAuth";
 import useAppNavigation from "../hooks/useNavigation";
-import { Escolaridade } from "../enums/userGrades";
+import { Escolaridade } from "../enums/UserGradesEnum";
+import { COLORS } from "../styles/colors";
 
 export default function SchoolYearScreen() {
   const [anoEscolar, setAnoEscolar] = useState<Escolaridade | null>(null);
@@ -22,21 +23,8 @@ export default function SchoolYearScreen() {
 
   const { name, email, passwordFormat } = route.params;
 
-  const { login, register, userLogin, userRegister, error, loading } = useAuth();   
+  const { login, register, userLogin, userRegister, error, loading } = useAuth();
 
-  const handleSubmit = async() => {
-    let response;
-    
-    response = await register({ name, email, password: passwordFormat, anoEscolar });
-
-    if (!response) {
-      Alert.alert("Erro", error || "Erro desconhecido");
-      return;
-    }
-
-    console.log(response);
-    navigation.navigate("HomeScreen");
-  }
 
   return (
     <View style={mainStyles.component}>
@@ -91,7 +79,7 @@ export default function SchoolYearScreen() {
           onPress={() => setAnoEscolar(Escolaridade.SEGUNDO_MEDIO)}
           activeOpacity={0.85}
         >
-          <View style={[styles.iconBox, { backgroundColor: "#e0f4ec" }]}>
+          <View style={[styles.iconBox, { backgroundColor: COLORS.SURFACE_GREEN_LIGHT }]}>
             <Text style={styles.icon}>📗</Text>
           </View>
           <View style={styles.cardInfo}>
@@ -112,7 +100,7 @@ export default function SchoolYearScreen() {
           onPress={() => setAnoEscolar(Escolaridade.TERCEIRO_MEDIO)}
           activeOpacity={0.85}
         >
-          <View style={[styles.iconBox, { backgroundColor: "#e8f0f8" }]}>
+          <View style={[styles.iconBox, { backgroundColor: COLORS.SURFACE_BLUE }]}>
             <Text style={styles.icon}>📘</Text>
           </View>
           <View style={styles.cardInfo}>
@@ -129,11 +117,11 @@ export default function SchoolYearScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      <View style={styles.footer}>
+      {/* <View style={styles.footer}>
         <TouchableOpacity style={styles.nextButton} activeOpacity={0.88} onPress={handleSubmit}>
           <Text style={styles.nextButtonText}>Próximo →</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 }
@@ -147,7 +135,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 52,
     paddingBottom: 14,
-    backgroundColor: "#f0ede8",
+    backgroundColor: COLORS.BG_WARM,
   },
   backButton: {
     width: 36,
@@ -159,13 +147,13 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 18,
-    color: "#2d3340",
+    color: COLORS.TEXT_PRIMARY,
     lineHeight: 20,
   },
   headerTitle: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#2d3340",
+    color: COLORS.TEXT_PRIMARY,
   },
   headerPlaceholder: {
     width: 36,
@@ -178,17 +166,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     paddingVertical: 10,
-    backgroundColor: "#f0ede8",
+    backgroundColor: COLORS.BG_WARM,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#d0cdc5",
+    backgroundColor: COLORS.BORDER_WARM,
   },
   dotActive: {
     width: 20,
-    backgroundColor: "#5b82b5",
+    backgroundColor: COLORS.INFO,
     borderRadius: 4,
   },
 
@@ -219,7 +207,7 @@ const styles = StyleSheet.create({
   bubbleText: {
     flex: 1,
     fontSize: 14,
-    color: "#2d3340",
+    color: COLORS.TEXT_PRIMARY,
     lineHeight: 20,
   },
 
@@ -236,7 +224,7 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   cardSelected: {
-    borderColor: "#5b82b5",
+    borderColor: COLORS.INFO,
   },
   iconBox: {
     width: 48,
@@ -255,12 +243,12 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#2d3340",
+    color: COLORS.TEXT_PRIMARY,
     marginBottom: 3,
   },
   cardSubtitle: {
     fontSize: 13,
-    color: "#9a9a8e",
+    color: COLORS.TEXT_MUTED,
     lineHeight: 17,
   },
 
@@ -270,14 +258,14 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: "#d0cdc5",
+    borderColor: COLORS.BORDER_WARM,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
   },
   checkboxSelected: {
-    backgroundColor: "#5b82b5",
-    borderColor: "#5b82b5",
+    backgroundColor: COLORS.INFO,
+    borderColor: COLORS.INFO,
   },
   checkmark: {
     color: "#fff",
@@ -291,10 +279,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 32,
     paddingTop: 12,
-    backgroundColor: "#f0ede8",
+    backgroundColor: COLORS.BG_WARM,
   },
   nextButton: {
-    backgroundColor: "#5b82b5",
+    backgroundColor: COLORS.INFO,
     borderRadius: 100,
     paddingVertical: 16,
     alignItems: "center",

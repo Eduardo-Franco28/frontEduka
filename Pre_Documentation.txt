@@ -1,0 +1,682 @@
+DOCUMENTAÇÃO TÉCNICA DO APLICATIVO
+
+Trabalho de Conclusão de Curso
+Colégio Raphael di Santo
+
+Equipe: Eduardo Franco, Edson Barbarini, Lucas Volpe,
+        Luiz Felipe, Luiza Marinho, Gabriel Brito
+
+
+--------------------------------------------------------------------------------
+SUMÁRIO
+--------------------------------------------------------------------------------
+
+  1. Apresentação do sistema
+  2. Tecnologias empregadas
+  3. Arquitetura do sistema
+  4. Organização do código
+  5. Autenticação e segurança
+  6. Funcionamento das telas
+  7. Padrões de desenvolvimento adotados
+  8. Estágio atual e trabalhos futuros
+
+
+================================================================================
+1. APRESENTAÇÃO DO SISTEMA
+================================================================================
+
+1.1 O que é
+
+O sistema desenvolvido é um aplicativo educacional para celulares, voltado a
+estudantes do Ensino Médio. Seu objetivo é oferecer conteúdo escolar dividido
+em pequenas atividades interativas, permitindo que o aluno estude no próprio
+ritmo e acompanhe visualmente o próprio progresso.
+
+A proposta central é a de que aprender por meio de interação seja mais
+eficiente do que apenas ler um texto. Por isso, as atividades não se limitam a
+perguntas de múltipla escolha: elas envolvem manipulação direta de elementos na
+tela, como arrastar objetos para montar uma operação matemática.
+
+1.2 Como o conteúdo é organizado
+
+O conteúdo educacional foi estruturado em quatro níveis hierárquicos, do mais
+amplo ao mais específico:
+
+    MATÉRIA          Por exemplo, Matemática.
+       │
+       └── TÓPICO    Um assunto dentro da matéria, como "Adição".
+              │      Cada tópico guarda o percentual já concluído
+              │      pelo aluno e seu situação atual.
+              │
+              └── QUESTÃO    Um exercício do tópico, com um nível
+                     │       de dificuldade associado.
+                     │
+                     └── ALTERNATIVA    As opções de resposta,
+                                        das quais uma é a correta.
+
+Essa organização permite que o progresso do aluno seja medido de forma
+granular: ao concluir questões, o percentual do tópico avança; ao concluir
+tópicos, a matéria avança.
+
+1.3 Divisão do sistema em duas partes
+
+O projeto é composto por dois programas independentes que conversam entre si
+pela internet:
+
+  O APLICATIVO (front-end), instalado no celular do aluno. É responsável por
+  tudo aquilo que o usuário vê e toca: telas, botões, animações e atividades.
+  É este programa que esta documentação descreve.
+
+  O SERVIDOR (back-end), executado em um computador remoto. É responsável por
+  guardar os dados de forma permanente: cadastros de usuários, matérias,
+  tópicos, questões e o progresso de cada aluno.
+
+Essa separação é uma prática consolidada no desenvolvimento de software. Ela
+garante que os dados não fiquem presos a um único celular: o aluno pode trocar
+de aparelho e recuperar todo o seu progresso, pois as informações estão no
+servidor, e não no dispositivo.
+
+A comunicação entre as duas partes ocorre por meio de uma API — sigla para
+Interface de Programação de Aplicações. Na prática, a API é um conjunto de
+endereços que o aplicativo acessa para pedir ou enviar informações, de modo
+semelhante a um site que responde a diferentes endereços conforme a página
+solicitada.
+
+
+================================================================================
+2. TECNOLOGIAS EMPREGADAS
+================================================================================
+
+Esta seção apresenta as ferramentas utilizadas na construção do aplicativo e a
+justificativa de cada escolha.
+
+2.1 React Native
+
+React Native é um framework — isto é, uma base pronta de ferramentas e regras
+sobre a qual o programa é construído — criado pela Meta para o desenvolvimento
+de aplicativos móveis.
+
+Sua principal característica é permitir que um único código-fonte gere
+aplicativos tanto para Android quanto para iOS. Sem essa tecnologia, seria
+necessário escrever o aplicativo duas vezes, em duas linguagens diferentes, o
+que dobraria o esforço da equipe.
+
+Diferentemente de tecnologias que apenas exibem uma página da internet dentro
+de uma janela, o React Native gera componentes visuais nativos do sistema
+operacional. O resultado é um aplicativo com aparência e desempenho
+equivalentes aos de um aplicativo desenvolvido especificamente para a
+plataforma.
+
+Versão utilizada: 0.81.5
+
+2.2 Expo
+
+O Expo é um conjunto de ferramentas que simplifica o desenvolvimento em React
+Native. Ele fornece acesso facilitado a recursos do aparelho — como
+armazenamento seguro e efeitos visuais — sem que seja necessário programar
+diretamente em linguagem nativa do Android ou do iOS.
+
+Sua adoção reduziu significativamente a complexidade de configuração do
+ambiente, permitindo que a equipe concentrasse esforços na construção das
+funcionalidades.
+
+Versão utilizada: SDK 54
+
+2.3 TypeScript
+
+TypeScript é uma extensão da linguagem JavaScript que acrescenta verificação
+de tipos de dados.
+
+Em JavaScript puro, um erro como somar um número a um texto só se manifesta
+quando o programa já está em execução, muitas vezes na frente do usuário. Com
+TypeScript, esse tipo de inconsistência é detectado ainda durante a escrita do
+código, no editor.
+
+Em um projeto desenvolvido por seis pessoas, esse recurso é especialmente
+valioso: ele documenta de forma explícita o formato dos dados que circulam
+entre as partes do sistema, evitando que um integrante utilize incorretamente
+o código escrito por outro.
+
+Versão utilizada: 5.9
+
+2.4 React Navigation
+
+Biblioteca responsável pelo controle da navegação entre telas.
+
+É ela que gerencia a transição de uma tela para outra, a animação de entrada e
+saída, e o comportamento do botão "voltar" do Android. Também mantém o
+histórico de navegação, permitindo que o usuário retorne às telas anteriores na
+ordem correta.
+
+2.5 Axios
+
+Biblioteca utilizada para realizar as requisições à API, ou seja, para enviar e
+receber dados do servidor.
+
+Foi escolhida por permitir a configuração de comportamentos automáticos
+aplicados a todas as requisições. No projeto, esse recurso é utilizado para
+anexar automaticamente as credenciais do usuário a cada comunicação com o
+servidor, conforme detalhado na seção 5.
+
+2.6 Expo Secure Store
+
+Ferramenta de armazenamento criptografado de dados sensíveis no aparelho.
+
+É empregada para guardar a credencial de acesso do usuário. A escolha por um
+armazenamento criptografado, em vez de um armazenamento comum, é uma medida
+deliberada de segurança: caso o aparelho seja comprometido, a credencial não
+pode ser lida diretamente.
+
+2.7 Reanimated e Gesture Handler
+
+Bibliotecas responsáveis, respectivamente, pelas animações e pelo
+reconhecimento de gestos do usuário, como o ato de arrastar um elemento pela
+tela.
+
+Essas bibliotecas processam as animações em uma via de execução separada
+daquela que processa a lógica do aplicativo. A consequência prática é que o
+movimento acompanha o dedo do usuário de forma fluida, sem travamentos, mesmo
+que o aplicativo esteja simultaneamente realizando outras operações.
+
+São a base técnica da atividade interativa descrita na seção 6.7.
+
+2.8 Bibliotecas complementares
+
+  Expo Linear Gradient        Aplica os degradês de cor da identidade visual.
+  Safe Area Context           Impede que o conteúdo seja encoberto por
+                              elementos do sistema, como o entalhe da câmera
+                              ou a barra de gestos.
+  React Native Screens        Otimiza o uso de memória durante a navegação.
+
+2.9 Quadro-resumo
+
+  Tecnologia            Finalidade
+  ------------------------------------------------------------------------
+  React Native 0.81     Base do aplicativo
+  Expo SDK 54           Ferramentas e acesso a recursos do aparelho
+  TypeScript 5.9        Verificação de tipos e segurança do código
+  React Navigation 7    Navegação entre telas
+  Axios                 Comunicação com o servidor
+  Expo Secure Store     Armazenamento criptografado da credencial
+  Reanimated 4          Animações
+  Gesture Handler       Reconhecimento de gestos
+  Linear Gradient       Degradês da identidade visual
+  Safe Area Context     Adaptação a diferentes formatos de tela
+
+
+================================================================================
+3. ARQUITETURA DO SISTEMA
+================================================================================
+
+3.1 O conceito de arquitetura em camadas
+
+A arquitetura de um software corresponde à sua organização interna: como o
+código é dividido e de que maneira as partes se comunicam.
+
+O aplicativo adota uma arquitetura EM CAMADAS. Nesse modelo, cada camada possui
+uma responsabilidade única e bem delimitada, e conhece apenas a camada
+imediatamente inferior.
+
+Uma analogia útil é a de um restaurante. O cliente comunica seu pedido ao
+garçom; o garçom o transmite à cozinha; a cozinha prepara o prato. O cliente
+não entra na cozinha, e o cozinheiro não atende às mesas. Cada função é
+independente, e é possível substituir o garçom sem alterar o funcionamento da
+cozinha.
+
+3.2 As camadas do aplicativo
+
+    ┌──────────────────────────────────────────────────────────┐
+    │  TELA                                                    │
+    │  Exibe as informações e recebe os toques do usuário.     │
+    │  Não sabe de onde vêm os dados.                          │
+    └──────────────────────────┬───────────────────────────────┘
+                               │  solicita
+    ┌──────────────────────────▼───────────────────────────────┐
+    │  HOOK                                                    │
+    │  Controla a situação da solicitação: se está carregando, │
+    │  se houve erro, e quais dados foram obtidos.             │
+    └──────────────────────────┬───────────────────────────────┘
+                               │  solicita
+    ┌──────────────────────────▼───────────────────────────────┐
+    │  SERVIÇO                                                 │
+    │  Conhece o endereço exato da API a ser consultado.       │
+    └──────────────────────────┬───────────────────────────────┘
+                               │  utiliza
+    ┌──────────────────────────▼───────────────────────────────┐
+    │  CLIENTE HTTP                                            │
+    │  Executa a comunicação e anexa a credencial do usuário.  │
+    └──────────────────────────┬───────────────────────────────┘
+                               │  internet
+    ┌──────────────────────────▼───────────────────────────────┐
+    │  SERVIDOR (back-end)                                     │
+    │  Consulta o banco de dados e devolve as informações.     │
+    └──────────────────────────────────────────────────────────┘
+
+3.3 Justificativa da escolha
+
+A organização em camadas foi adotada por três razões:
+
+  MANUTENÇÃO. Quando ocorre uma falha, sua origem é localizável. Se os dados
+  chegam incorretos, o problema está na camada de serviço ou no servidor; se
+  os dados estão corretos mas a exibição está errada, o problema está na tela.
+
+  REAPROVEITAMENTO. Uma mesma consulta pode ser utilizada por várias telas sem
+  duplicação de código.
+
+  TRABALHO EM EQUIPE. Com responsabilidades delimitadas, dois integrantes
+  podem trabalhar em camadas diferentes simultaneamente, sem conflito.
+
+3.4 Exemplo prático do fluxo
+
+O percurso completo de uma informação, desde o toque do usuário até a exibição
+na tela, ocorre da seguinte forma:
+
+  1. O aluno abre a tela de matérias.
+  2. A tela solicita ao hook a lista de matérias.
+  3. O hook registra que a solicitação está em andamento; a tela exibe um
+     indicador de carregamento.
+  4. O hook aciona o serviço, que consulta o endereço correspondente na API.
+  5. O cliente HTTP anexa a credencial do usuário e envia a requisição.
+  6. O servidor consulta o banco de dados e devolve a lista de matérias.
+  7. O hook armazena a lista e registra o fim do carregamento.
+  8. A tela exibe as matérias em formato de cartões.
+
+Caso ocorra falha em qualquer ponto — ausência de conexão, servidor
+indisponível ou credencial expirada —, o hook registra a mensagem de erro
+correspondente, e a tela apresenta um aviso ao usuário em vez de permanecer
+travada.
+
+
+================================================================================
+4. ORGANIZAÇÃO DO CÓDIGO
+================================================================================
+
+Os arquivos do projeto estão distribuídos em pastas nomeadas segundo sua
+função. Um novo integrante da equipe, ao procurar determinado trecho de código,
+identifica sua localização pelo nome da pasta.
+
+  screens      As telas completas do aplicativo. Cada arquivo corresponde a
+               uma tela que o usuário visualiza.
+
+  components   Peças de interface reutilizáveis, empregadas em mais de uma
+               tela — como a barra de navegação inferior e o aviso de erro.
+
+  hooks        A lógica de obtenção e controle dos dados.
+
+  services     As funções que se comunicam com a API, organizadas por assunto.
+
+  contexts     Informações compartilhadas por todo o aplicativo. Contém apenas
+               os dados do usuário autenticado.
+
+  types        As definições de formato dos dados, verificadas pelo TypeScript.
+
+  styles       As cores da identidade visual e os estilos comuns.
+
+  constants    Valores fixos, como o endereço do servidor.
+
+  utils        Funções auxiliares de uso geral.
+
+  enums        Listas de valores possíveis, como as situações de um tópico
+               (não iniciado, em andamento, concluído).
+
+  assets       As imagens do aplicativo, incluindo o mascote.
+
+
+================================================================================
+5. AUTENTICAÇÃO E SEGURANÇA
+================================================================================
+
+5.1 O mecanismo de credencial
+
+O aplicativo utiliza autenticação baseada em token. Um token é uma sequência de
+caracteres, gerada pelo servidor no momento do login, que funciona como uma
+credencial temporária de identificação.
+
+A analogia adequada é a de uma pulseira de acesso a um evento. Ao entrar, o
+visitante apresenta seu documento uma única vez e recebe uma pulseira. A partir
+daí, basta exibir a pulseira nas demais áreas, sem necessidade de reapresentar
+o documento.
+
+De forma equivalente, o aluno informa e-mail e senha apenas uma vez. O servidor
+valida os dados e devolve um token, que passa a ser apresentado
+automaticamente em todas as requisições seguintes.
+
+5.2 Por que esse mecanismo foi adotado
+
+A alternativa seria armazenar a senha no aparelho e reenviá-la a cada
+requisição — prática inadequada, pois multiplica as oportunidades de
+interceptação da senha.
+
+O token apresenta duas vantagens de segurança: possui prazo de validade, de
+modo que uma eventual interceptação tem efeito limitado no tempo; e pode ser
+invalidado pelo servidor sem que o usuário precise alterar sua senha.
+
+5.3 Como o token é armazenado
+
+O token é guardado por meio do Expo Secure Store, que utiliza os mecanismos de
+criptografia do próprio sistema operacional. Não é gravado em texto legível.
+
+5.4 Como o token é utilizado
+
+A anexação do token às requisições é AUTOMÁTICA. Foi configurado um
+interceptador — um trecho de código executado antes de cada envio ao
+servidor — que recupera o token do armazenamento seguro e o insere na
+requisição.
+
+Essa decisão é relevante do ponto de vista da segurança: como o processo é
+automático, nenhum desenvolvedor da equipe precisa lembrar de anexar a
+credencial manualmente, o que elimina a possibilidade de esquecimento.
+
+5.5 Recuperação da sessão
+
+Ao abrir o aplicativo, antes de exibir qualquer tela, o sistema verifica a
+existência de um token armazenado. Se houver, consulta o servidor para
+confirmar sua validade e recuperar os dados do usuário. Durante essa
+verificação, exibe-se um indicador de carregamento.
+
+Caso o token esteja expirado ou inválido, ele é descartado e o usuário é
+direcionado à tela de boas-vindas. Caso esteja válido, o usuário acessa
+diretamente a tela principal, sem necessidade de novo login.
+
+É esse mecanismo que produz a experiência de "permanecer conectado" entre uma
+utilização e outra.
+
+
+================================================================================
+6. FUNCIONAMENTO DAS TELAS
+================================================================================
+
+O aplicativo é composto por nove telas. Esta seção descreve a finalidade de
+cada uma, seguindo o percurso natural do usuário.
+
+6.1 Tela de abertura
+
+Primeira tela exibida. Apresenta a marca do aplicativo sobre fundo em degradê,
+acompanhada do mascote e do slogan.
+
+Ao ser tocada, verifica se há usuário autenticado: em caso afirmativo,
+direciona à tela principal; caso contrário, à tela de apresentação. Essa
+verificação torna a abertura do aplicativo diferente para quem já possui conta
+e para quem acessa pela primeira vez.
+
+6.2 Tela de apresentação
+
+Destinada a quem ainda não possui cadastro. Apresenta o mascote e a proposta do
+aplicativo, oferecendo dois caminhos: criar uma conta ou acessar uma conta
+existente.
+
+6.3 Tela de acesso
+
+Reúne cadastro e login em uma única tela, cujo conteúdo se adapta conforme a
+operação escolhida. No cadastro, exibem-se os campos de nome e confirmação de
+senha, ocultos no login.
+
+Antes de qualquer comunicação com o servidor, a tela valida localmente os dados
+informados, verificando se os campos obrigatórios foram preenchidos, se as
+senhas coincidem e se a senha possui o comprimento mínimo de seis caracteres.
+
+Essa validação prévia evita requisições desnecessárias e oferece resposta
+imediata ao usuário. Há ainda a opção de exibir a senha digitada, recurso de
+usabilidade que reduz erros de digitação em teclados de celular.
+
+Concluída a operação com sucesso, o usuário é direcionado à tela principal, e o
+histórico de navegação é reiniciado — de modo que o botão "voltar" não retorne
+à tela de login.
+
+6.4 Tela principal
+
+Página inicial após a autenticação. Exibe saudação personalizada com o nome do
+aluno e dois cartões de acesso rápido: a atividade sugerida do dia e a
+continuação dos estudos em andamento.
+
+Nesta versão, apenas a saudação utiliza dados reais do servidor; o conteúdo dos
+cartões ainda é fixo.
+
+6.5 Tela de matérias
+
+Apresenta as matérias disponíveis em uma grade de dois cartões por linha, com
+os dados obtidos do servidor.
+
+Durante o carregamento, exibe-se um indicador de progresso; em caso de falha na
+comunicação, apresenta-se uma mensagem explicativa. Ao selecionar uma matéria,
+o aluno é conduzido à tela de tópicos correspondente.
+
+6.6 Tela de tópicos
+
+Lista os tópicos da matéria selecionada. Cada item apresenta o título, uma
+breve descrição, um indicador de situação e o percentual já concluído pelo
+aluno.
+
+A tela inclui um balão de orientação com o mascote, explicando o significado
+dos indicadores — recurso de usabilidade adotado para reduzir a necessidade de
+instruções externas.
+
+6.7 Tela de atividade
+
+Constitui o núcleo pedagógico do aplicativo e a tela mais complexa do ponto de
+vista técnico.
+
+Apresenta uma operação de adição na qual o aluno não seleciona a resposta de
+imediato: primeiro, deve ARRASTAR conjuntos de elementos visuais até uma área
+de destino, representando fisicamente a soma das quantidades. Somente após
+posicionar corretamente ambos os conjuntos as opções de resposta são
+habilitadas.
+
+O funcionamento se dá da seguinte forma: o aplicativo mede a posição de cada
+elemento na tela e, quando o aluno solta um conjunto, calcula a distância até a
+área de destino. Se a distância for inferior a um limite estabelecido, o
+conjunto se encaixa automaticamente com uma animação elástica; caso contrário,
+retorna à posição de origem.
+
+A intenção pedagógica é a de que o aluno compreenda a operação por meio da
+manipulação concreta das quantidades, e não apenas pela memorização do
+resultado.
+
+Nesta versão, a atividade apresenta uma operação fixa. A estrutura foi
+concebida para que, futuramente, as atividades sejam carregadas do servidor e
+apresentadas conforme seu tipo.
+
+6.8 Tela de perfil
+
+Reúne os dados do aluno, suas estatísticas de uso — estrelas acumuladas,
+atividades concluídas e dias consecutivos de estudo — e o menu de opções, que
+inclui conquistas, configurações de acessibilidade, edição de dados e
+encerramento de sessão.
+
+Nesta versão, apenas o encerramento de sessão está implementado; as
+estatísticas são ilustrativas.
+
+6.9 Tela de ano escolar
+
+Prevista para permitir que o aluno informe seu ano do Ensino Médio,
+possibilitando a adequação do conteúdo à sua série.
+
+A tela foi construída, mas ainda não integrada ao fluxo de navegação. Trata-se
+de funcionalidade planejada e não concluída, detalhada na seção 8.
+
+6.10 Navegação entre as telas
+
+A movimentação principal se dá por uma barra fixa na parte inferior da tela,
+com três destinos: Início, Trajetória e Perfil. Essa barra é visível nas telas
+principais e oculta durante as atividades, a fim de evitar distrações no
+momento do estudo.
+
+    Abertura
+       │
+       ├── com conta ──────────────► Tela principal
+       │
+       └── sem conta ──► Apresentação ──► Acesso ──► Tela principal
+
+    Barra inferior:
+
+       Início ◄────► Matérias ◄────► Perfil
+          │             │              │
+          │             ▼              ▼
+          │          Tópicos       Encerrar sessão
+          ▼
+       Atividade
+
+
+================================================================================
+7. PADRÕES DE DESENVOLVIMENTO ADOTADOS
+================================================================================
+
+Padrões de desenvolvimento são convenções acordadas pela equipe quanto à forma
+de escrever o código. Sua função é garantir que arquivos escritos por
+diferentes integrantes mantenham estrutura semelhante, facilitando a leitura e
+a manutenção.
+
+7.1 Nomenclatura padronizada
+
+Os nomes de arquivos e funções seguem regras fixas. Telas recebem o sufixo
+correspondente; funções que controlam dados recebem prefixo próprio; funções de
+comunicação com o servidor são nomeadas pela combinação entre o assunto e a
+ação executada.
+
+O benefício é a previsibilidade: pelo nome de um arquivo, identifica-se sua
+função sem necessidade de abri-lo.
+
+7.2 Estrutura uniforme de obtenção de dados
+
+Toda consulta ao servidor segue o mesmo formato, controlando três informações:
+os dados obtidos, se a consulta está em andamento e se ocorreu algum erro.
+
+Essa uniformidade produz um efeito prático relevante: compreendida uma
+consulta, compreendem-se todas. As consultas de matérias, tópicos, questões e
+alternativas possuem estrutura idêntica, variando apenas o assunto tratado.
+
+7.3 Tratamento centralizado de erros
+
+Todas as mensagens de erro passam por uma única função, responsável por
+traduzir a falha técnica em texto compreensível ao usuário.
+
+A função opera por ordem de prioridade: utiliza preferencialmente a mensagem
+enviada pelo servidor, que é mais específica; na ausência desta, recorre à
+descrição técnica do erro; e, em último caso, a uma mensagem genérica
+previamente definida.
+
+Dessa forma, nenhuma tela precisa redigir mensagens de erro, e o usuário nunca
+é exposto a códigos técnicos incompreensíveis.
+
+7.4 Paleta de cores centralizada
+
+As cores do aplicativo estão reunidas em um único arquivo, agrupadas por
+finalidade: cores de marca, de texto, de fundo, de borda e de indicação de
+situação.
+
+A vantagem é que a alteração de uma cor da identidade visual ocorre em um único
+ponto e se propaga a todo o aplicativo, sem necessidade de busca manual em
+dezenas de arquivos.
+
+7.5 Adaptação a diferentes aparelhos
+
+Os aparelhos disponíveis no mercado apresentam formatos distintos: variam em
+tamanho, alguns possuem entalhe para a câmera, outros exibem barra de gestos na
+parte inferior.
+
+O aplicativo trata essa variação por meio de dois princípios:
+
+  Elementos de estrutura fixa — como a barra inferior — possuem altura
+  determinada em unidades independentes de densidade, e não em proporção da
+  tela. Assim, mantêm dimensão constante em qualquer aparelho.
+
+  As áreas ocupadas pelo sistema operacional são consultadas em tempo de
+  execução e compensadas por exatamente um elemento da interface, evitando
+  tanto a sobreposição de conteúdo quanto o surgimento de espaços vazios.
+
+7.6 Verificação de tipos na navegação
+
+Os nomes das telas e os dados que cada uma recebe estão formalmente declarados.
+Uma tentativa de navegar para uma tela inexistente, ou de enviar dados em
+formato incorreto, é detectada durante a escrita do código, e não durante o uso
+do aplicativo.
+
+7.7 Separação entre lógica e apresentação
+
+As telas não realizam consultas ao servidor diretamente: solicitam os dados a
+uma camada especializada e ocupam-se exclusivamente da exibição.
+
+Essa separação permite que a forma de obtenção dos dados seja alterada sem
+qualquer modificação nas telas — e, reciprocamente, que o layout seja
+redesenhado sem risco de comprometer o funcionamento das consultas.
+
+
+================================================================================
+8. ESTÁGIO ATUAL E TRABALHOS FUTUROS
+================================================================================
+
+Esta seção registra, com transparência, o estágio de desenvolvimento em que o
+sistema se encontra. Trata-se de uma versão funcional, porém incompleta.
+
+8.1 Funcionalidades implementadas
+
+  ● Cadastro de novo usuário
+  ● Login com validação de dados
+  ● Permanência da sessão entre utilizações
+  ● Encerramento de sessão
+  ● Listagem de matérias obtidas do servidor
+  ● Listagem de tópicos por matéria, com percentual de conclusão
+  ● Atividade interativa de adição, com arrastar e soltar
+  ● Navegação completa entre as telas
+  ● Tratamento e exibição de erros de comunicação
+
+8.2 Funcionalidades parcialmente implementadas
+
+  ● Tela principal — a estrutura visual está concluída, mas os cartões de
+    atividade ainda exibem conteúdo ilustrativo.
+
+  ● Tela de perfil — o encerramento de sessão está operante; as estatísticas
+    de uso e as demais opções do menu permanecem ilustrativas.
+
+  ● Atividade — a mecânica de interação está completa e funcional, porém o
+    exercício apresentado é fixo, não sendo ainda carregado do servidor.
+
+8.3 Funcionalidades planejadas e não concluídas
+
+  ● Seleção de ano escolar — a tela foi construída, mas não integrada ao
+    fluxo de navegação. A funcionalidade permitiria adequar o conteúdo à
+    série do aluno.
+
+  ● Registro de respostas — não existe, no momento, o envio da resposta do
+    aluno ao servidor. Trata-se da lacuna mais relevante do sistema: sem esse
+    registro, o percentual de conclusão dos tópicos não evolui, e o progresso
+    exibido permanece estático.
+
+  ● Substituição dos ícones — a interface utiliza atualmente emojis. As
+    bibliotecas de ícones vetoriais já foram incorporadas ao projeto, restando
+    sua aplicação nas telas.
+
+8.4 Melhorias técnicas previstas
+
+  ● Barra de navegação inferior — a implementação atual funciona, porém não
+    destaca automaticamente a seção em que o usuário se encontra. Prevê-se sua
+    reconstrução com o componente específico oferecido pela biblioteca de
+    navegação.
+
+  ● Componentes reutilizáveis — identificaram-se trechos de interface
+    repetidos entre telas, como cabeçalhos e balões de orientação. Sua
+    extração para componentes únicos reduziria a duplicação de código.
+
+  ● Configuração do endereço do servidor — o endereço encontra-se fixo no
+    código, adequado ao ambiente de desenvolvimento. Para distribuição, deverá
+    ser convertido em configuração externa.
+
+  ● Modelagem das alternativas — atualmente, as alternativas de resposta são
+    obtidas em consulta separada da questão à qual pertencem. Como uma
+    alternativa não possui significado isolado, avalia-se a alteração para que
+    sejam entregues junto da questão, reduzindo o número de comunicações com
+    o servidor.
+
+8.5 Considerações finais
+
+O sistema encontra-se em estágio de protótipo funcional. Sua fundação — a
+arquitetura em camadas, a autenticação, a comunicação com o servidor e a
+navegação — está estabelecida e operante. As lacunas remanescentes concentram-se
+na integração das telas já construídas com os dados reais do servidor, e não em
+sua estrutura, o que indica que os trabalhos futuros representam continuidade,
+e não reformulação do que foi desenvolvido.
+
+
+================================================================================
+FIM DO DOCUMENTO
+================================================================================

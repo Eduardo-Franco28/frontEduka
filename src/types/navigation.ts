@@ -1,12 +1,20 @@
 export type RootStackParamList = {
-    FirstScreen: undefined;
-    AuthScreen: {isLogin: boolean};
-    HomeScreen: undefined;
-    SubjectsScreen: undefined;
-    ProfileScreen: undefined;
-    SchoolYearScreen: {
-        name: string;
-        email: string;
-        passwordFormat: string;
-    };
-}
+  WelcomeScreen: undefined;
+  FirstScreen: undefined;
+  AuthScreen: { isLogin: boolean };
+  HomeScreen: undefined;
+  SubjectsScreen: undefined;
+  ProfileScreen: undefined;
+  SchoolYearScreen: {
+    name: string;
+    email: string;
+    passwordFormat: string;
+  };
+  TopicsScreen: {
+    subjectId: number;
+    subjectName: string;
+  };
+  ActivityScreen: {
+    topicId: number
+  };
+};

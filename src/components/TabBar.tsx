@@ -1,11 +1,16 @@
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import useAppNavigation from "../hooks/useNavigation";
 
 export default function TabBar() {
   const navigation = useAppNavigation();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.tabBar}>
+    <View style={[styles.tabBar, {
+      height: 64 + insets.bottom,
+      paddingBottom: insets.bottom
+    }]}>
       <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("HomeScreen")}>
         <Text style={styles.tabIconActive}>🏠</Text>
         <Text style={styles.tabLabelActive}>Início</Text>
@@ -28,9 +33,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopWidth: 0.5,
     borderTopColor: "#e0ddd7",
-    paddingVertical: 10,
-    paddingBottom: 16,
-    flex: 0.1,
   },
   tabItem: {
     flex: 1,

@@ -5,81 +5,89 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
 } from "react-native";
 import { useState } from "react";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import mainStyles from "../styles/theme";
 import useAppNavigation from "../hooks/useNavigation";
-import { saveStore } from "../services/storageService";
 import useAuth from "../hooks/useAuth";
+import { LinearGradient } from "expo-linear-gradient";
+import { COLORS } from "../styles/colors";
+import ErrorMessage from "../components/ErrorMessage";
 
 export default function AuthScreen() {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState<boolean>(true);
+  const [hidePassword, setHidePassword] = useState<boolean>(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const route = useRoute<RouteProp<RootStackParamList, "AuthScreen">>();
   const navigation = useAppNavigation();
 
-  const { login, userLogin, error, loading } = useAuth();
+  const { login, register, error, loading, user } = useAuth();
 
   const isLogin = route.params.isLogin;
 
   const handleSubmit = async () => {
     if (!validar()) return;
 
-    const passwordFormat = password.trim();
-
-    if(isLogin){
     let response;
 
-    response = await login({ email, password: passwordFormat });
+    const passwordFormat = password.trim();
 
-    if (!response) {
-      Alert.alert("Erro", error || "Erro desconhecido");
-      return;
-    }
+    if (isLogin) {
+      response = await login({ email, password: passwordFormat });
 
-    await saveStore("token", response.token);
-
-    console.log(response);
-    navigation.navigate("HomeScreen");
+      if (!response) {
+        setErrorMessage("Verifique seu e-mail e senha.");
+        return;
+      }
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "HomeScreen" }],
+      });
     } else {
-      navigation.navigate("SchoolYearScreen", {
-        name,
-        email,
-        passwordFormat: passwordFormat,
+      response = await register({ name, email, password: passwordFormat });
+
+      if (!response) {
+        setErrorMessage("Não foi possível criar sua conta. Tente novamente.");
+        return;
+      }
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "HomeScreen" }],
       });
     }
   };
 
   const validar = () => {
     if (email.trim() == "") {
-      Alert.alert("E-mail não pode ser vazio");
+      setErrorMessage("E-mail não pode ser vazio");
       return false;
     }
 
     if (password.trim() == "") {
-      Alert.alert("Senha não pode ser vazia");
+      setErrorMessage("Senha não pode ser vazia");
       return false;
     }
 
     if (!isLogin) {
       if (password.trim() !== confirmPassword.trim()) {
-        Alert.alert("As senhas não batem");
+        setErrorMessage("As senhas não batem");
         return false;
       }
 
-      if (password.length <= 3) {
-        Alert.alert("Senha Fraca");
+      if (password.length < 6) {
+        setErrorMessage("A senha deve ter pelo menos 6 caracteres.");
         return false;
       }
 
       if (name.trim() == "") {
-        Alert.alert("Nome não pode ser vazio");
+        setErrorMessage("Nome não pode ser vazio");
         return false;
       }
     }
@@ -89,15 +97,17 @@ export default function AuthScreen() {
   return (
     <View style={mainStyles.component}>
       <View style={styles.container}>
-        <Text style={mainStyles.headerTitle}>Entrar na conta</Text>
-
-        <View style={styles.dica}>
-          <Text style={styles.dicaTexto}>
-            {isLogin
-              ? "🦁 Olá! Digite seu e-mail e senha para entrar."
-              : "🦁Vamos criar sua conta juntos! Preencha cada campo com calma, sem pressa."}
+        <View style={styles.headerContainer}>
+          <Image
+            source={require("../../assets/mascoteFeliz.png")}
+            style={styles.mascote}
+          />
+          <Text style={styles.title}>
+            {!isLogin ? "Criar conta" : "Entrar na conta"}
           </Text>
         </View>
+
+        <ErrorMessage message={errorMessage} />
 
         {!isLogin && (
           <>
@@ -117,8 +127,8 @@ export default function AuthScreen() {
           onChangeText={setEmail}
           autoCapitalize="none"
           autoCorrect={false}
+          keyboardType="email-address"
         />
-        <Text style={styles.inputHint}>Use o e-mail que você cadastrou</Text>
 
         <Text style={styles.label}>Senha</Text>
         <TextInput
@@ -127,7 +137,7 @@ export default function AuthScreen() {
           onChangeText={setPassword}
           autoCapitalize="none"
           autoCorrect={false}
-          secureTextEntry={showPassword}
+          secureTextEntry={hidePassword}
         />
 
         {!isLogin && (
@@ -139,30 +149,41 @@ export default function AuthScreen() {
               onChangeText={setConfirmPassword}
               autoCapitalize="none"
               autoCorrect={false}
-              secureTextEntry={showPassword}
+              secureTextEntry={hidePassword}
             />
           </>
         )}
 
         <TouchableOpacity
           style={styles.checkboxRow}
-          onPress={() => setShowPassword(!showPassword)}
+          onPress={() => setHidePassword(!hidePassword)}
         >
-          <View style={styles.checkbox}></View>
+          <View
+            style={[styles.checkbox, !hidePassword && styles.checkBoxChecked]}
+          ></View>
           <Text style={styles.checkboxLabel}>Mostrar senha</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.primaryButton} onPress={handleSubmit}>
-          <Text style={styles.primaryButtonText}>
-            {isLogin ? "Entrar" : "Criar Conta"} →
-          </Text>
+        <TouchableOpacity onPress={handleSubmit} disabled={loading}>
+          <LinearGradient
+            colors={[COLORS.PRIMARY, COLORS.SECONDARY]}
+            style={mainStyles.primaryButton}
+          >
+            <Text style={mainStyles.primaryButtonText}>
+              {isLogin ? "Entrar" : "Criar Conta"} →
+            </Text>
+          </LinearGradient>
         </TouchableOpacity>
 
         <View style={styles.rodape}>
           <Text style={styles.rodapeTexto}>
             {isLogin ? "Não tem conta?" : "Já tem conta?"}
           </Text>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.replace("AuthScreen", { isLogin: !isLogin })
+            }
+          >
             <Text style={styles.rodapeLink}>
               {isLogin ? " Criar conta" : " Entrar na conta"}
             </Text>
@@ -178,38 +199,35 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingTop: 24,
-  },
-  dica: {
-    backgroundColor: "#dce8f5",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 28,
-  },
-  dicaTexto: {
-    fontSize: 14,
-    color: "#3a5a7a",
-    lineHeight: 20,
+    justifyContent: "center",
   },
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#2d3a4a",
+    color: "#000",
     marginBottom: 8,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: COLORS.TEXT_DARK,
+    textAlign: "left",
+  },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 24,
   },
   input: {
     width: "100%",
-    height: 52,
+    height: 60,
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: "#4a6fa5",
+    borderColor: COLORS.BORDER_LIGHT,
     paddingHorizontal: 16,
     marginBottom: 6,
-  },
-  inputHint: {
-    fontSize: 12,
-    color: "#8a9ab0",
-    marginBottom: 20,
   },
   checkboxRow: {
     flexDirection: "row",
@@ -222,39 +240,33 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 6,
     borderWidth: 1.5,
-    borderColor: "#4a6fa5",
+    borderColor: COLORS.BORDER_LIGHT,
     backgroundColor: "#fff",
     marginRight: 10,
   },
+  checkBoxChecked: {
+    backgroundColor: COLORS.PRIMARY,
+  },
   checkboxLabel: {
     fontSize: 14,
-    color: "#2d3a4a",
-  },
-  primaryButton: {
-    width: "100%",
-    height: 52,
-    backgroundColor: "#4a6fa5",
-    borderRadius: 100,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  primaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: COLORS.TEXT_DARK,
   },
   rodape: {
+    marginTop: 12,
     flexDirection: "row",
     justifyContent: "center",
   },
   rodapeTexto: {
     fontSize: 14,
-    color: "#7a8ba8",
+    color: "#000",
   },
   rodapeLink: {
     fontSize: 14,
-    color: "#4a6fa5",
+    color: COLORS.PRIMARY,
     fontWeight: "600",
+  },
+  mascote: {
+    width: 70,
+    height: 70,
   },
 });

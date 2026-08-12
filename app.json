@@ -14,11 +14,14 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.Eduka"
     },
     "web": {},
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-vector-icons/fontawesome-free-solid",
+      "@react-native-vector-icons/evil-icons"
     ]
   }
 }

@@ -22,4 +22,12 @@ Este projeto foi desenvolvido como Trabalho de Conclusão de Curso (TCC) pelos a
 - npx expo install @react-navigation/native-stack
 
 - npm install axios
-- npx expo install expo-secure-store
+- npx expo install expo-secure-store    
+
+- npx expo install expo-linear-gradient
+
+- npx expo install react-native-gesture-handler
+- npx expo install hoist-non-react-statics
+- npx expo install react-native-reanimated
+- npx expo install react-native-worklets
+- npx expo install @react-native-vector-icons/fontawesome-free-solid @react-native-vector-icons/evil-icons

@@ -1,37 +1,45 @@
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import mainStyles from "../styles/theme";
 import useAppNavigation from "../hooks/useNavigation";
+import { LinearGradient } from "expo-linear-gradient";
+import { COLORS } from "../styles/colors";
 
 export default function FirstScreen() {
   const navigation = useAppNavigation();
 
   return (
-    <View style={styles.component}>
+    <View style={mainStyles.component}>
       <View style={styles.container}>
         <View style={styles.birdArea}>
-          <Image source={require("../../assets/pet.png")} />
+          <Image source={require("../../assets/mascote.png")} />
         </View>
 
         {/* Textos */}
-        <Text style={styles.logo}>EduKa</Text>
-        <Text style={styles.subtitle}>Seu companheiro de estudos.</Text>
-        <Text style={styles.subtitle}>No seu ritmo, do seu jeito.</Text>
+        <Text style={styles.title}>Bem-vindo ao</Text>
+        <Text style={styles.logo}>IntegraMente!</Text>
+        <Text style={styles.subtitle}>Aprender do seu jeito,</Text>
+        <Text style={styles.subtitle}>no seu ritmo.</Text>
 
         {/* Botões */}
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
-            style={styles.primaryButton}
             onPress={() =>
               navigation.navigate("AuthScreen", { isLogin: false })
             }
           >
-            <Text style={styles.primaryButtonText}>Começar agora →</Text>
+            <LinearGradient
+              colors={[COLORS.PRIMARY, COLORS.SECONDARY]}
+              style={mainStyles.primaryButton}
+            >
+              <Text style={mainStyles.primaryButtonText}>Começar agora →</Text>
+            </LinearGradient>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.secondaryButton}
+            style={mainStyles.secondaryButton}
             onPress={() => navigation.navigate("AuthScreen", { isLogin: true })}
           >
-            <Text style={styles.secondaryButtonText}>Já tenho conta</Text>
+            <Text style={mainStyles.secondaryButtonText}>Já tenho conta</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -40,30 +48,32 @@ export default function FirstScreen() {
 }
 
 const styles = StyleSheet.create({
-  component: {
-    flex: 1,
-    backgroundColor: "#eef1f7",
-  },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 32,
-    paddingBottom: 48,
-    gap: 16,
+    paddingTop: 48,
   },
   birdArea: {
     width: 160,
     height: 160,
     marginBottom: 16,
   },
+  title: {
+    fontSize: 44,
+    fontWeight: "800",
+    color: "#000",
+  },
   logo: {
     fontSize: 48,
     fontWeight: "800",
-    color: "#4a6fa5",
+    color: COLORS.PRIMARY,
+    marginTop: -12,
+    marginBottom: 18,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: 16,
     color: "#7a8ba8",
     textAlign: "center",
     lineHeight: 22,
@@ -72,32 +82,5 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 32,
     gap: 14,
-  },
-  primaryButton: {
-    width: "100%",
-    height: 52,
-    backgroundColor: "#4a6fa5",
-    borderRadius: 100,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  secondaryButton: {
-    width: "100%",
-    height: 52,
-    borderRadius: 100,
-    borderWidth: 1.5,
-    borderColor: "#4a6fa5",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  secondaryButtonText: {
-    color: "#4a6fa5",
-    fontSize: 16,
-    fontWeight: "600",
   },
 });

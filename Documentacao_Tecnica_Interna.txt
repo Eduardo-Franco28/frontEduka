@@ -1,0 +1,597 @@
+================================================================================
+EDUKA / INTEGRAMENTE - PRE-DOCUMENTACAO TECNICA
+Aplicativo educacional mobile - Trabalho de Conclusao de Curso
+Colegio Raphael di Santo
+================================================================================
+
+Equipe: Eduardo Franco, Edson Barbarini, Lucas Volpe, Luiz Felipe,
+        Luiza Marinho, Gabriel Brito
+
+STATUS: versao em desenvolvimento. Este documento descreve o estado real do
+codigo hoje, incluindo o que ainda esta incompleto. A secao 7 lista as
+pendencias conhecidas.
+
+NOTA SOBRE O NOME: o repositorio, o package.json e o app.json usam "Eduka"
+(package Android: com.anonymous.Eduka). Ja as telas de abertura
+(WelcomeScreen e FirstScreen) exibem a marca "IntegraMente". A divergencia
+existe no codigo e precisa ser resolvida antes da entrega.
+
+
+================================================================================
+1. TECNOLOGIAS UTILIZADAS
+================================================================================
+
+1.1 NUCLEO
+--------------------------------------------------------------------------------
+  React Native            0.81.5      framework mobile multiplataforma
+  React                   19.1.0      biblioteca de UI
+  Expo SDK                ~54.0.33    toolchain e APIs nativas
+  TypeScript              ~5.9.2      tipagem estatica
+
+  A New Architecture do React Native esta ativa (newArchEnabled: true no
+  app.json), usando Fabric e TurboModules.
+
+1.2 NAVEGACAO
+--------------------------------------------------------------------------------
+  @react-navigation/native         ^7.2.2
+  @react-navigation/native-stack   ^7.14.10
+  react-native-screens             ~4.16.0
+
+  Usa navegacao em pilha (stack) nativa. Nao ha tab navigator: a barra
+  inferior e um componente comum renderizado dentro de cada tela.
+
+1.3 COMUNICACAO COM A API
+--------------------------------------------------------------------------------
+  axios                   ^1.15.0    cliente HTTP
+  expo-secure-store       ~15.0.8    armazenamento criptografado do token JWT
+
+1.4 INTERFACE E INTERACAO
+--------------------------------------------------------------------------------
+  expo-linear-gradient          ~15.0.8    gradientes da identidade visual
+  react-native-safe-area-context ~5.6.0    areas seguras (notch, gesture bar)
+  react-native-gesture-handler  ~2.28.0    gestos (arrastar) nas atividades
+  react-native-reanimated       ~4.1.1     animacoes na thread de UI
+  react-native-worklets         0.5.1      dependencia do reanimated 4
+  expo-status-bar               ~3.0.9     controle da status bar
+  hoist-non-react-statics       ^3.3.2     dependencia transitiva
+
+  Icones (adicionados recentemente, ainda nao usados nas telas):
+  @react-native-vector-icons/evil-icons            ^13.1.2
+  @react-native-vector-icons/fontawesome-free-solid ^1.1.2
+
+  Hoje todos os icones da interface sao EMOJIS em componentes <Text>.
+  A troca por icones vetoriais e um item em aberto (TODO.txt).
+
+1.5 PLATAFORMA
+--------------------------------------------------------------------------------
+  Alvo principal: Android (pasta android/ com prebuild ja gerado)
+  Package:        com.anonymous.Eduka
+  Orientacao:     portrait (retrato, travado)
+  Tema:           light (claro, fixo - nao ha modo escuro)
+  Edge-to-edge:   ativado (o app desenha sob a status bar e a barra de gestos,
+                  por isso o tratamento de safe area e obrigatorio)
+
+1.6 O QUE NAO EXISTE (decisao consciente ou pendencia)
+--------------------------------------------------------------------------------
+  - Nenhum framework de testes (Jest, Testing Library)
+  - Nenhum linter/formatter configurado (ESLint, Prettier)
+  - Nenhuma biblioteca de estado global (Redux, Zustand) - usa Context API
+  - Nenhuma biblioteca de cache de dados (React Query, SWR)
+  - Nenhuma biblioteca de formularios (Formik, React Hook Form)
+  - Nenhum CI/CD
+
+
+================================================================================
+2. ARQUITETURA
+================================================================================
+
+2.1 VISAO GERAL
+--------------------------------------------------------------------------------
+A arquitetura e em CAMADAS, com fluxo de dados unidirecional. Cada camada so
+conhece a camada imediatamente abaixo dela:
+
+    TELA (screens/)
+      |  chama
+      v
+    HOOK (hooks/)              <- estado: dados, loading, error
+      |  chama
+      v
+    SERVICE (services/)        <- funcao fina, so monta a chamada HTTP
+      |  usa
+      v
+    API CLIENT (configs/api)   <- axios + interceptor que injeta o token
+      |  HTTP
+      v
+    BACKEND (Spring, projeto separado)
+
+O ganho e isolamento: a tela nunca sabe que existe axios; o service nunca sabe
+que existe React. Trocar o cliente HTTP mexe em um arquivo so.
+
+2.2 ARVORE DE PASTAS
+--------------------------------------------------------------------------------
+  index.ts                    ponto de entrada (registerRootComponent)
+  App.tsx                     providers + declaracao das rotas
+  app.json                    configuracao do Expo
+  android/                    projeto nativo Android (prebuild)
+  assets/                     imagens do mascote
+
+  src/
+    screens/      telas completas, uma por rota
+    components/   pecas reutilizaveis de UI
+    contexts/     estado global (somente AuthContext)
+    hooks/        logica de estado e acesso a dados
+    services/     chamadas HTTP por recurso
+    configs/      instancia do axios e interceptors
+    constants/    valores fixos (URL da API, chave de storage)
+    types/        interfaces TypeScript
+    enums/        enumeracoes de dominio
+    styles/       tema e paleta de cores
+    utils/        funcoes auxiliares puras
+
+2.3 INICIALIZACAO DO APP
+--------------------------------------------------------------------------------
+  index.ts
+    -> registerRootComponent(App)
+
+  App.tsx monta a arvore de providers, de fora para dentro:
+
+    <GestureHandlerRootView>      habilita gestos em todo o app
+      <AuthProvider>              carrega a sessao antes de tudo
+        <NavigationContainer>     contexto de navegacao
+          <Stack.Navigator>       as rotas
+            8 telas registradas, todas com headerShown: false
+                                  (cada tela desenha o proprio cabecalho)
+
+  OBSERVACAO: nao ha <SafeAreaProvider> explicito na raiz. Funciona hoje
+  porque o native-stack injeta um provider de compatibilidade internamente,
+  mas isso e um detalhe de implementacao da biblioteca - o ideal e declarar
+  explicitamente.
+
+2.4 AUTENTICACAO
+--------------------------------------------------------------------------------
+Toda a autenticacao vive em src/contexts/AuthContext.tsx, que e o UNICO
+estado verdadeiramente global da aplicacao.
+
+  Estado exposto:  user, loading, error
+  Acoes expostas:  login(), register(), logOut()
+
+  Ciclo de vida:
+
+  1. INICIALIZACAO (useEffect no mount)
+     - le o token do SecureStore (chave "token")
+     - se nao existe: user = null, segue para as telas publicas
+     - se existe: chama GET /auth/me para validar e reidratar o usuario
+     - se a chamada falha (token expirado): apaga o token e zera o user
+     - enquanto isso, o provider renderiza um ActivityIndicator e NAO
+       renderiza a arvore de telas (flag "initializing")
+
+  2. LOGIN / CADASTRO
+     - chama o service, guarda o token no SecureStore, seta o user
+     - em caso de erro, preenche o estado "error" via getMessageError()
+     - devolve null em caso de falha, para a tela decidir o que exibir
+
+  3. LOGOUT
+     - zera o user e apaga o token do SecureStore
+
+  O TOKEN NUNCA E PASSADO MANUALMENTE. O interceptor em src/configs/api.ts
+  le o SecureStore a cada requisicao e injeta o header
+  Authorization: Bearer <token> automaticamente.
+
+2.5 CONTRATO COM O BACKEND
+--------------------------------------------------------------------------------
+  URL base: http://192.168.0.161:8080
+            (IP de rede local, fixo em src/constants/constant.ts - precisa
+            ser trocado por variavel de ambiente antes de distribuir)
+
+  Autenticacao:
+    POST  /auth/login              { email, password }      -> { token, userResponse }
+    POST  /auth/register           { name, email, password} -> { token, userResponse }
+    GET   /auth/me                                          -> User
+
+  Conteudo:
+    GET   /subject                        -> SubjectResponse[]
+    GET   /topic/:subjectId               -> TopicsResponse[]
+    GET   /question/:topicId              -> QuestionResponse[]
+    GET   /alternative/:questionId        -> AlternativeResponse[]
+
+2.6 MODELO DE DOMINIO
+--------------------------------------------------------------------------------
+A hierarquia do conteudo educacional tem quatro niveis:
+
+    MATERIA (Subject)
+       └── TOPICO (Topic)          ex.: "Adicao", com % de conclusao e status
+              └── QUESTAO (Question)   tem nivel de dificuldade
+                     └── ALTERNATIVA (Alternative)   uma delas e a correta
+
+  User          { id, nome, email }
+  Subject       { id, name }
+  Topic         { id, title, subTitle, subject, percentConclued, status }
+  Question      { id, title, conclued, level, topic }
+  Alternative   { id, description, correct, question }
+
+  Enums:
+    TopicStatusEnum   CONCLUIDO | NAO_INICIADO | EM_ANDAMENTO
+    Escolaridade      SEXTO_ANO .. NONO_ANO, PRIMEIRO_MEDIO .. TERCEIRO_MEDIO
+                      (declarado, mas ainda nao usado no cadastro)
+
+
+================================================================================
+3. PADROES DE CODIGO
+================================================================================
+
+3.1 NOMENCLATURA
+--------------------------------------------------------------------------------
+  Telas       PascalCase + sufixo Screen     HomeScreen.tsx
+  Componentes PascalCase                     TabBar.tsx, ErrorMessage.tsx
+  Hooks       camelCase + prefixo use        useSubject.ts
+  Services    <recurso><Acao>                subjectGetAll, topicsGetBySubject
+  Tipos       PascalCase + Response/Request  SubjectResponse, LoginRequest
+  Constantes  SCREAMING_SNAKE_CASE           API_URL, STORAGE_KEY, COLORS
+
+  Todo arquivo exporta seu artefato principal como DEFAULT EXPORT.
+  Services sao a excecao: usam named exports (varias funcoes por arquivo).
+
+  O codigo mistura portugues e ingles. Nomes de dominio vindos da API estao
+  em ingles (subject, topic, question), enquanto textos de UI, comentarios e
+  algumas variaveis estao em portugues (anoEscolar, validar, rodape). Vale
+  padronizar antes da entrega.
+
+3.2 PADRAO DOS SERVICES
+--------------------------------------------------------------------------------
+Um service e uma funcao fina: monta a chamada, tipa a resposta, devolve
+response.data. Nao trata erro (deixa propagar para o hook) e nao guarda
+estado.
+
+    export async function subjectGetAll(): Promise<Array<SubjectResponse>> {
+        const response = await api.get<Array<SubjectResponse>>('/subject');
+        return response.data;
+    }
+
+3.3 PADRAO DOS HOOKS DE DADOS
+--------------------------------------------------------------------------------
+Todos os hooks de dados seguem exatamente a mesma forma - useSubject,
+useTopic, useQuestion e useAlternative sao estruturalmente identicos:
+
+    - tres estados: <dado>, loading, error
+    - uma funcao async que executa a busca
+    - try / catch / finally:
+        try:     chama o service e guarda o resultado
+        catch:   traduz o erro com getMessageError() e guarda em "error"
+        finally: sempre desliga o loading
+    - retorna um objeto { funcao, loading, error, dado }
+
+Exemplo (useSubject):
+
+    const getAll = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await subjectGetAll();
+        setSubject(response);
+        return response;
+      } catch (error) {
+        const errorMessage = getMessageError(error, "Erro na busca de materias");
+        console.error("Subject error:", errorMessage);
+        setError(errorMessage);
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    };
+
+A consistencia e o ponto forte do projeto: quem entende um hook entende
+todos.
+
+3.4 TRATAMENTO DE ERROS
+--------------------------------------------------------------------------------
+Centralizado em src/utils/getMessageErrorUtils.ts. A funcao recebe o erro
+desconhecido e uma mensagem de fallback, e resolve em cascata:
+
+    1. e um erro do axios?  -> usa response.data.message (mensagem do backend)
+    2. e um Error comum?    -> usa error.message
+    3. nenhum dos dois?     -> usa o fallback
+
+Nenhuma tela monta mensagem de erro na mao. A mensagem resultante e exibida
+pelo componente <ErrorMessage message={error} />, que se auto-oculta quando
+a mensagem e nula.
+
+3.5 ESTILIZACAO
+--------------------------------------------------------------------------------
+Tres niveis, do mais generico ao mais especifico:
+
+  1. src/styles/colors.ts    paleta COLORS, agrupada por funcao (marca,
+                             texto, fundos, bordas, superficies, status)
+  2. src/styles/theme.ts     mainStyles: estilos compartilhados entre telas
+                             (component, primaryButton, secondaryButton...)
+  3. StyleSheet local        cada tela declara seu proprio StyleSheet no fim
+                             do arquivo, com comentarios de secao
+
+  Sempre StyleSheet.create, nunca objeto inline solto - a excecao legitima
+  sao valores que so existem em runtime (ex.: insets da safe area).
+
+  Composicao por array, com o mais especifico por ultimo:
+      style={[styles.card, isSelected && styles.cardSelected]}
+
+  OBSERVACAO: varias telas ainda tem cores em hexadecimal literal em vez de
+  usar COLORS (SubjectsScreen e TabBar sao os casos mais visiveis).
+
+3.6 NAVEGACAO TIPADA
+--------------------------------------------------------------------------------
+  src/types/navigation.ts declara RootStackParamList: o nome de cada rota e
+  os parametros que ela recebe.
+
+  src/hooks/useNavigation.ts exporta useAppNavigation(), um wrapper que ja
+  devolve o objeto de navegacao tipado. As telas usam esse hook, nunca o
+  useNavigation cru - assim o autocomplete funciona e um nome de rota errado
+  vira erro de compilacao.
+
+  Para ler parametros, o padrao e:
+      const route = useRoute<RouteProp<RootStackParamList, "TopicsScreen">>();
+
+  Apos login e logout usa-se navigation.reset() em vez de navigate(), para
+  limpar a pilha e impedir o "voltar" para uma tela que nao faz mais sentido.
+
+3.7 SAFE AREA
+--------------------------------------------------------------------------------
+Como o app roda em edge-to-edge, cada borda da tela precisa ser compensada
+por EXATAMENTE UMA camada. A convencao adotada:
+
+  - Telas COM TabBar:  <SafeAreaView edges={["top"]}>  (a TabBar cuida do
+                       rodape, somando insets.bottom a sua altura fixa)
+  - Telas SEM TabBar:  a propria tela cuida das duas bordas
+
+  A TabBar tem ALTURA FIXA (64dp) + insets.bottom. Nunca flex - componente de
+  chrome tem tamanho proprio, so o conteudo usa flex: 1 para ocupar a sobra.
+
+  Esse padrao esta aplicado na TabBar e na SubjectsScreen. As demais telas
+  ainda usam paddingTop fixo (52 ou 92) para compensar a status bar, o que e
+  um valor chutado que acerta por acaso em alguns aparelhos. Ver secao 7.
+
+
+================================================================================
+4. TELAS
+================================================================================
+
+Oito telas registradas no Stack.Navigator, todas sem header nativo.
+
+4.1 WelcomeScreen  (rota inicial)
+--------------------------------------------------------------------------------
+  Splash de marca. Fundo em gradiente com o mascote, o nome "IntegraMente" e
+  o slogan "Aprender do seu jeito". A tela inteira e tocavel.
+
+  Ao tocar, consulta o AuthContext e decide o destino:
+      usuario logado    -> HomeScreen
+      sem usuario       -> FirstScreen
+
+  Usa replace() para nao deixar o splash na pilha.
+
+4.2 FirstScreen  (onboarding)
+--------------------------------------------------------------------------------
+  Apresentacao para quem nao tem conta. Mascote, titulo "Bem-vindo ao
+  IntegraMente!" e dois caminhos:
+      "Comecar agora"   -> AuthScreen com isLogin: false  (cadastro)
+      "Ja tenho conta"  -> AuthScreen com isLogin: true   (login)
+
+4.3 AuthScreen  (login e cadastro)
+--------------------------------------------------------------------------------
+  Tela unica para as duas operacoes, controlada pelo parametro de rota
+  isLogin. Quando isLogin e false, mostra tambem os campos "Seu nome" e
+  "Confirmar senha".
+
+  Validacao local antes de chamar a API:
+      - e-mail nao pode ser vazio
+      - senha nao pode ser vazia
+      - no cadastro: senhas devem coincidir, minimo 6 caracteres,
+        nome obrigatorio
+
+  Tem um checkbox "Mostrar senha" que alterna secureTextEntry, e um link no
+  rodape que alterna entre login e cadastro via replace().
+
+  Em caso de sucesso, faz navigation.reset() para HomeScreen.
+
+4.4 HomeScreen  (dashboard)
+--------------------------------------------------------------------------------
+  Tela principal pos-login. Saudacao personalizada ("Ola {nome}"), lendo o
+  nome do AuthContext.
+
+  Dois cards:
+      "Atividade do dia"    -> card destacado, conteudo ainda FIXO
+                               (Matematica / Contagem de objetos)
+      "Continue seus estudos" -> card com o mascote, botao "Continuar jornada"
+                                 que leva a ActivityScreen
+
+  Exibe a TabBar. Exceto o nome do usuario, o conteudo ainda nao vem da API.
+
+4.5 SubjectsScreen  (materias)
+--------------------------------------------------------------------------------
+  Lista as materias vindas de GET /subject, em grid de dois por linha.
+
+  Usa useSubject(), busca no mount via useEffect, exibe <ErrorMessage> em
+  caso de falha. Tocar num card navega para TopicsScreen levando subjectId e
+  subjectName como parametros.
+
+  E a tela que ja segue o padrao correto de safe area (edges={["top"]}).
+  Todos os cards ainda usam o mesmo emoji (compasso), sem icone por materia.
+
+4.6 TopicsScreen  (topicos da materia)
+--------------------------------------------------------------------------------
+  Recebe subjectId e subjectName por parametro e lista os topicos daquela
+  materia via GET /topic/:subjectId, usando useTopic().
+
+  Cada card mostra o status (badge a esquerda), titulo, subtitulo e o
+  percentual de conclusao (pill a direita). Tem cabecalho proprio com o nome
+  da materia e um balao do mascote explicando a tela.
+
+  Ha estilos ja preparados para os tres estados visuais (concluido, em
+  andamento, bloqueado), mas eles ainda nao sao aplicados condicionalmente -
+  o valor cru do enum e renderizado como texto no badge.
+
+4.7 ActivityScreen  (atividade)
+--------------------------------------------------------------------------------
+  A tela mais elaborada tecnicamente. Implementa uma atividade de ADICAO
+  (4 + 3) com interacao por arrastar:
+
+      - dois grupos de bolinhas (4 e 3) sao arrastaveis via Gesture.Pan
+      - um alvo fixo marca onde elas devem ser soltas
+      - measure() calcula a posicao absoluta de cada elemento na tela e
+        guarda a distancia em useSharedValue (evita re-render)
+      - ao soltar, calcula a distancia euclidiana ate o alvo; se for menor
+        que 60dp, a bolinha "gruda" com withSpring(); senao volta ao lugar
+      - so depois que OS DOIS grupos estao no alvo, runOnJS libera as
+        alternativas de resposta (5, 7, 9) para toque
+
+  Toda a logica de animacao roda na UI thread via Reanimated.
+
+  IMPORTANTE: o conteudo e 100% fixo. A tela nao recebe parametros e nao
+  consome a API. O comentario em types/navigation.ts registra a intencao de
+  que ela receba a atividade e renderize por componentes reutilizaveis
+  conforme o tipo.
+
+4.8 ProfileScreen  (perfil)
+--------------------------------------------------------------------------------
+  Avatar com o mascote, nome do usuario, e uma linha de estatisticas
+  (estrelas, atividades, dias de sequencia) - todas com valores FIXOS.
+
+  Menu com quatro itens: Conquistas, Acessibilidade, Editar dados e Sair.
+  Apenas "Sair" esta implementado: chama logOut() e faz reset() para a
+  WelcomeScreen. Os outros tres nao tem acao.
+
+4.9 SchoolYearScreen  (ano escolar) - NAO REGISTRADA
+--------------------------------------------------------------------------------
+  Tela de selecao do ano do Ensino Medio (1o, 2o ou 3o), com cards
+  selecionaveis usando o enum Escolaridade.
+
+  ESTA TELA NAO ESTA NO Stack.Navigator e portanto e inalcancavel. Ela
+  existe no arquivo e no RootStackParamList, mas nao foi registrada em
+  App.tsx. Alem disso, tenta desestruturar userLogin e userRegister do
+  AuthContext - propriedades que nao existem - o que gera dois erros de
+  compilacao TypeScript. O botao "Proximo" esta comentado.
+
+  Corresponde a uma funcionalidade planejada e nao concluida: escolher a
+  serie no cadastro para filtrar o conteudo.
+
+
+================================================================================
+5. COMPONENTES
+================================================================================
+
+  TabBar.tsx        Barra de navegacao inferior com tres destinos: Inicio
+                    (HomeScreen), Trajetoria (SubjectsScreen) e Perfil
+                    (ProfileScreen). Altura fixa de 64dp somada ao inset
+                    inferior do aparelho. Renderizada manualmente dentro de
+                    cada tela que a utiliza - nao e um tab navigator.
+
+  ErrorMessage.tsx  Faixa de erro vermelha com icone. Retorna null quando a
+                    mensagem e nula, entao pode ficar sempre no JSX sem
+                    condicional. Aceita callbacks opcionais onRetry e
+                    onDismiss, que renderizam os botoes correspondentes.
+
+  LoadingPage.tsx   ARQUIVO VAZIO. A funcao existe mas nao retorna nada.
+                    Os estados de carregamento hoje sao improvisados dentro
+                    de cada tela.
+
+
+================================================================================
+6. FLUXO DE NAVEGACAO
+================================================================================
+
+    WelcomeScreen
+        |
+        +-- ja logado --> HomeScreen
+        |
+        +-- deslogado --> FirstScreen
+                              |
+                              +-- "Comecar agora"  --> AuthScreen (cadastro)
+                              +-- "Ja tenho conta" --> AuthScreen (login)
+                                                            |
+                                                     reset  v
+                                                        HomeScreen
+
+    Navegacao principal (via TabBar, presente nas quatro telas):
+
+        HomeScreen  <---->  SubjectsScreen  <---->  ProfileScreen
+             |                    |                       |
+             |                    v                       v
+             |              TopicsScreen             logOut -> reset
+             |                                       WelcomeScreen
+             v
+        ActivityScreen
+
+    Fora do fluxo: SchoolYearScreen (nao registrada)
+
+
+================================================================================
+7. ESTADO ATUAL E PENDENCIAS CONHECIDAS
+================================================================================
+
+7.1 BLOQUEADORES (impedem compilacao limpa ou funcionalidade)
+--------------------------------------------------------------------------------
+  [ ] SchoolYearScreen nao esta registrada no Stack.Navigator e desestrutura
+      userLogin/userRegister, que nao existem no AuthContext. Sao os dois
+      unicos erros retornados por "npx tsc --noEmit" hoje.
+
+  [ ] Botoes de voltar sem onPress em TopicsScreen e SchoolYearScreen.
+
+7.2 INTEGRACAO COM A API INCOMPLETA
+--------------------------------------------------------------------------------
+  [ ] HomeScreen: cards de atividade com conteudo fixo.
+  [ ] ProfileScreen: nome e estatisticas fixos.
+  [ ] ActivityScreen: atividade inteira fixa, nao consome a API.
+  [ ] useQuestion e useAlternative existem mas nenhuma tela os usa.
+  [ ] Nao existe endpoint para REGISTRAR A RESPOSTA do aluno. Sem ele, o
+      percentConclued e o status do topico nunca mudam.
+
+7.3 DECISAO DE MODELAGEM EM ABERTO
+--------------------------------------------------------------------------------
+  [ ] As alternativas tem endpoint proprio (GET /alternative/:questionId).
+      Como alternativa nao existe fora da questao, carregar N questoes exige
+      N+1 requisicoes. Alem disso, useAlternative guarda um unico array -
+      chamar getByQuestion em loop faz cada resposta sobrescrever a anterior,
+      silenciosamente. A correcao recomendada e o backend devolver as
+      alternativas aninhadas dentro da questao, eliminando o service e o hook
+      de alternativa.
+
+  [ ] O campo "correct" das alternativas trafega para o app, ou seja, o
+      gabarito esta visivel na resposta HTTP. Aceitavel para o escopo do TCC,
+      mas a alternativa e corrigir no backend via endpoint de resposta.
+
+7.4 LAYOUT E SAFE AREA
+--------------------------------------------------------------------------------
+  [ ] TopicsScreen ainda usa <SafeAreaView> sem edges, o que faz o inset
+      inferior ser contado duas vezes (pelo container e pela TabBar),
+      deixando uma faixa de fundo abaixo da barra.
+  [ ] HomeScreen e ProfileScreen usam View puro com paddingTop fixo (92 e 52)
+      em vez de safe area no topo.
+  [ ] Falta <SafeAreaProvider> explicito no App.tsx.
+
+7.5 QUALIDADE DE CODIGO
+--------------------------------------------------------------------------------
+  [ ] TabBar: o item ativo esta fixo no codigo (Inicio sempre destacado).
+      Deveria derivar da rota atual.
+  [ ] TabBar dentro de um stack empilha/desempilha telas a cada toque. O
+      correto e @react-navigation/bottom-tabs.
+  [ ] useQuestion.ts exporta uma funcao chamada "useTopic" (copia e cola).
+  [ ] Duplicacao literal de estilos entre TopicsScreen e SchoolYearScreen:
+      o cabecalho (backButton, backArrow, headerTitle, headerPlaceholder) e
+      o balao do mascote (bubble, bubbleEmoji, bubbleText) sao identicos.
+      Candidatos a componentes: ScreenLayout, ScreenHeader, MascotBubble,
+      GradientButton, Card, StepDots.
+  [ ] API_URL fixa como IP de rede local - precisa virar variavel de
+      ambiente.
+  [ ] Cores em hexadecimal literal em vez de COLORS em varias telas.
+  [ ] Mistura de portugues e ingles na nomenclatura.
+  [ ] LoadingPage.tsx vazio.
+  [ ] Icones sao emojis; as bibliotecas de icones vetoriais ja foram
+      instaladas mas nao usadas.
+  [ ] Divergencia de marca: "Eduka" no projeto, "IntegraMente" nas telas.
+
+7.6 TODO REGISTRADO PELA EQUIPE (TODO.txt)
+--------------------------------------------------------------------------------
+  - Arrumar status do topico
+  - Novo tabBar
+  - Adicionar icones unicos
+
+
+================================================================================
+FIM DO DOCUMENTO
+================================================================================
