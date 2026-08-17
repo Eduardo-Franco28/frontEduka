@@ -35,3 +35,13 @@ export interface ActivityResponse {
   resumeQuestionId: number | null;
   lstQuestions: Array<QuestionResponse>;
 }
+
+export interface AnsweredAlternativeResponse{
+  correct: boolean,
+  concluded: boolean
+}
+
+export interface AttemptAlternativeRequest{
+  questionId: number,
+  lstAlternativeId: Array<number>
+}

@@ -17,12 +17,12 @@ import useAppNavigation from "../hooks/useNavigation";
 export default function SubjectsScreen() {
   const { loading, subject, getAll, error } = useSubject();
 
-  const navigator = useAppNavigation();
+  const navigation = useAppNavigation();
 
   const handleSelectSubject = (id: number, subject: string) => {
     if (id === null) return;
 
-    navigator.navigate("TopicsScreen", { subjectId: id, subjectName: subject });
+    navigation.navigate("TopicsScreen", { subjectId: id, subjectName: subject });
   };
 
   useEffect(() => {

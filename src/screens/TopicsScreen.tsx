@@ -18,7 +18,7 @@ import LoadingPage from "../components/LoadingPage";
 import useAppNavigation from "../hooks/useNavigation";
 
 export default function TopicsScreen() {
-  const navigator = useAppNavigation();
+  const navigation = useAppNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "TopicsScreen">>();
 
   const { subjectId, subjectName } = route.params;
@@ -32,7 +32,7 @@ export default function TopicsScreen() {
   const handleActivity = (id: number) =>{
     if(id === null) return;
 
-    navigator.navigate("ActivityScreen", { topicId: id });
+    navigation.navigate("ActivityScreen", { topicId: id });
   }
 
   if (loading) {
@@ -43,7 +43,7 @@ export default function TopicsScreen() {
     <SafeAreaView style={mainStyles.component}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{subjectName}</Text>

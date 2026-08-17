@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, act } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useState, useRef, useEffect } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import mainStyles from "../styles/theme";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -14,33 +14,81 @@ import useTopic from "../hooks/useTopic";
 import LoadingPage from "../components/LoadingPage";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
+import { AttemptAlternativeRequest } from "../types/subject";
 
 export default function ActivityScreen() {
   const [index, setIndex] = useState<number>(0);
+  const [alternativeId, setAlternativeId] = useState<number | null>(null);
+  const [canAnswer, setIsCanAnswer] = useState(false);
 
   const navigation = useAppNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "ActivityScreen">>();
 
-  const { getActivity, loading, error, activity } = useTopic();
+  const { getActivity, loading, error, activity, answer, result } = useTopic();
   const { topicId } = route.params;
 
   useEffect(() => {
-    getActivity(topicId).then(data =>{
-      if(data == null) return;
+    getActivity(topicId).then((data) => {
+      if (data == null) return;
 
-      const start = data.lstQuestions.findIndex(q => q.id === data.resumeQuestionId);
+      const start = data.lstQuestions.findIndex(
+        (q) => q.id === data.resumeQuestionId,
+      );
       setIndex(start === -1 ? 0 : start); //Caso o usuario ja tenha terminado tudo nos conseguimos tratar
-    })
-  }, [topicId])
+    });
+  }, [topicId]);
 
-  const currentActivity = activity?.lstQuestions[index]
+  const currentActivity = activity?.lstQuestions[index];
 
   const questionContent = currentActivity?.content
-  ? JSON.parse(currentActivity.content)
-  : null;
+    ? JSON.parse(currentActivity.content)
+    : null;
 
-  const [selected, setSelected] = useState<number | null>(null);
-  const [canAnswer, setIsCanAnswer] = useState(false);
+  const handleAnswer = async () => {
+    if (alternativeId === null || !currentActivity?.id) return;
+
+    const attempt: AttemptAlternativeRequest = {
+      questionId: currentActivity.id,
+      lstAlternativeId: [alternativeId],
+    };
+
+    const response = await answer(attempt);
+
+    if (!response) return;
+
+    if (response.concluded) {
+      navigation.navigate("HomeScreen");
+
+      return;
+    }
+
+    if (response.correct) {
+      setAlternativeId(null);
+      setIsCanAnswer(false);
+
+      isAswerAble3.value = false;   // shared values não zeram sozinhos
+      isAswerAble4.value = false;
+      translateX3.value = 0;
+      translateY3.value = 0;
+      translateX4.value = 0;
+      translateY4.value = 0;
+
+      setIndex((pre) => pre + 1);
+    } else {
+      setAlternativeId(null);
+      setIsCanAnswer(false);
+
+      isAswerAble3.value = false;   // shared values não zeram sozinhos
+      isAswerAble4.value = false;
+      translateX3.value = 0;
+      translateY3.value = 0;
+      translateX4.value = 0;
+      translateY4.value = 0;
+
+      Alert.alert("Resposta errada", "Voce marcou a resposta errada")
+    }
+  };
+
   const isAswerAble4 = useSharedValue(false);
   const isAswerAble3 = useSharedValue(false);
 
@@ -67,23 +115,28 @@ export default function ActivityScreen() {
     if (targetRef.current) {
       // Pequeno delay apenas para garantir que a UI nativa se estabilizou
       setTimeout(() => {
-        targetRef.current?.measure((_x, _y, _w, _h, pageX_target, pageY_target) => {
+        targetRef.current?.measure(
+          (_x, _y, _w, _h, pageX_target, pageY_target) => {
+            if (dotsRef4.current) {
+              dotsRef4.current.measure(
+                (_x2, _y2, _w2, _h2, pageX_dots4, pageY_dots4) => {
+                  // Atribuir valor direto ao .value NÃO causa re-render do componente
+                  finalPositionDotX4.value = pageX_target - pageX_dots4;
+                  finalPositionDotY4.value = pageY_target - pageY_dots4;
+                },
+              );
+            }
 
-          if (dotsRef4.current) {
-            dotsRef4.current.measure((_x2, _y2, _w2, _h2, pageX_dots4, pageY_dots4) => {
-              // Atribuir valor direto ao .value NÃO causa re-render do componente
-              finalPositionDotX4.value = pageX_target - pageX_dots4;
-              finalPositionDotY4.value = pageY_target - pageY_dots4;
-            });
-          }
-
-          if (dotsRef3.current) {
-            dotsRef3.current.measure((_x3, _y3, _w3, _h3, pageX_dots3, pageY_dots3) => {
-              finalPositionDotX3.value = (pageX_target - pageX_dots3) + 20;
-              finalPositionDotY3.value = (pageY_target - pageY_dots3) - 6;
-            });
-          }
-        });
+            if (dotsRef3.current) {
+              dotsRef3.current.measure(
+                (_x3, _y3, _w3, _h3, pageX_dots3, pageY_dots3) => {
+                  finalPositionDotX3.value = pageX_target - pageX_dots3 + 20;
+                  finalPositionDotY3.value = pageY_target - pageY_dots3 - 6;
+                },
+              );
+            }
+          },
+        );
       }, 100);
     }
   };
@@ -97,7 +150,7 @@ export default function ActivityScreen() {
     .onEnd(() => {
       const distance = Math.sqrt(
         Math.pow(translateX4.value - finalPositionDotX4.value, 2) +
-        Math.pow(translateY4.value - finalPositionDotY4.value, 2)
+          Math.pow(translateY4.value - finalPositionDotY4.value, 2),
       );
       if (distance < DISTANCE) {
         translateX4.value = withSpring(finalPositionDotX4.value);
@@ -122,7 +175,7 @@ export default function ActivityScreen() {
     .onEnd(() => {
       const distance = Math.sqrt(
         Math.pow(translateX3.value - finalPositionDotX3.value, 2) +
-        Math.pow(translateY3.value - finalPositionDotY3.value, 2)
+          Math.pow(translateY3.value - finalPositionDotY3.value, 2),
       );
       if (distance < DISTANCE) {
         translateX3.value = withSpring(finalPositionDotX3.value);
@@ -139,11 +192,17 @@ export default function ActivityScreen() {
     });
 
   const animatedStyle4 = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX4.value }, { translateY: translateY4.value }],
+    transform: [
+      { translateX: translateX4.value },
+      { translateY: translateY4.value },
+    ],
   }));
 
   const animatedStyle3 = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX3.value }, { translateY: translateY3.value }],
+    transform: [
+      { translateX: translateX3.value },
+      { translateY: translateY3.value },
+    ],
   }));
 
   // Precisa vir depois de todos os hooks, senão quebra a ordem deles.
@@ -154,7 +213,11 @@ export default function ActivityScreen() {
   return (
     <View style={mainStyles.component}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} activeOpacity={0.8}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.8}
+        >
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
       </View>
@@ -162,14 +225,17 @@ export default function ActivityScreen() {
       <View style={{ justifyContent: "center", flex: 1 }}>
         <Text style={styles.questionTitle}>{currentActivity?.title}</Text>
         <View style={styles.questionCard}>
-
           <View style={styles.questionEquation}>
-
             {/* Bloco do Número 4 */}
             <View style={styles.numberGroup}>
               <Text style={styles.questionText}>{questionContent.teste1}</Text>
               {/* O onLayout dispara a função, mas agora ela é segura */}
-              <View ref={dotsRef4} collapsable={false} onLayout={calculateDistance} style={styles.dotsWrapper}>
+              <View
+                ref={dotsRef4}
+                collapsable={false}
+                onLayout={calculateDistance}
+                style={styles.dotsWrapper}
+              >
                 <GestureDetector gesture={dragGesture4}>
                   <Animated.View style={[animatedStyle4, styles.dotsVertical]}>
                     <View style={[styles.dotV, styles.dotVActive]} />
@@ -186,7 +252,11 @@ export default function ActivityScreen() {
             {/* Bloco do Número 3 */}
             <View style={styles.numberGroup}>
               <Text style={styles.questionText}>{questionContent.teste2}</Text>
-              <View ref={dotsRef3} collapsable={false} style={styles.dotsWrapper}>
+              <View
+                ref={dotsRef3}
+                collapsable={false}
+                style={styles.dotsWrapper}
+              >
                 <GestureDetector gesture={dragGesture3}>
                   <Animated.View style={[animatedStyle3, styles.dotsVertical]}>
                     <View style={[styles.dotV, styles.dotVActive]} />
@@ -207,33 +277,45 @@ export default function ActivityScreen() {
                 style={styles.targetBox}
               />
             </View>
-
           </View>
-          <Text style={styles.questionLabel}>*Arraste as bolinhas para completar a soma!</Text>
+          <Text style={styles.questionLabel}>
+            *Arraste as bolinhas para completar a soma!
+          </Text>
         </View>
 
         <Text style={styles.instruction}>TOQUE O NÚMERO CERTO</Text>
 
         <View style={styles.optionsRow}>
-          {currentActivity?.lstAlternative?.map((alternative) => (
+          {currentActivity?.lstAlternative?.map((alt) => (
             <TouchableOpacity
-              key={alternative.id}
-              style={[styles.optionCard]}
-              onPress={() => setSelected(alternative.id)}
+              key={alt.id}
+              style={[
+                styles.optionCard,
+                alternativeId === alt.id && styles.optionCardSelected,
+              ]}
+              onPress={() => setAlternativeId(alt.id)}
               activeOpacity={0.8}
-              disabled={!(canAnswer)}
+              disabled={!canAnswer}
             >
-              <Text style={[styles.optionText]}>
-                {alternative.description}
+              <Text
+                style={[
+                  styles.optionText,
+                  alternativeId === alt.id && styles.optionTextSelected,
+                ]}
+              >
+                {alt.description}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
+
+        <TouchableOpacity onPress={handleAnswer}>
+          <Text>Confirmar</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   header: {

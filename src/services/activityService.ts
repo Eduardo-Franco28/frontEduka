@@ -1,5 +1,10 @@
 import { api } from "../configs/api";
-import { ActivityResponse, TopicsResponse } from "../types/subject";
+import { ActivityResponse, AnsweredAlternativeResponse, AttemptAlternativeRequest, TopicsResponse } from "../types/subject";
+
+export async function answerActivity(attempt: AttemptAlternativeRequest): Promise<AnsweredAlternativeResponse>{
+    const response = await api.post<AnsweredAlternativeResponse>('/progress/answer', attempt);
+    return response.data;
+}
 
 export async function getTopicsBySubject(subjectId: number): Promise<Array<TopicsResponse>> {
     const response = await api.get<Array<TopicsResponse>>('/topic/' + subjectId + '/subject');
