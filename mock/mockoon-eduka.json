@@ -1,0 +1,481 @@
+{
+  "uuid": "c6ab0cff-1730-4982-a8f7-c711681c59c4",
+  "lastMigration": 33,
+  "name": "Eduka - Backend Falso",
+  "endpointPrefix": "",
+  "latency": 300,
+  "port": 3000,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "81cf3343-55d5-4761-8b3d-7955e9cd715b",
+      "type": "http",
+      "documentation": "Aceita qualquer email/senha e devolve um token falso.",
+      "method": "post",
+      "endpoint": "auth/login",
+      "responses": [
+        {
+          "uuid": "214effdd-d829-4189-a43f-e4069ef30496",
+          "body": "{\n  \"token\": \"mock-token-eduka\",\n  \"userResponse\": {\n    \"id\": 1,\n    \"nome\": \"Aluno Teste\",\n    \"email\": \"aluno@eduka.com\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "login ok",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "a5d1db0a-e725-4f00-aadf-7b95e08d4daf",
+      "type": "http",
+      "documentation": "Devolve o nome e o email que foram enviados no cadastro.",
+      "method": "post",
+      "endpoint": "auth/register",
+      "responses": [
+        {
+          "uuid": "e0a6f5dd-5c14-45f0-b5f6-21a80e527125",
+          "body": "{\n  \"token\": \"mock-token-eduka\",\n  \"userResponse\": {\n    \"id\": 1,\n    \"nome\": \"{{body 'name'}}\",\n    \"email\": \"{{body 'email'}}\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "cadastro ok",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "2cd2cc53-3a30-4379-9cdd-dbd11693db64",
+      "type": "http",
+      "documentation": "Chamado na abertura do app quando já existe token salvo.",
+      "method": "get",
+      "endpoint": "auth/me",
+      "responses": [
+        {
+          "uuid": "bd4988fe-1b0b-499e-8eaa-71b8244df5d2",
+          "body": "{\n  \"id\": 1,\n  \"nome\": \"Aluno Teste\",\n  \"email\": \"aluno@eduka.com\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "usuário logado",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "dd3dc76a-725e-4710-8c54-158995139e44",
+      "type": "http",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "subject",
+      "responses": [
+        {
+          "uuid": "e153a018-620f-4b2c-af40-7999f2ec4896",
+          "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Matemática\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Português\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Ciências\"\n  },\n  {\n    \"id\": 4,\n    \"name\": \"História\"\n  },\n  {\n    \"id\": 5,\n    \"name\": \"Geografia\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "lista de matérias",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "ab013f38-0680-4ca8-a741-49cdbddacf06",
+      "type": "http",
+      "documentation": "Cada resposta é escolhida pela regra sobre o parâmetro :subjectId.",
+      "method": "get",
+      "endpoint": "topic/:subjectId/subject",
+      "responses": [
+        {
+          "uuid": "67b2eef7-64ea-44f7-a0f7-f85da50bc106",
+          "body": "[\n  {\n    \"id\": 101,\n    \"title\": \"Soma\",\n    \"subTitle\": \"Juntando quantidades\",\n    \"subject\": 1,\n    \"percentConclued\": 100,\n    \"status\": \"CONCLUIDO\"\n  },\n  {\n    \"id\": 102,\n    \"title\": \"Subtração\",\n    \"subTitle\": \"Tirando quantidades\",\n    \"subject\": 1,\n    \"percentConclued\": 40,\n    \"status\": \"EM_ANDAMENTO\"\n  },\n  {\n    \"id\": 103,\n    \"title\": \"Multiplicação\",\n    \"subTitle\": \"Somas repetidas\",\n    \"subject\": 1,\n    \"percentConclued\": 0,\n    \"status\": \"NAO_INICIADO\"\n  },\n  {\n    \"id\": 104,\n    \"title\": \"Divisão\",\n    \"subTitle\": \"Repartindo em partes iguais\",\n    \"subject\": 1,\n    \"percentConclued\": 0,\n    \"status\": \"NAO_INICIADO\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Matemática",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "subjectId",
+              "value": "1",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "72718d37-8028-4813-bc2c-9a3be46c3623",
+          "body": "[\n  {\n    \"id\": 201,\n    \"title\": \"Substantivos\",\n    \"subTitle\": \"Nomes das coisas\",\n    \"subject\": 2,\n    \"percentConclued\": 60,\n    \"status\": \"EM_ANDAMENTO\"\n  },\n  {\n    \"id\": 202,\n    \"title\": \"Adjetivos\",\n    \"subTitle\": \"Características\",\n    \"subject\": 2,\n    \"percentConclued\": 0,\n    \"status\": \"NAO_INICIADO\"\n  },\n  {\n    \"id\": 203,\n    \"title\": \"Verbos\",\n    \"subTitle\": \"Ações e estados\",\n    \"subject\": 2,\n    \"percentConclued\": 100,\n    \"status\": \"CONCLUIDO\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Português",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "subjectId",
+              "value": "2",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "6ff49311-bdd8-4b73-8f17-30c9745c997f",
+          "body": "[\n  {\n    \"id\": 301,\n    \"title\": \"Corpo humano\",\n    \"subTitle\": \"Sistemas do corpo\",\n    \"subject\": 3,\n    \"percentConclued\": 100,\n    \"status\": \"CONCLUIDO\"\n  },\n  {\n    \"id\": 302,\n    \"title\": \"Plantas\",\n    \"subTitle\": \"Fotossíntese\",\n    \"subject\": 3,\n    \"percentConclued\": 20,\n    \"status\": \"EM_ANDAMENTO\"\n  },\n  {\n    \"id\": 303,\n    \"title\": \"Ciclo da água\",\n    \"subTitle\": \"Evaporação e chuva\",\n    \"subject\": 3,\n    \"percentConclued\": 0,\n    \"status\": \"NAO_INICIADO\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Ciências",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "subjectId",
+              "value": "3",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "77b60719-7a7d-425e-8543-e6f9e6148f69",
+          "body": "[\n  {\n    \"id\": 401,\n    \"title\": \"Brasil Colônia\",\n    \"subTitle\": \"1500 a 1822\",\n    \"subject\": 4,\n    \"percentConclued\": 0,\n    \"status\": \"NAO_INICIADO\"\n  },\n  {\n    \"id\": 402,\n    \"title\": \"Independência\",\n    \"subTitle\": \"O processo de 1822\",\n    \"subject\": 4,\n    \"percentConclued\": 0,\n    \"status\": \"NAO_INICIADO\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "História",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "subjectId",
+              "value": "4",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "eacf95ca-2c67-4029-a231-c0bd2593f55a",
+          "body": "[\n  {\n    \"id\": 501,\n    \"title\": \"Mapas\",\n    \"subTitle\": \"Escala e legenda\",\n    \"subject\": 5,\n    \"percentConclued\": 80,\n    \"status\": \"EM_ANDAMENTO\"\n  },\n  {\n    \"id\": 502,\n    \"title\": \"Relevo\",\n    \"subTitle\": \"Formas do terreno\",\n    \"subject\": 5,\n    \"percentConclued\": 0,\n    \"status\": \"NAO_INICIADO\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Geografia",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "subjectId",
+              "value": "5",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "981fa357-aa43-400c-8d12-df896da6afaf",
+          "body": "[]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "matéria sem tópicos",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "f31d6684-8f59-4a75-b1f7-f43b0a9834ff",
+      "type": "http",
+      "documentation": "Monta 3 questões para qualquer tópico, a partir do :topicId da URL.",
+      "method": "get",
+      "endpoint": "topic/:topicId/activity",
+      "responses": [
+        {
+          "uuid": "eff7daf2-4f6a-4f42-858f-129e647a88d0",
+          "body": "{\n  \"resumeQuestionId\": {{add (multiply (urlParam 'topicId') 10) 1}},\n  \"lstQuestions\": [\n    {\n      \"id\": {{add (multiply (urlParam 'topicId') 10) 1}},\n      \"title\": \"Quanto é 4 + 3?\",\n      \"topic\": {{urlParam 'topicId'}},\n      \"level\": 1,\n      \"type\": \"DRAG_DOTS\",\n      \"content\": \"{\\\"teste1\\\": 4, \\\"teste2\\\": 3}\",\n      \"lstAlternative\": [\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 11}}, \"description\": \"6\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 12}}, \"description\": \"7\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 13}}, \"description\": \"8\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 14}}, \"description\": \"9\" }\n      ],\n      \"conclued\": false\n    },\n    {\n      \"id\": {{add (multiply (urlParam 'topicId') 10) 2}},\n      \"title\": \"Quanto é 5 + 2?\",\n      \"topic\": {{urlParam 'topicId'}},\n      \"level\": 2,\n      \"type\": \"DRAG_DOTS\",\n      \"content\": \"{\\\"teste1\\\": 5, \\\"teste2\\\": 2}\",\n      \"lstAlternative\": [\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 21}}, \"description\": \"6\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 22}}, \"description\": \"7\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 23}}, \"description\": \"8\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 24}}, \"description\": \"9\" }\n      ],\n      \"conclued\": false\n    },\n    {\n      \"id\": {{add (multiply (urlParam 'topicId') 10) 3}},\n      \"title\": \"Quanto é 6 + 3?\",\n      \"topic\": {{urlParam 'topicId'}},\n      \"level\": 3,\n      \"type\": \"DRAG_DOTS\",\n      \"content\": \"{\\\"teste1\\\": 6, \\\"teste2\\\": 3}\",\n      \"lstAlternative\": [\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 31}}, \"description\": \"8\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 32}}, \"description\": \"9\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 33}}, \"description\": \"10\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 34}}, \"description\": \"11\" }\n      ],\n      \"conclued\": false\n    }\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "atividade do tópico",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "589a63a9-1793-4349-b82d-c126a7d191bc",
+      "type": "http",
+      "documentation": "A segunda alternativa de cada questão é sempre a correta.",
+      "method": "post",
+      "endpoint": "progress/answer",
+      "responses": [
+        {
+          "uuid": "89fca68b-610f-4455-8b55-b9e4b6de067a",
+          "body": "{\n  \"correct\": true,\n  \"concluded\": true\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "acertou a última questão -> conclui o tópico",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "lstAlternativeId.0",
+              "value": "32$",
+              "invert": false,
+              "operator": "regex"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "8e847f5b-5f1f-4918-b9d4-a429f869e460",
+          "body": "{\n  \"correct\": true,\n  \"concluded\": false\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "acertou -> vai para a próxima",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "lstAlternativeId.0",
+              "value": "2$",
+              "invert": false,
+              "operator": "regex"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "99cb6406-d480-4b10-9fbe-8e21199b56e5",
+          "body": "{\n  \"correct\": false,\n  \"concluded\": false\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "errou",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "81cf3343-55d5-4761-8b3d-7955e9cd715b"
+    },
+    {
+      "type": "route",
+      "uuid": "a5d1db0a-e725-4f00-aadf-7b95e08d4daf"
+    },
+    {
+      "type": "route",
+      "uuid": "2cd2cc53-3a30-4379-9cdd-dbd11693db64"
+    },
+    {
+      "type": "route",
+      "uuid": "dd3dc76a-725e-4710-8c54-158995139e44"
+    },
+    {
+      "type": "route",
+      "uuid": "ab013f38-0680-4ca8-a741-49cdbddacf06"
+    },
+    {
+      "type": "route",
+      "uuid": "f31d6684-8f59-4a75-b1f7-f43b0a9834ff"
+    },
+    {
+      "type": "route",
+      "uuid": "589a63a9-1793-4349-b82d-c126a7d191bc"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}
