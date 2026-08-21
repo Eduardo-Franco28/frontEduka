@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -16,6 +15,7 @@ import useAuth from "../hooks/useAuth";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../styles/colors";
 import ErrorMessage from "../components/ErrorMessage";
+import Input from "../components/Input";
 
 export default function AuthScreen() {
   const [name, setName] = useState<string>("");
@@ -110,30 +110,28 @@ export default function AuthScreen() {
         <ErrorMessage message={errorMessage} />
 
         {!isLogin && (
-          <>
-            <Text style={styles.label}>Seu nome</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite seu nome de usuário"
-              onChangeText={setName}
-            />
-          </>
+          <Input
+            label="Seu nome"
+            placeholder="Digite seu nome de usuário"
+            value={name}
+            onChangeText={setName}
+          />
         )}
 
-        <Text style={styles.label}>E-mail</Text>
-        <TextInput
-          style={styles.input}
+        <Input
+          label="E-mail"
           placeholder="Digite seu e-mail"
+          value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="email-address"
         />
 
-        <Text style={styles.label}>Senha</Text>
-        <TextInput
-          style={styles.input}
+        <Input
+          label="Senha"
           placeholder="Digite sua senha"
+          value={password}
           onChangeText={setPassword}
           autoCapitalize="none"
           autoCorrect={false}
@@ -141,17 +139,15 @@ export default function AuthScreen() {
         />
 
         {!isLogin && (
-          <>
-            <Text style={styles.label}>Confimar senha</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Confirme sua senha"
-              onChangeText={setConfirmPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              secureTextEntry={hidePassword}
-            />
-          </>
+          <Input
+            label="Confirmar senha"
+            placeholder="Confirme sua senha"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry={hidePassword}
+          />
         )}
 
         <TouchableOpacity
@@ -201,12 +197,6 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     justifyContent: "center",
   },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#000",
-    marginBottom: 8,
-  },
   title: {
     fontSize: 22,
     fontWeight: "700",
@@ -218,16 +208,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     marginBottom: 24,
-  },
-  input: {
-    width: "100%",
-    height: 60,
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: COLORS.BORDER_LIGHT,
-    paddingHorizontal: 16,
-    marginBottom: 6,
   },
   checkboxRow: {
     flexDirection: "row",

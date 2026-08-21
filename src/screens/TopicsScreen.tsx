@@ -32,7 +32,8 @@ export default function TopicsScreen() {
   const handleActivity = (id: number) =>{
     if(id === null) return;
 
-    navigation.navigate("ActivityScreen", { topicId: id });
+    // navigation.navigate("ActivityScreen", { topicId: id });
+    navigation.navigate("ActivityScreen2", { topicId: id });
   }
 
   if (loading) {
@@ -40,7 +41,7 @@ export default function TopicsScreen() {
   }
 
   return (
-    <SafeAreaView style={mainStyles.component}>
+    <SafeAreaView style={mainStyles.component} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>

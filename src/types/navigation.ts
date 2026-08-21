@@ -17,4 +17,7 @@ export type RootStackParamList = {
   ActivityScreen: {
     topicId: number
   };
+  ActivityScreen2: {
+    topicId: number
+  };
 };
