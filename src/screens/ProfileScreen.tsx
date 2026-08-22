@@ -95,9 +95,17 @@ export default function ProfileScreen() {
           <View style={styles.divider} />
 
           {/* Editar dados */}
-          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7} onPress={() => navigation.navigate("EditProfileScreen")}>
             <Text style={styles.menuIcon}>✏️</Text>
-            <Text style={styles.menuLabel}>Editar dados</Text>
+            <Text style={styles.menuLabel}>Editar perfil</Text>
+            <Text style={styles.menuChevron}>→</Text>
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+          {/* Editar dados */}
+          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7} onPress={() => navigation.navigate("ChangePasswordScreen")}>
+            <Text style={styles.menuIcon}>✏️</Text>
+            <Text style={styles.menuLabel}>Alterar senha</Text>
             <Text style={styles.menuChevron}>→</Text>
           </TouchableOpacity>
 

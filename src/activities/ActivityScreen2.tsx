@@ -16,6 +16,21 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import { AttemptAlternativeRequest } from "../types/subject";
 
+// Dados estáticos até o backend mandar a palavra e as posições dos buracos.
+// `blank: true` = buraco que o aluno preenche arrastando uma peça.
+const STATIC_PUZZLE = {
+  hint: "🍇",
+  word: [
+    { char: "U", blank: true },
+    { char: "V", blank: false },
+    { char: "A", blank: true },
+  ],
+  tiles: ["A", "U"],
+};
+
+// Índice do primeiro buraco — é nele que o drag que já existe mira.
+const FIRST_BLANK = STATIC_PUZZLE.word.findIndex((l) => l.blank);
+
 export default function ActivityScreen2() {
   const [index, setIndex] = useState<number>(0);
   const [alternativeId, setAlternativeId] = useState<number | null>(null);
@@ -105,6 +120,8 @@ export default function ActivityScreen2() {
   const finalPositionDotY3 = useSharedValue(0);
 
   const targetRef = useRef<View | null>(null);
+  // Um ref por buraco da palavra, pra medir a posição de cada slot.
+  const slotRefs = useRef<Array<View | null>>([]);
   const dotsRef4 = useRef<View | null>(null);
   const dotsRef3 = useRef<View | null>(null);
 
@@ -222,82 +239,74 @@ export default function ActivityScreen2() {
         </TouchableOpacity>
       </View>
 
-      <View style={{ justifyContent: "center", flex: 1 }}>
+      <View style={styles.content}>
         <Text style={styles.questionTitle}>{currentActivity?.title}</Text>
 
+        {/* ZONA 1 — card com as peças arrastáveis */}
         <View style={styles.questionCard}>
-          
-          <Text style={styles.questionLabel}>
-            *Arraste as letras para completar a palavra!
-          </Text>
-
-          <View style={styles.questionEquation}>
+          <View style={styles.tilesGrid}>
             <GestureDetector gesture={dragGesture4}>
-              <Animated.View style={[animatedStyle4]}>
-                {/* Bloco do Número 4 */}
-                <View style={styles.optionCard}>
-                  <Text style={styles.questionText}>
-                    {questionContent.teste1}
-                  </Text>
-                  {/* O onLayout dispara a função, mas agora ela é segura */}
+              <Animated.View style={animatedStyle4}>
+                <View style={styles.tile}>
+                  <Text style={styles.tileText}>{STATIC_PUZZLE.tiles[0]}</Text>
                   <View
                     ref={dotsRef4}
                     collapsable={false}
                     onLayout={calculateDistance}
-                  ></View>
+                  />
                 </View>
               </Animated.View>
             </GestureDetector>
 
-            {/* Bloco do Número 3 */}
             <GestureDetector gesture={dragGesture3}>
-              <Animated.View style={[animatedStyle3]}>
-                <View style={styles.optionCard}>
-                  <Text style={styles.questionText}>
-                    {questionContent.teste2}
-                  </Text>
-                  <View
-                    ref={dotsRef3}
-                    collapsable={false}
-                  ></View>
+              <Animated.View style={animatedStyle3}>
+                <View style={styles.tile}>
+                  <Text style={styles.tileText}>{STATIC_PUZZLE.tiles[1]}</Text>
+                  <View ref={dotsRef3} collapsable={false} />
                 </View>
               </Animated.View>
             </GestureDetector>
-
-            {/* Bloco do Alvo */}
-            <View style={styles.targetGroup}>
-              <View
-                ref={targetRef}
-                collapsable={false}
-                style={styles.targetBox}
-              />
-            </View>
           </View>
         </View>
 
-        <View style={styles.optionsRow}>
-          {currentActivity?.lstAlternative?.map((alt) => (
-            <TouchableOpacity
-              key={alt.id}
-              style={[
-              ]}
-              onPress={() => setAlternativeId(alt.id)}
-              activeOpacity={0.8}
-              disabled={!canAnswer}
-            >
-              <Text
-                style={[
-                ]}
-              >
-                {alt.description}
+        <Text style={styles.questionLabel}>
+          *Arraste as letras para completar a palavra!
+        </Text>
+
+        {/* ZONA 2 — linha da palavra: dica + letras fixas + buracos */}
+        <View style={styles.answerRow}>
+          <Text style={styles.answerHint}>{STATIC_PUZZLE.hint}</Text>
+
+          {STATIC_PUZZLE.word.map((letter, i) =>
+            letter.blank ? (
+              <View
+                key={i}
+                collapsable={false}
+                style={styles.answerSlot}
+                ref={(el) => {
+                  slotRefs.current[i] = el;
+                  // o primeiro buraco continua sendo o alvo do drag que já existe
+                  if (i === FIRST_BLANK) targetRef.current = el;
+                }}
+              />
+            ) : (
+              <Text key={i} style={styles.answerLetter}>
+                {letter.char}
               </Text>
-            </TouchableOpacity>
-          ))}
+            ),
+          )}
         </View>
 
-        <TouchableOpacity onPress={handleAnswer}>
-          <Text>Confirmar</Text>
-        </TouchableOpacity>
+        {/* ZONA 4 — confirmar */}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            onPress={handleAnswer}
+            activeOpacity={0.85}
+            style={mainStyles.primaryButton}
+          >
+            <Text style={mainStyles.primaryButtonText}>Confirmar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -326,15 +335,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: COLORS.TEXT_PRIMARY,
   },
-  questionCard: {
-    backgroundColor: "#fff",
-    borderRadius: 24,
-    marginHorizontal: 16,
-    padding: 14,
-    marginBottom: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 320,
+
+  // Coluna principal: as 4 zonas empilhadas
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
   },
   questionTitle: {
     fontSize: 24,
@@ -344,57 +349,89 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 24,
   },
+
+  // ZONA 1 — card com as peças
+  questionCard: {
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 320,
+  },
+  tilesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+  },
+  tile: {
+    width: 76,
+    height: 76,
+    backgroundColor: "#fff",
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#ccc",
+  },
+  tileText: {
+    fontSize: 40,
+    fontWeight: "800",
+    color: COLORS.TEXT_PRIMARY,
+    textAlign: "center",
+  },
   questionLabel: {
     fontSize: 16,
     fontWeight: "500",
     color: COLORS.TEXT_MUTED,
     letterSpacing: 1.2,
     textAlign: "center",
+    marginTop: 16,
   },
-  questionEquation: {
+
+  // ZONA 2 — linha da resposta
+  answerRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     justifyContent: "center",
-    width: "100%",
-    gap: 16,
-    marginBottom: 34,
+    gap: 12,
+    marginTop: 24,
+    marginBottom: 32,
   },
-  targetGroup: {
-    justifyContent: "flex-start",
-    paddingTop: 4,
+  answerHint: {
+    fontSize: 34,
+    lineHeight: 40,
+    marginRight: 4,
   },
-  questionText: {
-    fontSize: 46,
+  answerSlot: {
+    width: 46,
+    height: 48,
+    borderBottomWidth: 3,
+    borderBottomColor: COLORS.TEXT_PRIMARY,
+  },
+  answerLetter: {
+    width: 46,
+    height: 48,
+    fontSize: 34,
+    lineHeight: 44,
     fontWeight: "800",
     color: COLORS.TEXT_PRIMARY,
     textAlign: "center",
-    lineHeight: 52,
   },
-  targetBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
-  },
-  instruction: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: COLORS.TEXT_MUTED,
-    letterSpacing: 1.4,
-    textAlign: "center",
-    marginBottom: 16,
-  },
+
+  // ZONA 3 — alternativas
   optionsRow: {
     flexDirection: "row",
     gap: 12,
-    paddingHorizontal: 16,
-    marginBottom: 28,
+    marginBottom: 24,
   },
   optionCard: {
     flex: 1,
     backgroundColor: "#fff",
     borderRadius: 18,
     paddingVertical: 20,
-    paddingHorizontal: 50,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
@@ -411,5 +448,10 @@ const styles = StyleSheet.create({
   },
   optionTextSelected: {
     color: COLORS.PRIMARY_LIGHT,
+  },
+
+  // ZONA 4 — confirmar
+  footer: {
+    paddingBottom: 32,
   },
 });

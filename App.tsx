@@ -12,6 +12,8 @@ import ActivityScreen from "./src/activities/ActivityScreen";
 import ActivityScreen2 from "./src/activities/ActivityScreen2";
 import { AuthProvider } from "./src/contexts/AuthContext";
 import useAuth from "./src/hooks/useAuth";
+import EditProfileScreen from "./src/screens/EditProfileScreen";
+import ChangePasswordScreen from "./src/screens/ChangePasswordScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +33,8 @@ function Routes() {
       <Stack.Screen name="ActivityScreen2" component={ActivityScreen2} />
       <Stack.Screen name="FirstScreen" component={FirstScreen} />
       <Stack.Screen name="AuthScreen" component={AuthScreen} />
+      <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
+      <Stack.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} />
     </Stack.Navigator>
   );
 }

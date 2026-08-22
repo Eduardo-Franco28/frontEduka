@@ -309,8 +309,8 @@ export default function ActivityScreen() {
           ))}
         </View>
 
-        <TouchableOpacity onPress={handleAnswer}>
-          <Text>Confirmar</Text>
+        <TouchableOpacity style={mainStyles.primaryButton} onPress={handleAnswer}>
+          <Text style={mainStyles.primaryButtonText}>Confirmar</Text>
         </TouchableOpacity>
       </View>
     </View>

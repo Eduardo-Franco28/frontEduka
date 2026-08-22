@@ -20,4 +20,6 @@ export type RootStackParamList = {
   ActivityScreen2: {
     topicId: number
   };
+  EditProfileScreen: undefined
+  ChangePasswordScreen: undefined
 };
