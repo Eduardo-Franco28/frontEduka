@@ -8,6 +8,7 @@ import {
   Alert,
 } from "react-native";
 import mainStyles from "../styles/theme";
+import Header from "../components/Header";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import useAuth from "../hooks/useAuth";
@@ -28,13 +29,7 @@ export default function SchoolYearScreen() {
 
   return (
     <View style={mainStyles.component}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <Text style={styles.backArrow}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Seu ano escolar</Text>
-        <View style={styles.headerPlaceholder} />
-      </View>
+      <Header title="Seu ano escolar" />
 
       <View style={styles.dotsRow}>
         <View style={styles.dot} />
@@ -43,8 +38,8 @@ export default function SchoolYearScreen() {
       </View>
 
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        style={mainStyles.scroll}
+        contentContainerStyle={mainStyles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.bubble}>
@@ -128,36 +123,6 @@ export default function SchoolYearScreen() {
 
 const styles = StyleSheet.create({
   // Header
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingTop: 52,
-    paddingBottom: 14,
-    backgroundColor: COLORS.BG_WARM,
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  backArrow: {
-    fontSize: 18,
-    color: COLORS.TEXT_PRIMARY,
-    lineHeight: 20,
-  },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
-  },
-  headerPlaceholder: {
-    width: 36,
-  },
 
   // Step dots
   dotsRow: {
@@ -181,14 +146,6 @@ const styles = StyleSheet.create({
   },
 
   // Scroll
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 24,
-  },
 
   // Bubble
   bubble: {

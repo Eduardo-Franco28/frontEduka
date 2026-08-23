@@ -32,8 +32,8 @@ export default function SubjectsScreen() {
   return (
     <SafeAreaView style={mainStyles.component} edges={["top"]}>
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        style={mainStyles.scroll}
+        contentContainerStyle={[mainStyles.scrollContent, styles.scrollContent]}
         showsVerticalScrollIndicator={false}
       >
         <ErrorMessage message={error} />
@@ -72,9 +72,6 @@ export default function SubjectsScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-  },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 52,

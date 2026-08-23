@@ -9,8 +9,15 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import mainStyles from "../styles/theme";
 import { COLORS } from "../styles/colors";
+import Header from "../components/Header";
+import Input from "../components/Input";
+import { useState } from "react";
 
 export default function EditProfileScreen() {
+  const [currentPassword, setCurrentPassword] = useState<string>("")
+  const [currentPassword, setCurrentPassword] = useState<string>("") //todo email
+  const [currentPassword, setCurrentPassword] = useState<string>("") //todo username
+
   return (
     <SafeAreaView style={mainStyles.component} edges={["top"]}>
       <ScrollView
@@ -30,6 +37,39 @@ export default function EditProfileScreen() {
             <Text style={styles.profileName}>Eduardo</Text>
           </View>
         </View>
+
+        <Header title="Editar Perfil"/>
+
+        <Input 
+            label="E-mail"
+            placeholder="Digite seu novo email"
+            value={newPassword}
+            onChangeText={setNewPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+        />
+
+        <Input 
+            label="Username"
+            placeholder="Digite seu nome"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+        />
+
+        <Input 
+            label="Senha atual"
+            placeholder="Digite sua senha atual"
+            value={currentPassword}
+            onChangeText={setCurrentPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+        />
+
+        <TouchableOpacity style={mainStyles.primaryButton}>
+            <Text style={mainStyles.primaryButtonText}>Confirmar</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -48,10 +88,9 @@ const styles = StyleSheet.create({
 
   // Profile card
   profileCard: {
-    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 16,
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "center",
     gap: 16,
     marginBottom: 10,

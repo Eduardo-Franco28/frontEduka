@@ -6,12 +6,15 @@ const mainStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.BG_APP,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: COLORS.TEXT_DARK,
-    textAlign: "center",
-    marginBottom: 24,
+  // Base de toda ScrollView do app. Telas que precisam de um espaçamento
+  // diferente compõem: [mainStyles.scrollContent, styles.scrollContent]
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 24,
   },
   primaryButton: {
     width: "100%",
