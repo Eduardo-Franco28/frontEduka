@@ -107,7 +107,7 @@ export default function AuthScreen() {
           </Text>
         </View>
 
-        <ErrorMessage message={errorMessage} />
+        <ErrorMessage message={errorMessage ?? error} />
 
         {!isLogin && (
           <Input

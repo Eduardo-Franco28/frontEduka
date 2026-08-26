@@ -15,7 +15,7 @@ import useAppNavigation from "../hooks/useNavigation";
 import Header from "../components/Header";
 
 export default function ProfileScreen() {
-  const { logOut } = useAuth();
+  const { logOut, user } = useAuth();
 
   const navigation = useAppNavigation();
 
@@ -48,7 +48,7 @@ export default function ProfileScreen() {
             />
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>Eduardo</Text>
+            <Text style={styles.profileName}>{user?.nome}</Text>
           </View>
         </View>
 
