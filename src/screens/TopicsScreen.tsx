@@ -8,6 +8,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import mainStyles from "../styles/theme";
 import TabBar from "../components/TabBar";
+import Header from "../components/Header";
 import { COLORS } from "../styles/colors";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
@@ -32,7 +33,8 @@ export default function TopicsScreen() {
   const handleActivity = (id: number) =>{
     if(id === null) return;
 
-    navigation.navigate("ActivityScreen", { topicId: id });
+    // navigation.navigate("ActivityScreen", { topicId: id });
+    navigation.navigate("ActivityScreen2", { topicId: id });
   }
 
   if (loading) {
@@ -40,19 +42,12 @@ export default function TopicsScreen() {
   }
 
   return (
-    <SafeAreaView style={mainStyles.component}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backArrow}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{subjectName}</Text>
-        <View style={styles.headerPlaceholder} />
-      </View>
+    <SafeAreaView style={mainStyles.component} edges={["top"]}>
+      <Header title={subjectName} />
 
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        style={mainStyles.scroll}
+        contentContainerStyle={mainStyles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <ErrorMessage message={error} />
@@ -95,46 +90,8 @@ export default function TopicsScreen() {
 
 const styles = StyleSheet.create({
   // Header
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingTop: 52,
-    paddingBottom: 14,
-    backgroundColor: COLORS.BG_WARM,
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  backArrow: {
-    fontSize: 18,
-    color: COLORS.TEXT_PRIMARY,
-    lineHeight: 20,
-  },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
-  },
-  headerPlaceholder: {
-    width: 36,
-  },
 
   // Scroll
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 24,
-  },
 
   // Bubble
   bubble: {

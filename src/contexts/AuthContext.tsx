@@ -1,13 +1,15 @@
 import { useState, createContext, ReactNode, useEffect } from "react";
-import { authLogin, authRegister, authMe } from "../services/authService";
+import * as authService from "../services/authService";
 import {
   LoginRequest,
   RegisterRequest,
   AuthResponse,
   User,
+  NewProfileRequest,
+  NewPasswordRequest,
 } from "../types/auth";
 import { STORAGE_KEY } from "../constants/constant";
-import { saveStore, deleteStore, getStore } from "../services/storageService";
+import * as storageService from "../services/storageService";
 import getMessageError from "../utils/getMessageErrorUtils";
 import { AuthContextData } from "../types/context";
 import LoadingPage from "../components/LoadingPage";
@@ -26,20 +28,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const token = await getStore(STORAGE_KEY);
+        const token = await storageService.get(STORAGE_KEY);
 
         if (!token) {
         setUser(null);
         return;
       }
 
-        const user = await authMe(token);
+        const user = await authService.me(token);
 
         setUser(user);
       } catch (error) {
         console.log("Inicialização: Nenhum usuário ativo ou token expirado.");
 
-        await deleteStore(STORAGE_KEY);
+        await storageService.remove(STORAGE_KEY);
         setUser(null);
       } finally {
         setInitializing(false);
@@ -54,9 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      const response = await authLogin(data);
+      const response = await authService.login(data);
       setUser(response.userResponse);
-      await saveStore(STORAGE_KEY, response.token);
+      await storageService.save(STORAGE_KEY, response.token);
       return response;
     } catch (error) {
       const errorMessage = getMessageError(error, "Erro ao fazer login");
@@ -75,9 +77,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      const response = await authRegister(data);
+      const response = await authService.register(data);
       setUser(response.userResponse);
-      await saveStore(STORAGE_KEY, response.token);
+      await storageService.save(STORAGE_KEY, response.token);
       return response;
     } catch (error) {
       const errorMessage = getMessageError(error, "Erro ao criar conta");
@@ -89,11 +91,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateProfile = async (data: NewProfileRequest): Promise<AuthResponse | null> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await authService.updateProfile(data);
+      setUser(response.userResponse);
+      await storageService.save(STORAGE_KEY, response.token);
+      return response;
+    } catch (error) {
+      const errorMessage = getMessageError(error, "Erro ao atualizar perfil");
+      console.error("Update Profile Error:", errorMessage);
+      setError(errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePassword = async (data: NewPasswordRequest): Promise<AuthResponse | null> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await authService.updatePassword(data);
+      setUser(response.userResponse);
+      await storageService.save(STORAGE_KEY, response.token);
+      return response;
+    } catch (error) {
+      const errorMessage = getMessageError(error, "Erro ao atualizar a senha");
+      console.error("Update Password Error:", errorMessage);
+      setError(errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logOut = async (): Promise<void> => {
     setUser(null);
     setError(null);
 
-    await deleteStore(STORAGE_KEY);
+    await storageService.remove(STORAGE_KEY);
   };
 
   if (initializing) {
@@ -102,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, error, login, register, logOut }}
+      value={{ user, loading, error, login, register, logOut, updateProfile, updatePassword }}
     >
       {children}
     </AuthContext.Provider>

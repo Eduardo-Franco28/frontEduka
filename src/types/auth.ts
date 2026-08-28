@@ -19,3 +19,14 @@ export interface RegisterRequest {
     email: string;
     password: string;
 }
+
+export interface NewProfileRequest {
+    name: string,
+    email: string,
+    currentPassword: string
+}
+
+export interface NewPasswordRequest {
+    currentPassword: string,
+    newPassword: string
+}

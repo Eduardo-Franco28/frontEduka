@@ -16,13 +16,28 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import { AttemptAlternativeRequest } from "../types/subject";
 
-export default function ActivityScreen() {
+// Dados estáticos até o backend mandar a palavra e as posições dos buracos.
+// `blank: true` = buraco que o aluno preenche arrastando uma peça.
+const STATIC_PUZZLE = {
+  hint: "🍇",
+  word: [
+    { char: "U", blank: true },
+    { char: "V", blank: false },
+    { char: "A", blank: true },
+  ],
+  tiles: ["A", "U"],
+};
+
+// Índice do primeiro buraco — é nele que o drag que já existe mira.
+const FIRST_BLANK = STATIC_PUZZLE.word.findIndex((l) => l.blank);
+
+export default function ActivityScreen2() {
   const [index, setIndex] = useState<number>(0);
   const [alternativeId, setAlternativeId] = useState<number | null>(null);
   const [canAnswer, setIsCanAnswer] = useState(false);
 
   const navigation = useAppNavigation();
-  const route = useRoute<RouteProp<RootStackParamList, "ActivityScreen">>();
+  const route = useRoute<RouteProp<RootStackParamList, "ActivityScreen2">>();
 
   const { getActivity, loading, error, activity, answer, result } = useTopic();
   const { topicId } = route.params;
@@ -66,7 +81,7 @@ export default function ActivityScreen() {
       setAlternativeId(null);
       setIsCanAnswer(false);
 
-      isAswerAble3.value = false;   // shared values não zeram sozinhos
+      isAswerAble3.value = false; // shared values não zeram sozinhos
       isAswerAble4.value = false;
       translateX3.value = 0;
       translateY3.value = 0;
@@ -78,14 +93,14 @@ export default function ActivityScreen() {
       setAlternativeId(null);
       setIsCanAnswer(false);
 
-      isAswerAble3.value = false;   // shared values não zeram sozinhos
+      isAswerAble3.value = false; // shared values não zeram sozinhos
       isAswerAble4.value = false;
       translateX3.value = 0;
       translateY3.value = 0;
       translateX4.value = 0;
       translateY4.value = 0;
 
-      Alert.alert("Resposta errada", "Voce marcou a resposta errada")
+      Alert.alert("Resposta errada", "Voce marcou a resposta errada");
     }
   };
 
@@ -105,6 +120,8 @@ export default function ActivityScreen() {
   const finalPositionDotY3 = useSharedValue(0);
 
   const targetRef = useRef<View | null>(null);
+  // Um ref por buraco da palavra, pra medir a posição de cada slot.
+  const slotRefs = useRef<Array<View | null>>([]);
   const dotsRef4 = useRef<View | null>(null);
   const dotsRef3 = useRef<View | null>(null);
 
@@ -222,96 +239,74 @@ export default function ActivityScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={{ justifyContent: "center", flex: 1 }}>
+      <View style={styles.content}>
         <Text style={styles.questionTitle}>{currentActivity?.title}</Text>
+
+        {/* ZONA 1 — card com as peças arrastáveis */}
         <View style={styles.questionCard}>
-          <View style={styles.questionEquation}>
-            {/* Bloco do Número 4 */}
-            <View style={styles.numberGroup}>
-              <Text style={styles.questionText}>{questionContent.teste1}</Text>
-              {/* O onLayout dispara a função, mas agora ela é segura */}
-              <View
-                ref={dotsRef4}
-                collapsable={false}
-                onLayout={calculateDistance}
-                style={styles.dotsWrapper}
-              >
-                <GestureDetector gesture={dragGesture4}>
-                  <Animated.View style={[animatedStyle4, styles.dotsVertical]}>
-                    <View style={[styles.dotV, styles.dotVActive]} />
-                    <View style={[styles.dotV, styles.dotVActive]} />
-                    <View style={[styles.dotV, styles.dotVActive]} />
-                    <View style={[styles.dotV, styles.dotVActive]} />
-                  </Animated.View>
-                </GestureDetector>
-              </View>
-            </View>
+          <View style={styles.tilesGrid}>
+            <GestureDetector gesture={dragGesture4}>
+              <Animated.View style={animatedStyle4}>
+                <View style={styles.tile}>
+                  <Text style={styles.tileText}>{STATIC_PUZZLE.tiles[0]}</Text>
+                  <View
+                    ref={dotsRef4}
+                    collapsable={false}
+                    onLayout={calculateDistance}
+                  />
+                </View>
+              </Animated.View>
+            </GestureDetector>
 
-            <Text style={styles.operatorText}>+</Text>
-
-            {/* Bloco do Número 3 */}
-            <View style={styles.numberGroup}>
-              <Text style={styles.questionText}>{questionContent.teste2}</Text>
-              <View
-                ref={dotsRef3}
-                collapsable={false}
-                style={styles.dotsWrapper}
-              >
-                <GestureDetector gesture={dragGesture3}>
-                  <Animated.View style={[animatedStyle3, styles.dotsVertical]}>
-                    <View style={[styles.dotV, styles.dotVActive]} />
-                    <View style={[styles.dotV, styles.dotVActive]} />
-                    <View style={[styles.dotV, styles.dotVActive]} />
-                  </Animated.View>
-                </GestureDetector>
-              </View>
-            </View>
-
-            <Text style={styles.operatorText}>=</Text>
-
-            {/* Bloco do Alvo */}
-            <View style={styles.targetGroup}>
-              <View
-                ref={targetRef}
-                collapsable={false}
-                style={styles.targetBox}
-              />
-            </View>
+            <GestureDetector gesture={dragGesture3}>
+              <Animated.View style={animatedStyle3}>
+                <View style={styles.tile}>
+                  <Text style={styles.tileText}>{STATIC_PUZZLE.tiles[1]}</Text>
+                  <View ref={dotsRef3} collapsable={false} />
+                </View>
+              </Animated.View>
+            </GestureDetector>
           </View>
-          <Text style={styles.questionLabel}>
-            *Arraste as bolinhas para completar a soma!
-          </Text>
         </View>
 
-        <Text style={styles.instruction}>TOQUE O NÚMERO CERTO</Text>
+        <Text style={styles.questionLabel}>
+          *Arraste as letras para completar a palavra!
+        </Text>
 
-        <View style={styles.optionsRow}>
-          {currentActivity?.lstAlternative?.map((alt) => (
-            <TouchableOpacity
-              key={alt.id}
-              style={[
-                styles.optionCard,
-                alternativeId === alt.id && styles.optionCardSelected,
-              ]}
-              onPress={() => setAlternativeId(alt.id)}
-              activeOpacity={0.8}
-              disabled={!canAnswer}
-            >
-              <Text
-                style={[
-                  styles.optionText,
-                  alternativeId === alt.id && styles.optionTextSelected,
-                ]}
-              >
-                {alt.description}
+        {/* ZONA 2 — linha da palavra: dica + letras fixas + buracos */}
+        <View style={styles.answerRow}>
+          <Text style={styles.answerHint}>{STATIC_PUZZLE.hint}</Text>
+
+          {STATIC_PUZZLE.word.map((letter, i) =>
+            letter.blank ? (
+              <View
+                key={i}
+                collapsable={false}
+                style={styles.answerSlot}
+                ref={(el) => {
+                  slotRefs.current[i] = el;
+                  // o primeiro buraco continua sendo o alvo do drag que já existe
+                  if (i === FIRST_BLANK) targetRef.current = el;
+                }}
+              />
+            ) : (
+              <Text key={i} style={styles.answerLetter}>
+                {letter.char}
               </Text>
-            </TouchableOpacity>
-          ))}
+            ),
+          )}
         </View>
 
-        <TouchableOpacity onPress={handleAnswer}>
-          <Text>Confirmar</Text>
-        </TouchableOpacity>
+        {/* ZONA 4 — confirmar */}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            onPress={handleAnswer}
+            activeOpacity={0.85}
+            style={mainStyles.primaryButton}
+          >
+            <Text style={mainStyles.primaryButtonText}>Confirmar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -340,15 +335,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: COLORS.TEXT_PRIMARY,
   },
-  questionCard: {
-    backgroundColor: "#fff",
-    borderRadius: 24,
-    marginHorizontal: 16,
-    padding: 14,
-    marginBottom: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 320,
+
+  // Coluna principal: as 4 zonas empilhadas
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
   },
   questionTitle: {
     fontSize: 24,
@@ -358,80 +349,83 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 24,
   },
+
+  // ZONA 1 — card com as peças
+  questionCard: {
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 320,
+  },
+  tilesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+  },
+  tile: {
+    width: 76,
+    height: 76,
+    backgroundColor: "#fff",
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#ccc",
+  },
+  tileText: {
+    fontSize: 40,
+    fontWeight: "800",
+    color: COLORS.TEXT_PRIMARY,
+    textAlign: "center",
+  },
   questionLabel: {
     fontSize: 16,
     fontWeight: "500",
     color: COLORS.TEXT_MUTED,
     letterSpacing: 1.2,
     textAlign: "center",
+    marginTop: 16,
   },
-  questionEquation: {
+
+  // ZONA 2 — linha da resposta
+  answerRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "center",
-    width: "100%",
-    gap: 16,
-    marginBottom: 34,
-  },
-  numberGroup: {
-    flexDirection: "column",
     alignItems: "center",
-    minWidth: 50,
+    justifyContent: "center",
+    gap: 12,
+    marginTop: 24,
+    marginBottom: 32,
   },
-  targetGroup: {
-    justifyContent: "flex-start",
-    paddingTop: 4,
+  answerHint: {
+    fontSize: 34,
+    lineHeight: 40,
+    marginRight: 4,
   },
-  questionText: {
-    fontSize: 46,
+  answerSlot: {
+    width: 46,
+    height: 48,
+    borderBottomWidth: 3,
+    borderBottomColor: COLORS.TEXT_PRIMARY,
+  },
+  answerLetter: {
+    width: 46,
+    height: 48,
+    fontSize: 34,
+    lineHeight: 44,
     fontWeight: "800",
     color: COLORS.TEXT_PRIMARY,
     textAlign: "center",
-    lineHeight: 52,
   },
-  operatorText: {
-    fontSize: 46,
-    fontWeight: "400",
-    color: COLORS.TEXT_PRIMARY,
-    textAlign: "center",
-    lineHeight: 52,
-  },
-  dotsWrapper: {
-    marginTop: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 70,
-  },
-  dotsVertical: {
-    gap: 6,
-    alignItems: "center",
-  },
-  dotV: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-  },
-  dotVActive: {
-    backgroundColor: COLORS.PRIMARY_LIGHT,
-  },
-  targetBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
-  },
-  instruction: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: COLORS.TEXT_MUTED,
-    letterSpacing: 1.4,
-    textAlign: "center",
-    marginBottom: 16,
-  },
+
+  // ZONA 3 — alternativas
   optionsRow: {
     flexDirection: "row",
     gap: 12,
-    paddingHorizontal: 16,
-    marginBottom: 28,
+    marginBottom: 24,
   },
   optionCard: {
     flex: 1,
@@ -441,7 +435,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "transparent",
+    borderColor: "#ccc",
   },
   optionCardSelected: {
     borderColor: COLORS.PRIMARY_LIGHT,
@@ -454,5 +448,10 @@ const styles = StyleSheet.create({
   },
   optionTextSelected: {
     color: COLORS.PRIMARY_LIGHT,
+  },
+
+  // ZONA 4 — confirmar
+  footer: {
+    paddingBottom: 32,
   },
 });

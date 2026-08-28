@@ -1,6 +1,6 @@
 import { useState } from "react";
 import getMessageError from "../utils/getMessageErrorUtils";
-import { getTopicsBySubject, getActivityByTopic, answerActivity } from "../services/activityService";
+import * as activityService from "../services/activityService";
 import { TopicsResponse, ActivityResponse, AttemptAlternativeRequest, AnsweredAlternativeResponse } from "../types/subject";
 
 export default function useTopic() {
@@ -16,7 +16,7 @@ export default function useTopic() {
     setError(null);
 
     try {
-      const response = await getTopicsBySubject(subjectId);
+      const response = await activityService.getTopicsBySubject(subjectId);
       setTopic(response);
       return response;
     } catch (error) {
@@ -34,7 +34,7 @@ export default function useTopic() {
       setError(null);
   
       try {
-        const response = await getActivityByTopic(topicId);
+        const response = await activityService.getByTopic(topicId);
         setActivity(response);
         return response;
       } catch (error) {
@@ -52,7 +52,7 @@ export default function useTopic() {
       setError(null);
 
       try {
-        const response = await answerActivity(attempt);
+        const response = await activityService.answer(attempt);
         setResult(response);
         return response;
       } catch (error) {

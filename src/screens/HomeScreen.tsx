@@ -13,8 +13,8 @@ export default function HomeScreen() {
   return (
     <View style={mainStyles.component}>
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        style={mainStyles.scroll}
+        contentContainerStyle={[mainStyles.scrollContent, styles.scrollContent]}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
@@ -70,13 +70,8 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-  },
   scrollContent: {
-    paddingHorizontal: 16,
     paddingTop: 92,
-    paddingBottom: 24,
   },
 
   // Header

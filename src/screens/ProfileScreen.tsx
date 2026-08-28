@@ -12,9 +12,10 @@ import TabBar from "../components/TabBar";
 import { COLORS } from "../styles/colors";
 import useAuth from "../hooks/useAuth";
 import useAppNavigation from "../hooks/useNavigation";
+import Header from "../components/Header";
 
 export default function ProfileScreen() {
-  const { logOut } = useAuth();
+  const { logOut, user } = useAuth();
 
   const navigation = useAppNavigation();
 
@@ -32,12 +33,11 @@ export default function ProfileScreen() {
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.BG_WARM} />
 
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        style={mainStyles.scroll}
+        contentContainerStyle={[mainStyles.scrollContent, styles.scrollContent]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Page Title */}
-        <Text style={styles.pageTitle}>Meu Perfil</Text>
+        <Header title="Meu perfil" showBack={false}/>
 
         {/* Profile Card */}
         <View style={styles.profileCard}>
@@ -48,7 +48,7 @@ export default function ProfileScreen() {
             />
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>Eduardo</Text>
+            <Text style={styles.profileName}>{user?.nome}</Text>
           </View>
         </View>
 
@@ -95,9 +95,17 @@ export default function ProfileScreen() {
           <View style={styles.divider} />
 
           {/* Editar dados */}
-          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7} onPress={() => navigation.navigate("EditProfileScreen")}>
             <Text style={styles.menuIcon}>✏️</Text>
-            <Text style={styles.menuLabel}>Editar dados</Text>
+            <Text style={styles.menuLabel}>Editar perfil</Text>
+            <Text style={styles.menuChevron}>→</Text>
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+          {/* Editar dados */}
+          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7} onPress={() => navigation.navigate("ChangePasswordScreen")}>
+            <Text style={styles.menuIcon}>🔒</Text>
+            <Text style={styles.menuLabel}>Alterar senha</Text>
             <Text style={styles.menuChevron}>→</Text>
           </TouchableOpacity>
 
@@ -121,22 +129,9 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-  },
   scrollContent: {
-    paddingHorizontal: 16,
     paddingTop: 52,
-    paddingBottom: 24,
-  },
-
-  // Page title
-  pageTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: 16,
-  },
+  },  
 
   // Profile card
   profileCard: {

@@ -1,4 +1,4 @@
-import { AuthResponse, LoginRequest, RegisterRequest, User } from "./auth";
+import { AuthResponse, LoginRequest, NewPasswordRequest, NewProfileRequest, RegisterRequest, User } from "./auth";
 
 export interface AuthContextData {
     user: User | null;
@@ -6,5 +6,7 @@ export interface AuthContextData {
     error: string | null;
     login: (data: LoginRequest) => Promise<AuthResponse | null>;
     register: (data: RegisterRequest) => Promise<AuthResponse | null>;
+    updateProfile: (data: NewProfileRequest) => Promise<AuthResponse | null>;
+    updatePassword: (data: NewPasswordRequest) => Promise<AuthResponse | null>;
     logOut: () => Promise<void>;
 }

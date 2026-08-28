@@ -1,6 +1,6 @@
 import { useState } from "react";
 import getMessageError from "../utils/getMessageErrorUtils";
-import { getAllSubjects } from "../services/subjectService";
+import * as subjectService from "../services/subjectService";
 import { SubjectResponse } from "../types/subject";
 
 export default function useSubject() {
@@ -13,7 +13,7 @@ export default function useSubject() {
     setError(null);
 
     try {
-      const response = await getAllSubjects();
+      const response = await subjectService.getAll();
       setSubject(response);
       return response;
     } catch (error) {
