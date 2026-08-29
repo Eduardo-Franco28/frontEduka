@@ -15,6 +15,7 @@ import LoadingPage from "../components/LoadingPage";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import { AttemptAlternativeRequest } from "../types/subject";
+import TipActivity from "../components/TipActivity";
 
 // Dados estáticos até o backend mandar a palavra e as posições dos buracos.
 // `blank: true` = buraco que o aluno preenche arrastando uma peça.
@@ -35,6 +36,7 @@ export default function ActivityScreen2() {
   const [index, setIndex] = useState<number>(0);
   const [alternativeId, setAlternativeId] = useState<number | null>(null);
   const [canAnswer, setIsCanAnswer] = useState(false);
+  const [tipVisible, setTipVisible] = useState<boolean>(false)
 
   const navigation = useAppNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "ActivityScreen2">>();
@@ -52,6 +54,10 @@ export default function ActivityScreen2() {
       setIndex(start === -1 ? 0 : start); //Caso o usuario ja tenha terminado tudo nos conseguimos tratar
     });
   }, [topicId]);
+
+  useEffect(() => {
+    setTipVisible(true)
+  }, [])
 
   const currentActivity = activity?.lstQuestions[index];
 
@@ -229,6 +235,13 @@ export default function ActivityScreen2() {
 
   return (
     <View style={mainStyles.component}>
+
+      <TipActivity 
+          tip="Arraste as bolinhas para concluir"
+          visible={tipVisible}
+          onClose={() => setTipVisible(false)}
+        />
+
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -241,6 +254,10 @@ export default function ActivityScreen2() {
 
       <View style={styles.content}>
         <Text style={styles.questionTitle}>{currentActivity?.title}</Text>
+
+        <TouchableOpacity
+         onPress={() => setTipVisible(true)}
+        ><Text>Abrir Tip</Text></TouchableOpacity>
 
         {/* ZONA 1 — card com as peças arrastáveis */}
         <View style={styles.questionCard}>

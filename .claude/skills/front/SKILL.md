@@ -25,6 +25,7 @@ Este arquivo é o resumo. Abra a referência conforme a tarefa:
 | `references/receitas.md`       | Criar tela, endpoint, componente ou atividade (com código)|
 | `references/ui.md`             | Mexer em qualquer coisa visual — paleta, tamanhos, componentes |
 | `references/estado-atual.md`   | **Antes de qualquer tarefa maior** — o que está pela metade, bugs e erros de TS já existentes |
+| `references/git.md`            | Fluxo de branches, abrir PR no GitHub, limpeza depois do merge |
 
 ## Antes de escrever qualquer código
 
