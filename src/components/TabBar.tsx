@@ -1,28 +1,57 @@
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigationState } from "@react-navigation/native";
+import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 import useAppNavigation from "../hooks/useNavigation";
+import { COLORS } from "../styles/colors";
+
+const TABS = [
+  { route: "HomeScreen", label: "Início", icon: "house" },
+  { route: "SubjectsScreen", label: "Trajetória", icon: "map" },
+  { route: "ProfileScreen", label: "Perfil", icon: "user" },
+] as const;
 
 export default function TabBar() {
   const navigation = useAppNavigation();
   const insets = useSafeAreaInsets();
 
+  const currentRoute = useNavigationState(
+    (state) => state?.routes[state.index]?.name
+  );
+
   return (
-    <View style={[styles.tabBar, {
-      height: 64 + insets.bottom,
-      paddingBottom: insets.bottom
-    }]}>
-      <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("HomeScreen")}>
-        <Text style={styles.tabIconActive}>🏠</Text>
-        <Text style={styles.tabLabelActive}>Início</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("SubjectsScreen")}>
-        <Text style={styles.tabIcon}>📋</Text>
-        <Text style={styles.tabLabel}>Trajetória</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("ProfileScreen")}>
-        <Text style={styles.tabIcon}>👤</Text>
-        <Text style={styles.tabLabel}>Perfil</Text>
-      </TouchableOpacity>
+    <View
+      style={[
+        styles.tabBar,
+        {
+          height: 68 + insets.bottom,
+          paddingBottom: insets.bottom,
+        },
+      ]}
+    >
+      {TABS.map((tab) => {
+        const isActive = currentRoute === tab.route;
+        return (
+          <TouchableOpacity
+            key={tab.route}
+            style={styles.tabItem}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={tab.label}
+            accessibilityState={{ selected: isActive }}
+            onPress={() => navigation.navigate(tab.route)}
+          >
+            <FontAwesomeFreeSolid
+              name={tab.icon}
+              size={24}
+              color={isActive ? COLORS.PRIMARY : COLORS.TEXT_MUTED}
+            />
+            <Text style={isActive ? styles.tabLabelActive : styles.tabLabel}>
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }
@@ -31,28 +60,24 @@ const styles = StyleSheet.create({
   tabBar: {
     flexDirection: "row",
     backgroundColor: "#fff",
-    borderTopWidth: 0.5,
-    borderTopColor: "#e0ddd7",
+    borderTopWidth: 1,
+    borderTopColor: COLORS.BORDER_LIGHT,
   },
   tabItem: {
     flex: 1,
     alignItems: "center",
-    gap: 4,
-  },
-  tabIcon: {
-    fontSize: 20,
-    opacity: 0.45,
-  },
-  tabIconActive: {
-    fontSize: 20,
+    justifyContent: "center",
+    gap: 5,
+    paddingTop: 10,
   },
   tabLabel: {
-    fontSize: 11,
-    color: "#9a9a8e",
+    fontSize: 12,
+    color: COLORS.TEXT_MUTED,
+    fontWeight: "500",
   },
   tabLabelActive: {
-    fontSize: 11,
-    color: "#5b82b5",
-    fontWeight: "600",
+    fontSize: 12,
+    color: COLORS.PRIMARY,
+    fontWeight: "700",
   },
 });

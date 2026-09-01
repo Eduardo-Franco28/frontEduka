@@ -1,5 +1,5 @@
-export enum TopicStatus{
-    CONCLUIDO,
-    NAO_INICIADO,
-    EM_ANDAMENTO
+﻿export enum TopicStatus {
+  CONCLUIDO = "CONCLUIDO",
+  NAO_INICIADO = "NAO_INICIADO",
+  EM_ANDAMENTO = "EM_ANDAMENTO",
 }
