@@ -158,6 +158,16 @@ Pegadinhas do contrato:
 
 ## Git
 
-Branches: `main` ← `develop` ← `feature/<nome>`. Commits em inglês,
-prefixo `feat:` (às vezes `Core:`), descrição curta em minúsculas.
-Não commite nem faça push sem o usuário pedir.
+```
+main  ←  develop  ←  feature/<nome>
+```
+
+Nunca commite direto em `main` nem em `develop`. Toda feature nasce de um
+`develop` atualizado e volta por Pull Request, com base `develop` (não `main`).
+
+Commits em inglês, prefixo `feat:` (às vezes `Core:`), descrição curta em
+minúsculas. Não commite nem faça push sem o usuário pedir.
+
+O fluxo completo está em **`references/git.md`**: criar a branch, abrir o PR
+passo a passo no GitHub, e os comandos de limpeza depois do merge (atualizar o
+`develop` local, apagar a branch local e a do `origin`).
