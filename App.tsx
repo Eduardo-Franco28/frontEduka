@@ -11,9 +11,11 @@ import WelcomeScreen from "./src/screens/WelcomeScreen";
 import ActivityScreen from "./src/activities/ActivityScreen";
 import ActivityScreen2 from "./src/activities/ActivityScreen2";
 import { AuthProvider } from "./src/contexts/AuthContext";
+import { ThemeProvider } from "./src/contexts/ThemeContext";
 import useAuth from "./src/hooks/useAuth";
 import EditProfileScreen from "./src/screens/EditProfileScreen";
 import ChangePasswordScreen from "./src/screens/ChangePasswordScreen";
+import AccessibilityScreen from "./src/screens/AccessibilityScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -35,6 +37,7 @@ function Routes() {
       <Stack.Screen name="AuthScreen" component={AuthScreen} />
       <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
       <Stack.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} />
+      <Stack.Screen name="AccessibilityScreen" component={AccessibilityScreen} />
     </Stack.Navigator>
   );
 }
@@ -42,11 +45,13 @@ function Routes() {
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
-        <NavigationContainer>
-          <Routes />
-        </NavigationContainer>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <NavigationContainer>
+            <Routes />
+          </NavigationContainer>
+        </AuthProvider>
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 }

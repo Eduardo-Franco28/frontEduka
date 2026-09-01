@@ -2,16 +2,17 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from "rea
 import useAppNavigation from "../hooks/useNavigation";
 import mainStyles from "../styles/theme";
 import TabBar from "../components/TabBar";
-import { COLORS } from "../styles/colors";
 import useAuth from "../hooks/useAuth";
+import useTheme from "../hooks/useTheme";
 
 export default function HomeScreen() {
   const navigation = useAppNavigation();
+  const { colors, fontScale } = useTheme();
 
   const user = useAuth();
 
   return (
-    <View style={mainStyles.component}>
+    <View style={[mainStyles.component, { backgroundColor: colors.BG_APP }]}>
       <ScrollView
         style={mainStyles.scroll}
         contentContainerStyle={[mainStyles.scrollContent, styles.scrollContent]}
@@ -20,36 +21,53 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>Olá {user.user?.nome} 👋</Text>
-            <Text style={styles.headerSubtitle}>Pronto para aprender hoje?</Text>
+            <Text style={[styles.headerTitle, { color: colors.TEXT_PRIMARY, fontSize: 22 * fontScale }]}>
+              Olá {user.user?.nome} 👋
+            </Text>
+            <Text style={[styles.headerSubtitle, { color: colors.TEXT_MUTED, fontSize: 14 * fontScale }]}>
+              Pronto para aprender hoje?
+            </Text>
           </View>
         </View>
 
         {/* Daily Activity Card */}
-        <View style={styles.dailyCard}>
-          <Text style={styles.dailyLabel}>ATIVIDADE DO DIA</Text>
+        <View style={[styles.dailyCard, { backgroundColor: colors.PRIMARY_LIGHT }]}>
+          <Text style={[styles.dailyLabel, { fontSize: 12 * fontScale }]}>ATIVIDADE DO DIA</Text>
 
           <View style={styles.dailySubject}>
             <View style={styles.dailyIconBox}>
               <Text style={styles.dailyIcon}>📐</Text>
             </View>
             <View>
-              <Text style={styles.dailySubjectName}>Matemática</Text>
-              <Text style={styles.dailySubjectDesc}>Contagem de objetos</Text>
+              <Text style={[styles.dailySubjectName, { fontSize: 20 * fontScale }]}>Matemática</Text>
+              <Text style={[styles.dailySubjectDesc, { fontSize: 14 * fontScale }]}>Contagem de objetos</Text>
             </View>
           </View>
 
-          <TouchableOpacity style={styles.dailyButton} activeOpacity={0.85}>
-            <Text style={styles.dailyButtonText}>▶ Continuar matérias</Text>
+          <TouchableOpacity
+            style={[styles.dailyButton, { backgroundColor: colors.CARD }]}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate("SubjectsScreen")}
+          >
+            <Text style={[styles.dailyButtonText, { color: colors.PRIMARY_LIGHT, fontSize: 17 * fontScale }]}>
+              ▶ Continuar matérias
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Continue studying */}
-        <Text style={styles.sectionTitle}>Continue seus estudos</Text>
+        <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY, fontSize: 18 * fontScale }]}>
+          Continue seus estudos
+        </Text>
 
-        <View style={styles.continueCard}>
+        <View
+          style={[
+            styles.continueCard,
+            { backgroundColor: colors.CARD, borderColor: colors.BORDER_LIGHT },
+          ]}
+        >
           <View style={styles.continueTop}>
-            <View style={styles.continueIconBox}>
+            <View style={[styles.continueIconBox, { backgroundColor: colors.BG_WARM }]}>
               <Text style={styles.continueIcon}>📚</Text>
             </View>
             <View style={styles.continueMascotBox}>
@@ -58,7 +76,11 @@ export default function HomeScreen() {
             <View></View>
           </View>
 
-          <TouchableOpacity style={mainStyles.primaryButton} activeOpacity={0.85} onPress={() => navigation.navigate("ActivityScreen")}>
+          <TouchableOpacity
+            style={mainStyles.primaryButton}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate("ActivityScreen2", { topicId: 101 })}
+          >
             <Text style={mainStyles.primaryButtonText}>▶ Continuar jornada</Text>
           </TouchableOpacity>
         </View>
@@ -82,29 +104,21 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   headerTitle: {
-    fontSize: 22,
     fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
     marginBottom: 2,
   },
   headerSubtitle: {
-    fontSize: 14,
-    color: COLORS.TEXT_MUTED,
-  },
-  headerMascot: {
-    fontSize: 36,
+    fontWeight: "500",
   },
 
   // Daily Activity Card
   dailyCard: {
     height: 280,
-    backgroundColor: COLORS.PRIMARY_LIGHT,
     borderRadius: 22,
     padding: 20,
     marginBottom: 24,
   },
   dailyLabel: {
-    fontSize: 12,
     fontWeight: "700",
     color: "rgba(255,255,255,0.7)",
     letterSpacing: 1.2,
@@ -128,47 +142,38 @@ const styles = StyleSheet.create({
     fontSize: 26,
   },
   dailySubjectName: {
-    fontSize: 20,
     fontWeight: "700",
     color: "#fff",
     marginBottom: 3,
   },
   dailySubjectDesc: {
-    fontSize: 14,
     color: "rgba(255,255,255,0.75)",
   },
   dailyButton: {
-   width: "100%",
+    width: "100%",
     height: 60,
-    backgroundColor: "#fff",
     borderRadius: 26,
     alignItems: "center",
     justifyContent: "center",
     marginTop: "auto",
   },
   dailyButtonText: {
-    fontSize: 17,
     fontWeight: "700",
-    color: COLORS.PRIMARY_LIGHT,
   },
 
   // Section title
   sectionTitle: {
-    fontSize: 18,
     fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
     marginBottom: 12,
   },
 
   // Continue Card
   continueCard: {
     height: 280,
-    backgroundColor: "#fff",
     borderRadius: 22,
     padding: 16,
     marginBottom: 10,
     borderWidth: 2,
-    borderColor: COLORS.BORDER_LIGHT,
   },
   continueTop: {
     flexDirection: "row",
@@ -181,7 +186,6 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 14,
-    backgroundColor: COLORS.BG_WARM,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "flex-start",
