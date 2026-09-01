@@ -9,13 +9,14 @@ import {
 } from "react-native";
 import mainStyles from "../styles/theme";
 import TabBar from "../components/TabBar";
-import { COLORS } from "../styles/colors";
 import useAuth from "../hooks/useAuth";
 import useAppNavigation from "../hooks/useNavigation";
+import useTheme from "../hooks/useTheme";
 import Header from "../components/Header";
 
 export default function ProfileScreen() {
   const { logOut, user } = useAuth();
+  const { colors, fontScale, isDark } = useTheme();
 
   const navigation = useAppNavigation();
 
@@ -29,96 +30,130 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={mainStyles.component}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.BG_WARM} />
+    <View style={[mainStyles.component, { backgroundColor: colors.BG_APP }]}>
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor={colors.BG_WARM}
+      />
 
       <ScrollView
         style={mainStyles.scroll}
         contentContainerStyle={[mainStyles.scrollContent, styles.scrollContent]}
         showsVerticalScrollIndicator={false}
       >
-        <Header title="Meu perfil" showBack={false}/>
+        <Header title="Meu perfil" showBack={false} />
 
         {/* Profile Card */}
-        <View style={styles.profileCard}>
-          <View style={styles.avatarCircle}>
+        <View style={[styles.profileCard, { backgroundColor: colors.CARD }]}>
+          <View style={[styles.avatarCircle, { borderColor: colors.PRIMARY }]}>
             <Image
               style={styles.avatarEmoji}
               source={require("../../assets/mascotePerfil.png")}
             />
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{user?.nome}</Text>
+            <Text
+              style={[
+                styles.profileName,
+                { color: colors.TEXT_PRIMARY, fontSize: 20 * fontScale },
+              ]}
+            >
+              {user?.nome}
+            </Text>
           </View>
         </View>
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: COLORS.PRIMARY_LIGHT }]}>
+          <View style={[styles.statCard, { backgroundColor: colors.CARD }]}>
+            <Text style={[styles.statValue, { color: colors.PRIMARY_LIGHT, fontSize: 22 * fontScale }]}>
               24
             </Text>
-            <Text style={styles.statLabel}>ESTRELAS</Text>
+            <Text style={[styles.statLabel, { color: colors.TEXT_MUTED, fontSize: 11 * fontScale }]}>
+              ESTRELAS
+            </Text>
           </View>
-          <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: COLORS.TEXT_PRIMARY }]}>
+          <View style={[styles.statCard, { backgroundColor: colors.CARD }]}>
+            <Text style={[styles.statValue, { color: colors.TEXT_PRIMARY, fontSize: 22 * fontScale }]}>
               12
             </Text>
-            <Text style={styles.statLabel}>ATIVIDADES</Text>
+            <Text style={[styles.statLabel, { color: colors.TEXT_MUTED, fontSize: 11 * fontScale }]}>
+              ATIVIDADES
+            </Text>
           </View>
-          <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: COLORS.WARNING }]}>
+          <View style={[styles.statCard, { backgroundColor: colors.CARD }]}>
+            <Text style={[styles.statValue, { color: colors.WARNING, fontSize: 22 * fontScale }]}>
               3🔥
             </Text>
-            <Text style={styles.statLabel}>DIAS</Text>
+            <Text style={[styles.statLabel, { color: colors.TEXT_MUTED, fontSize: 11 * fontScale }]}>
+              DIAS
+            </Text>
           </View>
         </View>
 
         {/* Menu Card */}
-        <View style={styles.menuCard}>
-          {/* Conquistas */}
+        <View style={[styles.menuCard, { backgroundColor: colors.CARD }]}>
           <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
             <Text style={styles.menuIcon}>🏆</Text>
-            <Text style={styles.menuLabel}>Conquistas</Text>
-            <Text style={styles.menuChevron}>→</Text>
+            <Text style={[styles.menuLabel, { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale }]}>
+              Conquistas
+            </Text>
+            <Text style={[styles.menuChevron, { color: colors.TEXT_MUTED }]}>→</Text>
           </TouchableOpacity>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]} />
 
-          {/* Acessibilidade */}
-          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate("AccessibilityScreen")}
+          >
             <Text style={styles.menuIcon}>♿</Text>
-            <Text style={styles.menuLabel}>Acessibilidade</Text>
-            <Text style={styles.menuChevron}>→</Text>
+            <Text style={[styles.menuLabel, { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale }]}>
+              Acessibilidade
+            </Text>
+            <Text style={[styles.menuChevron, { color: colors.TEXT_MUTED }]}>→</Text>
           </TouchableOpacity>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]} />
 
-          {/* Editar dados */}
-          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7} onPress={() => navigation.navigate("EditProfileScreen")}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate("EditProfileScreen")}
+          >
             <Text style={styles.menuIcon}>✏️</Text>
-            <Text style={styles.menuLabel}>Editar perfil</Text>
-            <Text style={styles.menuChevron}>→</Text>
+            <Text style={[styles.menuLabel, { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale }]}>
+              Editar perfil
+            </Text>
+            <Text style={[styles.menuChevron, { color: colors.TEXT_MUTED }]}>→</Text>
           </TouchableOpacity>
 
-          <View style={styles.divider} />
-          {/* Editar dados */}
-          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7} onPress={() => navigation.navigate("ChangePasswordScreen")}>
+          <View style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]} />
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate("ChangePasswordScreen")}
+          >
             <Text style={styles.menuIcon}>🔒</Text>
-            <Text style={styles.menuLabel}>Alterar senha</Text>
-            <Text style={styles.menuChevron}>→</Text>
+            <Text style={[styles.menuLabel, { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale }]}>
+              Alterar senha
+            </Text>
+            <Text style={[styles.menuChevron, { color: colors.TEXT_MUTED }]}>→</Text>
           </TouchableOpacity>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]} />
 
-          {/* Sair */}
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
             onPress={handleLogOut}
           >
             <Text style={styles.menuIcon}>📕</Text>
-            <Text style={[styles.menuLabel, styles.menuLabelDanger]}>Sair</Text>
+            <Text style={[styles.menuLabel, { color: colors.DANGER, fontSize: 15 * fontScale }]}>
+              Sair
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -131,108 +166,80 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: 52,
-  },  
+  },
 
   // Profile card
   profileCard: {
-    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   avatarCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: COLORS.SURFACE_BLUE,
-    borderWidth: 2,
-    borderColor: COLORS.PRIMARY_LIGHT,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     alignItems: "center",
     justifyContent: "center",
-    flexShrink: 0,
+    borderWidth: 2,
   },
   avatarEmoji: {
-    width: 28,
-    height: 28,
+    width: 48,
+    height: 48,
   },
   profileInfo: {
     flex: 1,
   },
   profileName: {
-    fontSize: 20,
     fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: 3,
-  },
-  profileSub: {
-    fontSize: 13,
-    color: COLORS.TEXT_MUTED,
-    marginBottom: 6,
-  },
-  stars: {
-    fontSize: 16,
   },
 
-  // Stats row
+  // Stats
   statsRow: {
     flexDirection: "row",
     gap: 10,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#fff",
     borderRadius: 16,
-    paddingVertical: 14,
+    paddingVertical: 16,
     alignItems: "center",
+    gap: 4,
   },
   statValue: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 4,
+    fontWeight: "800",
   },
   statLabel: {
-    fontSize: 10,
     fontWeight: "700",
-    color: COLORS.TEXT_MUTED,
     letterSpacing: 0.8,
   },
 
-  // Menu card
+  // Menu
   menuCard: {
-    backgroundColor: "#fff",
     borderRadius: 20,
-    overflow: "hidden",
+    paddingHorizontal: 16,
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 18,
+    gap: 14,
     paddingVertical: 18,
-    gap: 12,
   },
   menuIcon: {
-    fontSize: 22,
+    fontSize: 20,
   },
   menuLabel: {
     flex: 1,
-    fontSize: 16,
-    fontWeight: "500",
-    color: COLORS.TEXT_PRIMARY,
-  },
-  menuLabelDanger: {
-    color: COLORS.DANGER,
+    fontWeight: "600",
   },
   menuChevron: {
     fontSize: 16,
-    color: COLORS.TEXT_MUTED,
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.BG_WARM,
-    marginLeft: 52,
+    marginLeft: 34,
   },
 });

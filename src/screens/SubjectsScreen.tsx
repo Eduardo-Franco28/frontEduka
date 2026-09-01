@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import mainStyles from "../styles/theme";
@@ -13,9 +12,13 @@ import useSubject from "../hooks/useSubject";
 import ErrorMessage from "../components/ErrorMessage";
 import TabBar from "../components/TabBar";
 import useAppNavigation from "../hooks/useNavigation";
+import useTheme from "../hooks/useTheme";
+import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
+import { getSubjectVisual } from "../constants/subjectVisuals";
 
 export default function SubjectsScreen() {
   const { loading, subject, getAll, error } = useSubject();
+  const { colors, fontScale } = useTheme();
 
   const navigation = useAppNavigation();
 
@@ -30,7 +33,10 @@ export default function SubjectsScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={mainStyles.component} edges={["top"]}>
+    <SafeAreaView
+      style={[mainStyles.component, { backgroundColor: colors.BG_APP }]}
+      edges={["top"]}
+    >
       <ScrollView
         style={mainStyles.scroll}
         contentContainerStyle={[mainStyles.scrollContent, styles.scrollContent]}
@@ -40,27 +46,46 @@ export default function SubjectsScreen() {
 
         {/* Step dots */}
         <View style={styles.dotsRow}>
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-          <View style={[styles.dot, styles.dotActive]} />
+          <View style={[styles.dot, { backgroundColor: colors.BORDER_WARM }]} />
+          <View style={[styles.dot, { backgroundColor: colors.BORDER_WARM }]} />
+          <View style={[styles.dot, styles.dotActive, { backgroundColor: colors.PRIMARY }]} />
         </View>
+
         {/* Icon + Title */}
         <Text style={styles.titleEmoji}>📚</Text>
-        <Text style={styles.title}>O que vamos{"\n"}aprender hoje?</Text>
+        <Text
+          style={[
+            styles.title,
+            { color: colors.TEXT_PRIMARY, fontSize: 28 * fontScale },
+          ]}
+        >
+          O que vamos{"\n"}aprender hoje?
+        </Text>
 
         {/* Grid */}
         <View style={styles.grid}>
-          {/* Matemática */}
           {subject?.map((item) => {
+            const visual = getSubjectVisual(item.name);
             return (
               <TouchableOpacity
                 key={item.id}
-                style={[styles.card]}
+                style={[styles.card, { backgroundColor: colors.CARD }]}
                 activeOpacity={0.85}
+                accessibilityRole="button"
+                accessibilityLabel={item.name}
                 onPress={() => handleSelectSubject(item.id, item.name)}
               >
-                <Text style={styles.cardIcon}>📐</Text>
-                <Text style={[styles.cardLabel]}>{item.name}</Text>
+                <View style={[styles.cardIconBox, { backgroundColor: visual.bg }]}>
+                  <FontAwesomeFreeSolid name={visual.icon} size={28} color={visual.color} />
+                </View>
+                <Text
+                  style={[
+                    styles.cardLabel,
+                    { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale },
+                  ]}
+                >
+                  {item.name}
+                </Text>
               </TouchableOpacity>
             );
           })}
@@ -88,19 +113,10 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#d0cdc5",
   },
   dotActive: {
     width: 24,
-    backgroundColor: "#6b7fe8",
     borderRadius: 5,
-  },
-  stepLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#9a9a8e",
-    letterSpacing: 1.2,
-    marginBottom: 24,
   },
 
   // Title
@@ -109,9 +125,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    fontSize: 28,
     fontWeight: "800",
-    color: "#2d3340",
     textAlign: "center",
     lineHeight: 36,
     marginBottom: 28,
@@ -128,7 +142,6 @@ const styles = StyleSheet.create({
   // Card
   card: {
     width: "47%",
-    backgroundColor: "#fff",
     borderRadius: 20,
     paddingVertical: 24,
     paddingHorizontal: 16,
@@ -137,46 +150,14 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
     gap: 10,
   },
-  cardSelected: {
-    backgroundColor: "#eef0fd",
-    borderColor: "#6b7fe8",
-  },
-  cardIcon: {
-    fontSize: 36,
-  },
-  cardLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#2d3340",
-  },
-  cardLabelSelected: {
-    color: "#6b7fe8",
-  },
-  checkmark: {
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: "700",
-    lineHeight: 15,
-  },
-
-  // Footer
-  footer: {
-    paddingHorizontal: 20,
-    paddingBottom: 36,
-    paddingTop: 12,
-    backgroundColor: "#f0ede8",
-  },
-  startButton: {
-    backgroundColor: "#6b7fe8",
-    borderRadius: 100,
-    paddingVertical: 16,
+  cardIconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },
-  startButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#fff",
-    letterSpacing: 0.2,
+  cardLabel: {
+    fontWeight: "600",
   },
 });
