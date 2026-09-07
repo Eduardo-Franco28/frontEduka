@@ -8,6 +8,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import mainStyles from "../styles/theme";
 import TabBar from "../components/TabBar";
+import BackButton from "../components/BackButton";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import useTopic from "../hooks/useTopic";
@@ -75,7 +76,7 @@ export default function TopicsScreen() {
   const handleActivity = (id: number) => {
     if (id === null) return;
 
-    navigation.navigate("ActivityScreen2", { topicId: id });
+    navigation.navigate("ActivityScreen4", { topicId: id });
   };
 
   if (loading) {
@@ -90,19 +91,7 @@ export default function TopicsScreen() {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: subjectVisual.bg }]}>
         <View style={styles.headerTopRow}>
-          <TouchableOpacity
-            style={[styles.backButton, { backgroundColor: colors.CARD }]}
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.8}
-            accessibilityRole="button"
-            accessibilityLabel="Voltar"
-          >
-            <FontAwesomeFreeSolid
-              name="arrow-left"
-              size={16}
-              color={colors.TEXT_PRIMARY}
-            />
-          </TouchableOpacity>
+          <BackButton />
           <View style={styles.headerPlaceholder} />
         </View>
 
@@ -243,13 +232,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
   },
   headerTitle: {
     fontWeight: "800",

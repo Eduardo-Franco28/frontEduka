@@ -9,6 +9,7 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import useAppNavigation from "../hooks/useNavigation";
+import BackButton from "../components/BackButton";
 import { COLORS } from "../styles/colors";
 import useTopic from "../hooks/useTopic";
 import LoadingPage from "../components/LoadingPage";
@@ -213,13 +214,7 @@ export default function ActivityScreen() {
   return (
     <View style={mainStyles.component}>
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.backArrow}>←</Text>
-        </TouchableOpacity>
+        <BackButton />
       </View>
 
       <View style={{ justifyContent: "center", flex: 1 }}>
@@ -325,20 +320,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 52,
     paddingBottom: 24,
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: COLORS.BORDER_LIGHT,
-  },
-  backArrow: {
-    fontSize: 20,
-    color: COLORS.TEXT_PRIMARY,
   },
   questionCard: {
     backgroundColor: "#fff",
