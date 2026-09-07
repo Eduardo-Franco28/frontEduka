@@ -13,7 +13,7 @@ export default function ErrorMessage({ message, onRetry, onDismiss }: ErrorMessa
   return (
     <View style={styles.container}>
       <Text style={styles.icon}>⚠️</Text>
-
+      
       <Text style={styles.message}>{message}</Text>
 
       {onRetry && (

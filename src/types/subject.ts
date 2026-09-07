@@ -24,6 +24,7 @@ export interface QuestionResponse {
   content: string;
   lstAlternative: Array<AlternativeResponse>;
   conclued: boolean;
+  board: BoardResponse | null;
 }
 
 export interface AlternativeResponse {
@@ -39,9 +40,36 @@ export interface ActivityResponse {
 export interface AnsweredAlternativeResponse{
   correct: boolean,
   concluded: boolean
+  lstWrongSlots: Array<string>;
 }
 
 export interface AttemptAlternativeRequest{
   questionId: number,
-  lstAlternativeId: Array<number>
+  lstAlternativeId?: Array<number>
+  lstFilledSlots?: Array<FilledSlot>;
+}
+
+export interface BoardResponse {
+  viewBox: string;
+  slots: string;
+}
+
+export interface BoardSlot {
+  name: string;
+  path: string;
+  bbox: string;
+}
+
+export interface QuestionSlot {
+  name: string;
+  blank: boolean;
+}
+
+export interface QuestionContent {
+  slots: Array<QuestionSlot>;
+}
+
+export interface FilledSlot {
+  name: string;
+  alternativeId: number;
 }

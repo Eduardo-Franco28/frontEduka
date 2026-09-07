@@ -9,13 +9,14 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import useAppNavigation from "../hooks/useNavigation";
+import BackButton from "../components/BackButton";
 import { COLORS } from "../styles/colors";
 import useTopic from "../hooks/useTopic";
 import LoadingPage from "../components/LoadingPage";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import { AttemptAlternativeRequest } from "../types/subject";
-import TipActivity from "../components/TipActivity";
+import TipButton from "../components/TipButton";
 
 // Dados estáticos até o backend mandar a palavra e as posições dos buracos.
 // `blank: true` = buraco que o aluno preenche arrastando uma peça.
@@ -26,7 +27,7 @@ const STATIC_PUZZLE = {
     { char: "V", blank: false },
     { char: "A", blank: true },
   ],
-  tiles: ["A", "U"],
+  tiles: ["A", "U", "E", "O"],
 };
 
 // Índice do primeiro buraco — é nele que o drag que já existe mira.
@@ -36,7 +37,6 @@ export default function ActivityScreen2() {
   const [index, setIndex] = useState<number>(0);
   const [alternativeId, setAlternativeId] = useState<number | null>(null);
   const [canAnswer, setIsCanAnswer] = useState(false);
-  const [tipVisible, setTipVisible] = useState<boolean>(false)
 
   const navigation = useAppNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "ActivityScreen2">>();
@@ -56,7 +56,7 @@ export default function ActivityScreen2() {
   }, [topicId]);
 
   useEffect(() => {
-    setTipVisible(true)
+    // setTipVisible(true)
   }, [])
 
   const currentActivity = activity?.lstQuestions[index];
@@ -235,83 +235,80 @@ export default function ActivityScreen2() {
 
   return (
     <View style={mainStyles.component}>
-
-      <TipActivity 
-          tip="Arraste as bolinhas para concluir"
-          visible={tipVisible}
-          onClose={() => setTipVisible(false)}
-        />
-
+      
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.backArrow}>←</Text>
-        </TouchableOpacity>
+        <BackButton />
       </View>
 
       <View style={styles.content}>
         <Text style={styles.questionTitle}>{currentActivity?.title}</Text>
 
-        <TouchableOpacity
-         onPress={() => setTipVisible(true)}
-        ><Text>Abrir Tip</Text></TouchableOpacity>
+        <TipButton
+          tip="Arraste as letras para completar a palavra"
+          style={styles.tipButton}
+        />
 
-        {/* ZONA 1 — card com as peças arrastáveis */}
+        {/* ZONA 1 — card branco com a linha da palavra */}
         <View style={styles.questionCard}>
-          <View style={styles.tilesGrid}>
-            <GestureDetector gesture={dragGesture4}>
-              <Animated.View style={animatedStyle4}>
-                <View style={styles.tile}>
-                  <Text style={styles.tileText}>{STATIC_PUZZLE.tiles[0]}</Text>
-                  <View
-                    ref={dotsRef4}
-                    collapsable={false}
-                    onLayout={calculateDistance}
-                  />
-                </View>
-              </Animated.View>
-            </GestureDetector>
+          <View style={styles.answerRow}>
+            <Text style={styles.answerHint}>{STATIC_PUZZLE.hint}</Text>
 
-            <GestureDetector gesture={dragGesture3}>
-              <Animated.View style={animatedStyle3}>
-                <View style={styles.tile}>
-                  <Text style={styles.tileText}>{STATIC_PUZZLE.tiles[1]}</Text>
-                  <View ref={dotsRef3} collapsable={false} />
-                </View>
-              </Animated.View>
-            </GestureDetector>
+            {STATIC_PUZZLE.word.map((letter, i) =>
+              letter.blank ? (
+                <View
+                  key={i}
+                  collapsable={false}
+                  style={styles.answerSlot}
+                  ref={(el) => {
+                    slotRefs.current[i] = el;
+                    // o primeiro buraco continua sendo o alvo do drag que já existe
+                    if (i === FIRST_BLANK) targetRef.current = el;
+                  }}
+                />
+              ) : (
+                <Text key={i} style={styles.answerLetter}>
+                  {letter.char}
+                </Text>
+              ),
+            )}
           </View>
         </View>
 
+        {/* ZONA 2 — dica */}
         <Text style={styles.questionLabel}>
           *Arraste as letras para completar a palavra!
         </Text>
 
-        {/* ZONA 2 — linha da palavra: dica + letras fixas + buracos */}
-        <View style={styles.answerRow}>
-          <Text style={styles.answerHint}>{STATIC_PUZZLE.hint}</Text>
+        {/* ZONA 3 — peças arrastáveis, soltas sobre o fundo */}
+        <View style={styles.tilesGrid}>
+          <GestureDetector gesture={dragGesture4}>
+            <Animated.View style={animatedStyle4}>
+              <View style={styles.tile}>
+                <Text style={styles.tileText}>{STATIC_PUZZLE.tiles[0]}</Text>
+                <View
+                  ref={dotsRef4}
+                  collapsable={false}
+                  onLayout={calculateDistance}
+                />
+              </View>
+            </Animated.View>
+          </GestureDetector>
 
-          {STATIC_PUZZLE.word.map((letter, i) =>
-            letter.blank ? (
-              <View
-                key={i}
-                collapsable={false}
-                style={styles.answerSlot}
-                ref={(el) => {
-                  slotRefs.current[i] = el;
-                  // o primeiro buraco continua sendo o alvo do drag que já existe
-                  if (i === FIRST_BLANK) targetRef.current = el;
-                }}
-              />
-            ) : (
-              <Text key={i} style={styles.answerLetter}>
-                {letter.char}
-              </Text>
-            ),
-          )}
+          <GestureDetector gesture={dragGesture3}>
+            <Animated.View style={animatedStyle3}>
+              <View style={styles.tile}>
+                <Text style={styles.tileText}>{STATIC_PUZZLE.tiles[1]}</Text>
+                <View ref={dotsRef3} collapsable={false} />
+              </View>
+            </Animated.View>
+          </GestureDetector>
+
+          {/* Peças extras: ainda SEM gesto de arrastar (falta ligar) */}
+          {STATIC_PUZZLE.tiles.slice(2).map((letra, i) => (
+            <View key={i} style={styles.tile}>
+              <Text style={styles.tileText}>{letra}</Text>
+            </View>
+          ))}
         </View>
 
         {/* ZONA 4 — confirmar */}
@@ -338,20 +335,6 @@ const styles = StyleSheet.create({
     paddingTop: 52,
     paddingBottom: 24,
   },
-  backButton: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: COLORS.BORDER_LIGHT,
-  },
-  backArrow: {
-    fontSize: 20,
-    color: COLORS.TEXT_PRIMARY,
-  },
 
   // Coluna principal: as 4 zonas empilhadas
   content: {
@@ -367,14 +350,21 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
-  // ZONA 1 — card com as peças
+  // Só o posicionamento — a aparência mora no TipButton
+  tipButton: {
+    alignSelf: "flex-end",
+    marginBottom: 16,
+  },
+
+  // ZONA 1 — card branco com a linha da palavra
   questionCard: {
     backgroundColor: "#fff",
     borderRadius: 24,
-    padding: 24,
+    paddingVertical: 28,
+    paddingHorizontal: 20,
+    minHeight: 200,
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 320,
   },
   tilesGrid: {
     flexDirection: "row",
@@ -400,26 +390,25 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   questionLabel: {
-    fontSize: 16,
+    fontSize: 14,
+    fontStyle: "italic",
     fontWeight: "500",
     color: COLORS.TEXT_MUTED,
-    letterSpacing: 1.2,
     textAlign: "center",
     marginTop: 16,
+    marginBottom: 24,
   },
 
-  // ZONA 2 — linha da resposta
+  // A linha da palavra, que agora vive dentro do card
   answerRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 12,
-    marginTop: 24,
-    marginBottom: 32,
   },
   answerHint: {
-    fontSize: 34,
-    lineHeight: 40,
+    fontSize: 40,
+    lineHeight: 46,
     marginRight: 4,
   },
   answerSlot: {
@@ -431,14 +420,14 @@ const styles = StyleSheet.create({
   answerLetter: {
     width: 46,
     height: 48,
-    fontSize: 34,
+    fontSize: 46,
     lineHeight: 44,
     fontWeight: "800",
     color: COLORS.TEXT_PRIMARY,
     textAlign: "center",
   },
 
-  // ZONA 3 — alternativas
+  // Não usados hoje: sobraram da versão de múltipla escolha
   optionsRow: {
     flexDirection: "row",
     gap: 12,
@@ -469,6 +458,6 @@ const styles = StyleSheet.create({
 
   // ZONA 4 — confirmar
   footer: {
-    paddingBottom: 32,
+    marginTop: 48,
   },
 });

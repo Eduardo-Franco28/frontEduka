@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
+import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 import mainStyles from "../styles/theme";
 import TabBar from "../components/TabBar";
 import useAuth from "../hooks/useAuth";
@@ -82,9 +83,16 @@ export default function ProfileScreen() {
             </Text>
           </View>
           <View style={[styles.statCard, { backgroundColor: colors.CARD }]}>
-            <Text style={[styles.statValue, { color: colors.WARNING, fontSize: 22 * fontScale }]}>
-              3🔥
-            </Text>
+            <View style={styles.statValueRow}>
+              <Text style={[styles.statValue, { color: colors.WARNING, fontSize: 22 * fontScale }]}>
+                3
+              </Text>
+              <FontAwesomeFreeSolid
+                name="fire"
+                size={18 * fontScale}
+                color={colors.WARNING}
+              />
+            </View>
             <Text style={[styles.statLabel, { color: colors.TEXT_MUTED, fontSize: 11 * fontScale }]}>
               DIAS
             </Text>
@@ -94,11 +102,20 @@ export default function ProfileScreen() {
         {/* Menu Card */}
         <View style={[styles.menuCard, { backgroundColor: colors.CARD }]}>
           <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
-            <Text style={styles.menuIcon}>🏆</Text>
+            <FontAwesomeFreeSolid
+              name="trophy"
+              size={19 * fontScale}
+              color={colors.PRIMARY_LIGHT}
+              style={styles.menuIcon}
+            />
             <Text style={[styles.menuLabel, { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale }]}>
               Conquistas
             </Text>
-            <Text style={[styles.menuChevron, { color: colors.TEXT_MUTED }]}>→</Text>
+            <FontAwesomeFreeSolid
+              name="chevron-right"
+              size={14 * fontScale}
+              color={colors.TEXT_MUTED}
+            />
           </TouchableOpacity>
 
           <View style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]} />
@@ -108,11 +125,20 @@ export default function ProfileScreen() {
             activeOpacity={0.7}
             onPress={() => navigation.navigate("AccessibilityScreen")}
           >
-            <Text style={styles.menuIcon}>♿</Text>
+            <FontAwesomeFreeSolid
+              name="universal-access"
+              size={19 * fontScale}
+              color={colors.PRIMARY_LIGHT}
+              style={styles.menuIcon}
+            />
             <Text style={[styles.menuLabel, { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale }]}>
               Acessibilidade
             </Text>
-            <Text style={[styles.menuChevron, { color: colors.TEXT_MUTED }]}>→</Text>
+            <FontAwesomeFreeSolid
+              name="chevron-right"
+              size={14 * fontScale}
+              color={colors.TEXT_MUTED}
+            />
           </TouchableOpacity>
 
           <View style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]} />
@@ -122,11 +148,20 @@ export default function ProfileScreen() {
             activeOpacity={0.7}
             onPress={() => navigation.navigate("EditProfileScreen")}
           >
-            <Text style={styles.menuIcon}>✏️</Text>
+            <FontAwesomeFreeSolid
+              name="user-pen"
+              size={19 * fontScale}
+              color={colors.PRIMARY_LIGHT}
+              style={styles.menuIcon}
+            />
             <Text style={[styles.menuLabel, { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale }]}>
               Editar perfil
             </Text>
-            <Text style={[styles.menuChevron, { color: colors.TEXT_MUTED }]}>→</Text>
+            <FontAwesomeFreeSolid
+              name="chevron-right"
+              size={14 * fontScale}
+              color={colors.TEXT_MUTED}
+            />
           </TouchableOpacity>
 
           <View style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]} />
@@ -136,11 +171,20 @@ export default function ProfileScreen() {
             activeOpacity={0.7}
             onPress={() => navigation.navigate("ChangePasswordScreen")}
           >
-            <Text style={styles.menuIcon}>🔒</Text>
+            <FontAwesomeFreeSolid
+              name="lock"
+              size={19 * fontScale}
+              color={colors.PRIMARY_LIGHT}
+              style={styles.menuIcon}
+            />
             <Text style={[styles.menuLabel, { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale }]}>
               Alterar senha
             </Text>
-            <Text style={[styles.menuChevron, { color: colors.TEXT_MUTED }]}>→</Text>
+            <FontAwesomeFreeSolid
+              name="chevron-right"
+              size={14 * fontScale}
+              color={colors.TEXT_MUTED}
+            />
           </TouchableOpacity>
 
           <View style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]} />
@@ -150,7 +194,12 @@ export default function ProfileScreen() {
             activeOpacity={0.7}
             onPress={handleLogOut}
           >
-            <Text style={styles.menuIcon}>📕</Text>
+            <FontAwesomeFreeSolid
+              name="right-from-bracket"
+              size={19 * fontScale}
+              color={colors.DANGER}
+              style={styles.menuIcon}
+            />
             <Text style={[styles.menuLabel, { color: colors.DANGER, fontSize: 15 * fontScale }]}>
               Sair
             </Text>
@@ -212,6 +261,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontWeight: "800",
   },
+  // Alinha o número e o ícone de fogo na mesma linha do card de stat
+  statValueRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
   statLabel: {
     fontWeight: "700",
     letterSpacing: 0.8,
@@ -228,8 +283,11 @@ const styles = StyleSheet.create({
     gap: 14,
     paddingVertical: 18,
   },
+  // Largura fixa: os ícones do FontAwesome têm larguras diferentes entre si,
+  // sem isso os textos do menu ficam desalinhados um do outro.
   menuIcon: {
-    fontSize: 20,
+    width: 22,
+    textAlign: "center",
   },
   menuLabel: {
     flex: 1,

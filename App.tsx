@@ -10,6 +10,9 @@ import TopicsScreen from "./src/screens/TopicsScreen";
 import WelcomeScreen from "./src/screens/WelcomeScreen";
 import ActivityScreen from "./src/activities/ActivityScreen";
 import ActivityScreen2 from "./src/activities/ActivityScreen2";
+import ActivityScreen3 from "./src/activities/ActivityScreen3";
+import ActivityScreen4 from "./src/activities/ActivityScreen4";
+import ActivityScreen5 from "./src/activities/ActivityScreen5";
 import { AuthProvider } from "./src/contexts/AuthContext";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
 import useAuth from "./src/hooks/useAuth";
@@ -33,6 +36,9 @@ function Routes() {
       <Stack.Screen name="TopicsScreen" component={TopicsScreen} />
       <Stack.Screen name="ActivityScreen" component={ActivityScreen} />
       <Stack.Screen name="ActivityScreen2" component={ActivityScreen2} />
+      <Stack.Screen name="ActivityScreen3" component={ActivityScreen3} />
+      <Stack.Screen name="ActivityScreen4" component={ActivityScreen4} />
+      <Stack.Screen name="ActivityScreen5" component={ActivityScreen5} />
       <Stack.Screen name="FirstScreen" component={FirstScreen} />
       <Stack.Screen name="AuthScreen" component={AuthScreen} />
       <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
