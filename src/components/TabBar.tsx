@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigationState } from "@react-navigation/native";
 import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 import useAppNavigation from "../hooks/useNavigation";
-import { COLORS } from "../styles/colors";
+import useTheme from "../hooks/useTheme";
 
 const TABS = [
   { route: "HomeScreen", label: "Início", icon: "house" },
@@ -14,6 +14,7 @@ const TABS = [
 export default function TabBar() {
   const navigation = useAppNavigation();
   const insets = useSafeAreaInsets();
+  const { colors, fontScale } = useTheme();
 
   const currentRoute = useNavigationState(
     (state) => state?.routes[state.index]?.name
@@ -26,6 +27,8 @@ export default function TabBar() {
         {
           height: 68 + insets.bottom,
           paddingBottom: insets.bottom,
+          backgroundColor: colors.CARD,
+          borderTopColor: colors.BORDER_LIGHT,
         },
       ]}
     >
@@ -44,9 +47,18 @@ export default function TabBar() {
             <FontAwesomeFreeSolid
               name={tab.icon}
               size={24}
-              color={isActive ? COLORS.PRIMARY : COLORS.TEXT_MUTED}
+              color={isActive ? colors.PRIMARY : colors.TEXT_MUTED}
             />
-            <Text style={isActive ? styles.tabLabelActive : styles.tabLabel}>
+            <Text
+              style={[
+                styles.tabLabel,
+                {
+                  color: isActive ? colors.PRIMARY : colors.TEXT_MUTED,
+                  fontWeight: isActive ? "700" : "500",
+                  fontSize: 12 * fontScale,
+                },
+              ]}
+            >
               {tab.label}
             </Text>
           </TouchableOpacity>
@@ -59,9 +71,7 @@ export default function TabBar() {
 const styles = StyleSheet.create({
   tabBar: {
     flexDirection: "row",
-    backgroundColor: "#fff",
     borderTopWidth: 1,
-    borderTopColor: COLORS.BORDER_LIGHT,
   },
   tabItem: {
     flex: 1,
@@ -71,13 +81,6 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   tabLabel: {
-    fontSize: 12,
-    color: COLORS.TEXT_MUTED,
     fontWeight: "500",
-  },
-  tabLabelActive: {
-    fontSize: 12,
-    color: COLORS.PRIMARY,
-    fontWeight: "700",
   },
 });
