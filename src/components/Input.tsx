@@ -8,7 +8,7 @@ import {
   StyleProp,
   ViewStyle,
 } from "react-native";
-import { COLORS } from "../styles/colors";
+import useTheme from "../hooks/useTheme";
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -26,19 +26,35 @@ export default function Input({
   ...rest
 }: InputProps) {
   const [focused, setFocused] = useState<boolean>(false);
+  const { colors, fontScale } = useTheme();
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && (
+        <Text
+          style={[
+            styles.label,
+            { color: colors.TEXT_PRIMARY, fontSize: 14 * fontScale },
+          ]}
+        >
+          {label}
+        </Text>
+      )}
 
       <TextInput
         style={[
           styles.input,
-          focused && styles.inputFocused,
-          !!error && styles.inputError,
+          {
+            backgroundColor: colors.CARD,
+            borderColor: colors.BORDER_LIGHT,
+            color: colors.TEXT_DARK,
+            fontSize: 15 * fontScale,
+          },
+          focused && { borderColor: colors.PRIMARY },
+          !!error && { borderColor: colors.DANGER },
           style,
         ]}
-        placeholderTextColor={COLORS.TEXT_MUTED}
+        placeholderTextColor={colors.TEXT_MUTED}
         onFocus={(e) => {
           setFocused(true);
           onFocus?.(e);
@@ -50,7 +66,16 @@ export default function Input({
         {...rest}
       />
 
-      {!!error && <Text style={styles.error}>{error}</Text>}
+      {!!error && (
+        <Text
+          style={[
+            styles.error,
+            { color: colors.DANGER, fontSize: 12 * fontScale },
+          ]}
+        >
+          {error}
+        </Text>
+      )}
     </View>
   );
 }
@@ -61,31 +86,18 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   label: {
-    fontSize: 14,
     fontWeight: "600",
-    color: "#000",
     marginBottom: 8,
   },
   input: {
     width: "100%",
     height: 60,
-    backgroundColor: "#fff",
     borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: COLORS.BORDER_LIGHT,
     paddingHorizontal: 16,
-    color: COLORS.TEXT_DARK,
-  },
-  inputFocused: {
-    borderColor: COLORS.PRIMARY,
-  },
-  inputError: {
-    borderColor: COLORS.DANGER,
   },
   error: {
     marginTop: 4,
-    fontSize: 12,
-    color: COLORS.DANGER,
     fontWeight: "500",
   },
 });
