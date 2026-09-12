@@ -1,0 +1,3 @@
+Arrumar funcao que calcula o tamanho do svg, esta retornando duas coisas, dividir resposabilidade
+
+Corrigir nomes para ingles

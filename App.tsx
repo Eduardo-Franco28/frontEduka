@@ -19,6 +19,7 @@ import useAuth from "./src/hooks/useAuth";
 import EditProfileScreen from "./src/screens/EditProfileScreen";
 import ChangePasswordScreen from "./src/screens/ChangePasswordScreen";
 import AccessibilityScreen from "./src/screens/AccessibilityScreen";
+import ResultScreen from "./src/screens/ResultScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -44,6 +45,7 @@ function Routes() {
       <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
       <Stack.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} />
       <Stack.Screen name="AccessibilityScreen" component={AccessibilityScreen} />
+      <Stack.Screen name="ResultScreen" component={ResultScreen} />
     </Stack.Navigator>
   );
 }

@@ -1,56 +1,162 @@
+import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { RouteProp, useRoute } from "@react-navigation/native";
 import mainStyles from "../styles/theme";
-import BackButton from "../components/BackButton";
 import { COLORS } from "../styles/colors";
+import BackButton from "../components/BackButton";
 import TipButton from "../components/TipButton";
 import DropTarget from "../components/DropTarget";
 import DraggablePiece from "../components/DraggablePiece";
+import LoadingPage from "../components/LoadingPage";
+import ErrorMessage from "../components/ErrorMessage";
 import useDragAndDrop from "../hooks/useDragAndDrop";
+import useTopic from "../hooks/useTopic";
+import useAppNavigation from "../hooks/useNavigation";
+import { RootStackParamList } from "../types/navigation";
+import { FilledSlot, QuestionSlotContent } from "../types/subject";
 
 /**
- * Dados estáticos até o backend mandar o board.
+ * COMO ESTA TELA FUNCIONA
  *
- * Este é o tabuleiro do tipo "zones": em vez de buracos com formato, os alvos
- * são áreas que aceitam VÁRIAS peças. É a única das quatro atividades em que
- * um mesmo `correctZone` se repete — o mar recebe golfinho e peixe.
- * Por isso não precisa de SVG: as zonas são cartões.
+ * Os cenários são os lugares e os animais são as peças. Igual às outras, com
+ * três diferenças que só existem aqui:
+ *
+ * 1. UM LUGAR RECEBE VÁRIAS PEÇAS. O mar fica com golfinho e peixe. Quem libera
+ *    isso é o `allowMultiple` do content — e é por causa dele que o backend
+ *    cobra TODAS as peças colocadas, e não uma por buraco.
+ *
+ * 2. SEM SNAP. Se as peças pulassem pro centro do cenário, as duas do mar
+ *    empilhariam no mesmo ponto e a de baixo desapareceria. Então cada uma fica
+ *    onde o dedo soltou.
+ *
+ * 3. A PEÇA É UM EMOJI, não um desenho. Nas outras o `path` vem copiado do slot
+ *    do board; aqui não há board, e o golfinho viria com o desenho do mar — o
+ *    mesmo do peixe. Por isso o emoji tem campo próprio: o `icon`.
+ *
+ * As cores dos cenários são design, não dado: a paleta abaixo é aplicada na
+ * ordem em que os cenários chegam.
  */
-const STATIC_BOARD = {
-  zones: [
-    {
-      id: "mar",
-      name: "MAR",
-      cores: [COLORS.SURFACE_BLUE, COLORS.INFO] as const,
-      cor: COLORS.INFO,
-    },
-    {
-      id: "floresta",
-      name: "FLORESTA",
-      cores: [COLORS.SURFACE_GREEN, COLORS.SUCCESS] as const,
-      cor: COLORS.SUCCESS,
-    },
-    {
-      id: "savana",
-      name: "SAVANA",
-      cores: [COLORS.SURFACE_ORANGE, COLORS.WARNING] as const,
-      cor: COLORS.WARNING,
-    },
-  ],
-  animais: [
-    { id: "golfinho", name: "Golfinho", emoji: "🐬", correctZone: "mar" },
-    { id: "peixe", name: "Peixe", emoji: "🐠", correctZone: "mar" },
-    { id: "macaco", name: "Macaco", emoji: "🐒", correctZone: "floresta" },
-    { id: "tucano", name: "Tucano", emoji: "🦜", correctZone: "floresta" },
-    { id: "leao", name: "Leão", emoji: "🦁", correctZone: "savana" },
-    { id: "zebra", name: "Zebra", emoji: "🦓", correctZone: "savana" },
-  ],
-};
 
-const TOTAL = STATIC_BOARD.animais.length;
+// Um par de cores por cenário, na ordem em que eles vêm do backend.
+// Se um dia entrar um quarto cenário, é aqui que se acrescenta.
+const ZONE_PALETTE = [
+  { colors: [COLORS.SURFACE_BLUE, COLORS.INFO] as const, badge: COLORS.INFO },
+  {
+    colors: [COLORS.SURFACE_GREEN, COLORS.SUCCESS] as const,
+    badge: COLORS.SUCCESS,
+  },
+  {
+    colors: [COLORS.SURFACE_ORANGE, COLORS.WARNING] as const,
+    badge: COLORS.WARNING,
+  },
+];
 
 export default function ActivityScreen5() {
-  const { targets, placements, placedCount, place, remove } = useDragAndDrop();
+  const route = useRoute<RouteProp<RootStackParamList, "ActivityScreen5">>();
+  const navigation = useAppNavigation();
+  const {
+    targets,
+    pieces,
+    placements,
+    placedCount,
+    place,
+    remove,
+    returnToBox,
+    reset,
+    isPiecePlaced,
+  } = useDragAndDrop();
+  const { getActivity, answer, answering, error, activity, loading } =
+    useTopic();
+  const [index, setIndex] = useState<number>(0);
+  const [lstWrongSlots, setLstWrongSlots] = useState<string[]>([]);
+
+  const { topicId } = route.params;
+
+  useEffect(() => {
+    getActivity(topicId).then((data) => {
+      if (data == null) return;
+
+      const start = data.lstQuestions.findIndex(
+        (q) => q.id === data.resumeQuestionId,
+      );
+      setIndex(start === -1 ? 0 : start);
+    });
+  }, [topicId]);
+
+  const currentActivity = activity?.lstQuestions[index];
+
+  // A partir daqui a questão existe e tem conteúdo. Não checo o board porque
+  // esta atividade não usa nenhum.
+  if (loading || !currentActivity?.content) {
+    return <LoadingPage message="Carregando atividade..." />;
+  }
+
+  const questionContent: QuestionSlotContent = JSON.parse(
+    currentActivity.content,
+  );
+
+  const zones = questionContent.slots;
+  const animals = currentActivity.lstAlternative ?? [];
+
+  // Aqui "terminou" é ter colocado todos os animais, não um por cenário — são
+  // 6 animais em 3 lugares. É a mesma conta que o backend faz.
+  const isComplete = placedCount === animals.length;
+
+  const handleAnswer = async () => {
+    setLstWrongSlots([]);
+
+    const response = await answer({
+      questionId: currentActivity.id,
+      lstFilledSlots: buildFilledSlots(),
+    });
+
+    if (!response) return;
+
+    if (!response.correct) {
+      setLstWrongSlots(response.lstWrongSlots);
+
+      // Todo animal que foi pro cenário errado volta pra fileira de baixo.
+      placements
+        .filter((placement) =>
+          response.lstWrongSlots.includes(placement.slotName),
+        )
+        .forEach((placement) => returnToBox(placement.pieceId));
+
+      return;
+    }
+
+    if (response.concluded) {
+      navigation.navigate("ResultScreen", {
+        topicId,
+        activityRoute: "ActivityScreen5",
+      });
+
+      return;
+    }
+
+    reset();
+    setIndex(index + 1);
+  };
+
+  /** O que a criança montou, no formato que o backend espera. */
+  function buildFilledSlots(): FilledSlot[] {
+    return placements.map((placement) => ({
+      name: placement.slotName,
+      alternativeId: placement.pieceId,
+    }));
+  }
+
+  /**
+   * Quantos animais estão neste cenário.
+   *
+   * Nas outras telas bastava saber "tem peça ou não" (o isSlotFilled do hook).
+   * Aqui o número importa: é ele que mostra à criança que o mar já recebeu dois.
+   */
+  function countIn(zoneName: string) {
+    return placements.filter((placement) => placement.slotName === zoneName)
+      .length;
+  }
 
   return (
     <View style={mainStyles.component}>
@@ -59,78 +165,108 @@ export default function ActivityScreen5() {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.questionTitle}>Onde eles vivem?</Text>
+        <Text style={styles.questionTitle}>{currentActivity.title}</Text>
         <Text style={styles.counter}>
-          {placedCount} DE {TOTAL} ANIMAIS
+          {placedCount} DE {animals.length} ANIMAIS
         </Text>
+
+        <ErrorMessage message={error} />
 
         <TipButton
           tip="Arraste cada animal para o cenário onde ele vive"
-          style={styles.tipButton}
+          style={mainStyles.tipButton}
           autoOpen={false}
         />
 
-        {/* ZONA 1 — os cenários, que recebem vários animais cada */}
+        {/* ================================================================
+            OS CENÁRIOS
+            Como na palavra, o alvo já é uma View — então ele mesmo é o
+            DropTarget, sem camada invisível por cima.
+        ================================================================= */}
         <View style={styles.zonesGrid}>
-          {STATIC_BOARD.zones.map((zone) => (
-            <DropTarget
-              key={zone.id}
-              id={zone.id}
-              targets={targets}
-              style={styles.zone}
-            >
-              <LinearGradient
-                colors={[...zone.cores]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.zoneFill}
+          {zones.map((zone, position) => {
+            const palette = ZONE_PALETTE[position % ZONE_PALETTE.length];
+            const isWrong = lstWrongSlots.includes(zone.name);
+            const total = countIn(zone.name);
+
+            return (
+              <DropTarget
+                key={zone.name}
+                id={zone.name}
+                targets={targets}
+                style={[
+                  styles.zone,
+                  // Diferente das outras telas, o vermelho não espera o cenário
+                  // esvaziar: ele recebe várias peças, então "vazio" não é sinal
+                  // de nada. O aviso sai quando a criança mexe ali de novo.
+                  isWrong ? styles.zoneWrong : null,
+                ]}
               >
-                <View style={styles.zoneBadge}>
-                  <Text style={[styles.zoneBadgeText, { color: zone.cor }]}>
-                    {zone.name}
-                  </Text>
-                </View>
-              </LinearGradient>
-            </DropTarget>
-          ))}
+                <LinearGradient
+                  colors={[...palette.colors]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.zoneFill}
+                >
+                  <View style={styles.zoneBadge}>
+                    <Text
+                      style={[styles.zoneBadgeText, { color: palette.badge }]}
+                    >
+                      {zone.label ?? zone.name.toUpperCase()}
+                    </Text>
+                  </View>
+
+                  {total > 0 ? (
+                    <Text style={styles.zoneCount}>{total}</Text>
+                  ) : null}
+                </LinearGradient>
+              </DropTarget>
+            );
+          })}
         </View>
 
-        {/* ZONA 2 — dica */}
         <Text style={styles.questionLabel}>
           *Arraste cada animal para o seu cenário!
         </Text>
 
-        {/* ZONA 3 — peças soltas sobre o fundo */}
+        {/* ================================================================
+            OS ANIMAIS
+        ================================================================= */}
         <View style={styles.piecesGrid}>
-          {STATIC_BOARD.animais.map((animal) => (
+          {animals.map((animal) => (
             <DraggablePiece
               key={animal.id}
               id={animal.id}
               targets={targets}
+              pieces={pieces}
               onDrop={place}
               onMiss={remove}
-              // Um cenário recebe vários animais: sem o snap eles não empilham
+              // Um cenário recebe vários animais: com snap eles empilhariam
               // todos no centro do cartão.
               snap={false}
             >
               <View
                 style={[
                   styles.piece,
-                  placements[animal.id] ? styles.piecePlaced : null,
+                  isPiecePlaced(animal.id) ? styles.piecePlaced : null,
                 ]}
               >
-                <Text style={styles.pieceEmoji}>{animal.emoji}</Text>
-                <Text style={styles.pieceLabel}>{animal.name}</Text>
+                <Text style={styles.pieceEmoji}>{animal.icon}</Text>
+                <Text style={styles.pieceLabel}>{animal.description}</Text>
               </View>
             </DraggablePiece>
           ))}
         </View>
 
-        {/* ZONA 4 — confirmar */}
         <View style={styles.footer}>
           <TouchableOpacity
             activeOpacity={0.85}
-            style={mainStyles.primaryButton}
+            disabled={answering || !isComplete}
+            style={[
+              mainStyles.primaryButton,
+              !isComplete ? styles.buttonDisabled : null,
+            ]}
+            onPress={handleAnswer}
           >
             <Text style={mainStyles.primaryButtonText}>Confirmar</Text>
           </TouchableOpacity>
@@ -170,13 +306,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
 
-  // Só o posicionamento — a aparência mora no TipButton
-  tipButton: {
-    alignSelf: "flex-end",
-    marginBottom: 8,
-  },
-
-  // ZONA 1 — cenários
+  // OS CENÁRIOS
   zonesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -188,6 +318,10 @@ const styles = StyleSheet.create({
     height: 112,
     borderRadius: 18,
     overflow: "hidden",
+  },
+  zoneWrong: {
+    borderWidth: 3,
+    borderColor: COLORS.DANGER,
   },
   zoneFill: {
     flex: 1,
@@ -205,6 +339,16 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 0.8,
   },
+  // Quantos animais já caíram aqui. Fica no canto pra não brigar com as peças,
+  // que pousam soltas por cima do cartão.
+  zoneCount: {
+    position: "absolute",
+    right: 10,
+    bottom: 8,
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#fff",
+  },
 
   questionLabel: {
     fontSize: 14,
@@ -216,7 +360,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
 
-  // ZONA 3 — peças
+  // OS ANIMAIS
   piecesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -247,8 +391,10 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT_MUTED,
   },
 
-  // ZONA 4 — confirmar
   footer: {
     marginTop: 20,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
 });

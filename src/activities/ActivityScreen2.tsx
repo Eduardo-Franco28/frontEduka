@@ -1,47 +1,63 @@
-import { useState, useRef, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import mainStyles from "../styles/theme";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-  useSharedValue,
-  withSpring,
-  useAnimatedStyle,
-  runOnJS,
-} from "react-native-reanimated";
-import useAppNavigation from "../hooks/useNavigation";
-import BackButton from "../components/BackButton";
-import { COLORS } from "../styles/colors";
-import useTopic from "../hooks/useTopic";
-import LoadingPage from "../components/LoadingPage";
+import { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { RootStackParamList } from "../types/navigation";
-import { AttemptAlternativeRequest } from "../types/subject";
+import mainStyles from "../styles/theme";
+import { COLORS } from "../styles/colors";
+import BackButton from "../components/BackButton";
 import TipButton from "../components/TipButton";
+import DropTarget from "../components/DropTarget";
+import DraggablePiece from "../components/DraggablePiece";
+import LoadingPage from "../components/LoadingPage";
+import ErrorMessage from "../components/ErrorMessage";
+import useDragAndDrop from "../hooks/useDragAndDrop";
+import useTopic from "../hooks/useTopic";
+import useAppNavigation from "../hooks/useNavigation";
+import { RootStackParamList } from "../types/navigation";
+import { FilledSlot, QuestionSlotContent } from "../types/subject";
 
-// Dados estáticos até o backend mandar a palavra e as posições dos buracos.
-// `blank: true` = buraco que o aluno preenche arrastando uma peça.
-const STATIC_PUZZLE = {
-  hint: "🍇",
-  word: [
-    { char: "U", blank: true },
-    { char: "V", blank: false },
-    { char: "A", blank: true },
-  ],
-  tiles: ["A", "U", "E", "O"],
-};
-
-// Índice do primeiro buraco — é nele que o drag que já existe mira.
-const FIRST_BLANK = STATIC_PUZZLE.word.findIndex((l) => l.blank);
+/**
+ * COMO ESTA TELA FUNCIONA
+ *
+ * A palavra é uma fila de lugares. Cada lugar é um "slot":
+ *   - preenchido desde o começo (o "V" da UVA, que ancora a palavra)
+ *   - vazio, esperando a criança arrastar a letra certa
+ *
+ * É a mesma mecânica do mapa e do boneco, com duas diferenças:
+ *
+ * 1. NÃO TEM BOARD. Não há desenho nenhum, então a questão vem com
+ *    `board: null` e tudo que a tela precisa está no `content`. Por isso aqui
+ *    não aparecem svgBoard, viewBox, path nem bbox.
+ *
+ * 2. TEM LETRA DISTRATORA. A UVA oferece 4 letras pra 2 buracos: o E e o O
+ *    existem pra estar errados. No banco elas são alternativas com
+ *    `correct: false` e sem `correctSlot` — e o backend trata quem não tem
+ *    gabarito como sempre errada.
+ *
+ * O `name` do slot é a POSIÇÃO ("1", "2", "3"), não a letra. Se fosse a letra,
+ * uma palavra como BANANA teria três lugares chamados "A" e o gabarito ficaria
+ * ambíguo.
+ */
 
 export default function ActivityScreen2() {
-  const [index, setIndex] = useState<number>(0);
-  const [alternativeId, setAlternativeId] = useState<number | null>(null);
-  const [canAnswer, setIsCanAnswer] = useState(false);
-
-  const navigation = useAppNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "ActivityScreen2">>();
+  const navigation = useAppNavigation();
+  const {
+    targets,
+    pieces,
+    placements,
+    placedCount,
+    place,
+    remove,
+    returnToBox,
+    reset,
+    isSlotFilled,
+    isPiecePlaced,
+  } = useDragAndDrop();
+  const { getActivity, answer, answering, error, activity, loading } =
+    useTopic();
+  const [index, setIndex] = useState<number>(0);
+  const [lstWrongSlots, setLstWrongSlots] = useState<string[]>([]);
 
-  const { getActivity, loading, error, activity, answer, result } = useTopic();
   const { topicId } = route.params;
 
   useEffect(() => {
@@ -51,272 +67,180 @@ export default function ActivityScreen2() {
       const start = data.lstQuestions.findIndex(
         (q) => q.id === data.resumeQuestionId,
       );
-      setIndex(start === -1 ? 0 : start); //Caso o usuario ja tenha terminado tudo nos conseguimos tratar
+      setIndex(start === -1 ? 0 : start);
     });
   }, [topicId]);
 
-  useEffect(() => {
-    // setTipVisible(true)
-  }, [])
-
   const currentActivity = activity?.lstQuestions[index];
 
-  const questionContent = currentActivity?.content
-    ? JSON.parse(currentActivity.content)
-    : null;
+  // A partir daqui a questão existe e tem conteúdo. Não checo o board porque
+  // esta atividade não usa nenhum.
+  if (loading || !currentActivity?.content) {
+    return <LoadingPage message="Carregando atividade..." />;
+  }
+
+  const questionContent: QuestionSlotContent = JSON.parse(
+    currentActivity.content,
+  );
+
+  const slots = questionContent.slots;
+  const blankSlots = slots.filter((slot) => slot.blank);
+  const alternatives = currentActivity.lstAlternative ?? [];
+
+  // O backend recusa tentativa incompleta como erro de requisição, não como
+  // resposta errada. Então a tela não deixa enviar antes de completar.
+  const isComplete = placedCount === blankSlots.length;
 
   const handleAnswer = async () => {
-    if (alternativeId === null || !currentActivity?.id) return;
+    setLstWrongSlots([]);
 
-    const attempt: AttemptAlternativeRequest = {
+    const response = await answer({
       questionId: currentActivity.id,
-      lstAlternativeId: [alternativeId],
-    };
-
-    const response = await answer(attempt);
+      lstFilledSlots: buildFilledSlots(),
+    });
 
     if (!response) return;
 
-    if (response.concluded) {
-      navigation.navigate("HomeScreen");
+    if (!response.correct) {
+      setLstWrongSlots(response.lstWrongSlots);
+
+      // Toda letra que caiu no lugar errado volta pra fileira de baixo.
+      placements
+        .filter((placement) =>
+          response.lstWrongSlots.includes(placement.slotName),
+        )
+        .forEach((placement) => returnToBox(placement.pieceId));
 
       return;
     }
 
-    if (response.correct) {
-      setAlternativeId(null);
-      setIsCanAnswer(false);
+    if (response.concluded) {
+      navigation.navigate("ResultScreen", {
+        topicId,
+        activityRoute: "ActivityScreen2",
+      });
 
-      isAswerAble3.value = false; // shared values não zeram sozinhos
-      isAswerAble4.value = false;
-      translateX3.value = 0;
-      translateY3.value = 0;
-      translateX4.value = 0;
-      translateY4.value = 0;
-
-      setIndex((pre) => pre + 1);
-    } else {
-      setAlternativeId(null);
-      setIsCanAnswer(false);
-
-      isAswerAble3.value = false; // shared values não zeram sozinhos
-      isAswerAble4.value = false;
-      translateX3.value = 0;
-      translateY3.value = 0;
-      translateX4.value = 0;
-      translateY4.value = 0;
-
-      Alert.alert("Resposta errada", "Voce marcou a resposta errada");
+      return;
     }
+
+    reset();
+    setIndex(index + 1);
   };
 
-  const isAswerAble4 = useSharedValue(false);
-  const isAswerAble3 = useSharedValue(false);
-
-  // Animações dos blocos
-  const translateX4 = useSharedValue(0);
-  const translateY4 = useSharedValue(0);
-  const translateX3 = useSharedValue(0);
-  const translateY3 = useSharedValue(0);
-
-  // 1. Mudança para useSharedValue para evitar re-renders no cálculo de distância
-  const finalPositionDotX4 = useSharedValue(0);
-  const finalPositionDotY4 = useSharedValue(0);
-  const finalPositionDotX3 = useSharedValue(0);
-  const finalPositionDotY3 = useSharedValue(0);
-
-  const targetRef = useRef<View | null>(null);
-  // Um ref por buraco da palavra, pra medir a posição de cada slot.
-  const slotRefs = useRef<Array<View | null>>([]);
-  const dotsRef4 = useRef<View | null>(null);
-  const dotsRef3 = useRef<View | null>(null);
-
-  const DISTANCE = 60;
-
-  // 2. Função de medição segura
-  const calculateDistance = () => {
-    if (targetRef.current) {
-      // Pequeno delay apenas para garantir que a UI nativa se estabilizou
-      setTimeout(() => {
-        targetRef.current?.measure(
-          (_x, _y, _w, _h, pageX_target, pageY_target) => {
-            if (dotsRef4.current) {
-              dotsRef4.current.measure(
-                (_x2, _y2, _w2, _h2, pageX_dots4, pageY_dots4) => {
-                  // Atribuir valor direto ao .value NÃO causa re-render do componente
-                  finalPositionDotX4.value = pageX_target - pageX_dots4;
-                  finalPositionDotY4.value = pageY_target - pageY_dots4;
-                },
-              );
-            }
-
-            if (dotsRef3.current) {
-              dotsRef3.current.measure(
-                (_x3, _y3, _w3, _h3, pageX_dots3, pageY_dots3) => {
-                  finalPositionDotX3.value = pageX_target - pageX_dots3 + 20;
-                  finalPositionDotY3.value = pageY_target - pageY_dots3 - 6;
-                },
-              );
-            }
-          },
-        );
-      }, 100);
-    }
-  };
-
-  // Gestos atualizados usando .value dos shared values de destino
-  const dragGesture4 = Gesture.Pan()
-    .onChange((event) => {
-      translateX4.value = event.translationX;
-      translateY4.value = event.translationY;
-    })
-    .onEnd(() => {
-      const distance = Math.sqrt(
-        Math.pow(translateX4.value - finalPositionDotX4.value, 2) +
-          Math.pow(translateY4.value - finalPositionDotY4.value, 2),
-      );
-      if (distance < DISTANCE) {
-        translateX4.value = withSpring(finalPositionDotX4.value);
-        translateY4.value = withSpring(finalPositionDotY4.value);
-        // O setState aqui só roda uma vez quando o bloco entra no alvo, não gera loop
-        if (!isAswerAble4.value) isAswerAble4.value = true;
-
-        if (isAswerAble3.value) {
-          runOnJS(setIsCanAnswer)(true);
-        }
-      } else {
-        translateX4.value = withSpring(0);
-        translateY4.value = withSpring(0);
-      }
-    });
-
-  const dragGesture3 = Gesture.Pan()
-    .onChange((event) => {
-      translateX3.value = event.translationX;
-      translateY3.value = event.translationY;
-    })
-    .onEnd(() => {
-      const distance = Math.sqrt(
-        Math.pow(translateX3.value - finalPositionDotX3.value, 2) +
-          Math.pow(translateY3.value - finalPositionDotY3.value, 2),
-      );
-      if (distance < DISTANCE) {
-        translateX3.value = withSpring(finalPositionDotX3.value);
-        translateY3.value = withSpring(finalPositionDotY3.value);
-        if (!isAswerAble3.value) isAswerAble3.value = true;
-
-        if (isAswerAble4.value) {
-          runOnJS(setIsCanAnswer)(true);
-        }
-      } else {
-        translateX3.value = withSpring(0);
-        translateY3.value = withSpring(0);
-      }
-    });
-
-  const animatedStyle4 = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX4.value },
-      { translateY: translateY4.value },
-    ],
-  }));
-
-  const animatedStyle3 = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX3.value },
-      { translateY: translateY3.value },
-    ],
-  }));
-
-  // Precisa vir depois de todos os hooks, senão quebra a ordem deles.
-  if (loading || !questionContent) {
-    return <LoadingPage message="Carregando atividade..." />;
+  /** O que a criança montou, no formato que o backend espera. */
+  function buildFilledSlots(): FilledSlot[] {
+    return placements.map((placement) => ({
+      name: placement.slotName,
+      alternativeId: placement.pieceId,
+    }));
   }
 
   return (
     <View style={mainStyles.component}>
-      
       <View style={styles.header}>
         <BackButton />
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.questionTitle}>{currentActivity?.title}</Text>
+        <Text style={styles.questionTitle}>{currentActivity.title}</Text>
+        <Text style={styles.counter}>
+          {placedCount} DE {blankSlots.length} LETRAS
+        </Text>
+
+        <ErrorMessage message={error} />
 
         <TipButton
           tip="Arraste as letras para completar a palavra"
-          style={styles.tipButton}
+          style={mainStyles.tipButton}
+          autoOpen={false}
         />
 
-        {/* ZONA 1 — card branco com a linha da palavra */}
+        {/* ================================================================
+            A PALAVRA
+            Diferente do mapa, aqui não há duas camadas: o buraco JÁ é a View
+            que recebe a peça, então ele mesmo é o DropTarget.
+        ================================================================= */}
         <View style={styles.questionCard}>
           <View style={styles.answerRow}>
-            <Text style={styles.answerHint}>{STATIC_PUZZLE.hint}</Text>
+            {questionContent.hint ? (
+              <Text style={styles.answerHint}>{questionContent.hint}</Text>
+            ) : null}
 
-            {STATIC_PUZZLE.word.map((letter, i) =>
-              letter.blank ? (
-                <View
-                  key={i}
-                  collapsable={false}
-                  style={styles.answerSlot}
-                  ref={(el) => {
-                    slotRefs.current[i] = el;
-                    // o primeiro buraco continua sendo o alvo do drag que já existe
-                    if (i === FIRST_BLANK) targetRef.current = el;
-                  }}
+            {slots.map((slot) => {
+              // Letra que já vem pronta: só texto, não recebe nada.
+              if (!slot.blank) {
+                return (
+                  <Text key={slot.name} style={styles.answerLetter}>
+                    {slot.label}
+                  </Text>
+                );
+              }
+
+              // Só fica vermelho enquanto o buraco continuar vazio: assim que a
+              // criança põe uma letra de novo, ele volta ao normal.
+              const isWrong =
+                lstWrongSlots.includes(slot.name) && !isSlotFilled(slot.name);
+
+              return (
+                <DropTarget
+                  key={slot.name}
+                  id={slot.name}
+                  targets={targets}
+                  style={[
+                    styles.answerSlot,
+                    isWrong ? styles.answerSlotWrong : null,
+                    !isWrong && isSlotFilled(slot.name)
+                      ? styles.answerSlotFilled
+                      : null,
+                  ]}
                 />
-              ) : (
-                <Text key={i} style={styles.answerLetter}>
-                  {letter.char}
-                </Text>
-              ),
-            )}
+              );
+            })}
           </View>
         </View>
 
-        {/* ZONA 2 — dica */}
         <Text style={styles.questionLabel}>
           *Arraste as letras para completar a palavra!
         </Text>
 
-        {/* ZONA 3 — peças arrastáveis, soltas sobre o fundo */}
+        {/* ================================================================
+            AS LETRAS
+            Todas arrastáveis — inclusive as que não entram na palavra.
+        ================================================================= */}
         <View style={styles.tilesGrid}>
-          <GestureDetector gesture={dragGesture4}>
-            <Animated.View style={animatedStyle4}>
-              <View style={styles.tile}>
-                <Text style={styles.tileText}>{STATIC_PUZZLE.tiles[0]}</Text>
-                <View
-                  ref={dotsRef4}
-                  collapsable={false}
-                  onLayout={calculateDistance}
-                />
+          {alternatives.map((alternative) => (
+            <DraggablePiece
+              key={alternative.id}
+              id={alternative.id}
+              targets={targets}
+              pieces={pieces}
+              onDrop={place}
+              onMiss={remove}
+              // Cada letra vai num lugar só, então ela pula pro centro do
+              // buraco quando é solta.
+              snap
+            >
+              <View
+                style={[
+                  styles.tile,
+                  isPiecePlaced(alternative.id) ? styles.tilePlaced : null,
+                ]}
+              >
+                <Text style={styles.tileText}>{alternative.description}</Text>
               </View>
-            </Animated.View>
-          </GestureDetector>
-
-          <GestureDetector gesture={dragGesture3}>
-            <Animated.View style={animatedStyle3}>
-              <View style={styles.tile}>
-                <Text style={styles.tileText}>{STATIC_PUZZLE.tiles[1]}</Text>
-                <View ref={dotsRef3} collapsable={false} />
-              </View>
-            </Animated.View>
-          </GestureDetector>
-
-          {/* Peças extras: ainda SEM gesto de arrastar (falta ligar) */}
-          {STATIC_PUZZLE.tiles.slice(2).map((letra, i) => (
-            <View key={i} style={styles.tile}>
-              <Text style={styles.tileText}>{letra}</Text>
-            </View>
+            </DraggablePiece>
           ))}
         </View>
 
-        {/* ZONA 4 — confirmar */}
         <View style={styles.footer}>
           <TouchableOpacity
-            onPress={handleAnswer}
             activeOpacity={0.85}
-            style={mainStyles.primaryButton}
+            disabled={answering || !isComplete}
+            style={[
+              mainStyles.primaryButton,
+              !isComplete ? styles.buttonDisabled : null,
+            ]}
+            onPress={handleAnswer}
           >
             <Text style={mainStyles.primaryButtonText}>Confirmar</Text>
           </TouchableOpacity>
@@ -333,10 +257,9 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 16,
     paddingTop: 52,
-    paddingBottom: 24,
+    paddingBottom: 16,
   },
 
-  // Coluna principal: as 4 zonas empilhadas
   content: {
     flex: 1,
     paddingHorizontal: 16,
@@ -347,16 +270,17 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT_PRIMARY,
     letterSpacing: 1.5,
     textAlign: "center",
-    marginBottom: 24,
+  },
+  counter: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 1.4,
+    color: COLORS.TEXT_MUTED,
+    textAlign: "center",
+    marginTop: 6,
   },
 
-  // Só o posicionamento — a aparência mora no TipButton
-  tipButton: {
-    alignSelf: "flex-end",
-    marginBottom: 16,
-  },
-
-  // ZONA 1 — card branco com a linha da palavra
+  // A PALAVRA
   questionCard: {
     backgroundColor: "#fff",
     borderRadius: 24,
@@ -366,40 +290,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  tilesGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 16,
-  },
-  tile: {
-    width: 76,
-    height: 76,
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#ccc",
-  },
-  tileText: {
-    fontSize: 40,
-    fontWeight: "800",
-    color: COLORS.TEXT_PRIMARY,
-    textAlign: "center",
-  },
-  questionLabel: {
-    fontSize: 14,
-    fontStyle: "italic",
-    fontWeight: "500",
-    color: COLORS.TEXT_MUTED,
-    textAlign: "center",
-    marginTop: 16,
-    marginBottom: 24,
-  },
-
-  // A linha da palavra, que agora vive dentro do card
   answerRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -411,53 +301,77 @@ const styles = StyleSheet.create({
     lineHeight: 46,
     marginRight: 4,
   },
+  // O buraco. Um pouco maior que a letra pronta porque é ele que recebe o
+  // dedo da criança — e um alvo apertado é frustrante.
   answerSlot: {
-    width: 46,
-    height: 48,
+    width: 52,
+    height: 56,
+    borderRadius: 8,
     borderBottomWidth: 3,
     borderBottomColor: COLORS.TEXT_PRIMARY,
   },
+  answerSlotFilled: {
+    backgroundColor: COLORS.SURFACE_ORANGE,
+    borderBottomColor: COLORS.WARNING,
+  },
+  answerSlotWrong: {
+    backgroundColor: "#fdecec",
+    borderBottomColor: COLORS.DANGER,
+  },
   answerLetter: {
     width: 46,
-    height: 48,
+    height: 56,
     fontSize: 46,
-    lineHeight: 44,
+    lineHeight: 52,
     fontWeight: "800",
     color: COLORS.TEXT_PRIMARY,
     textAlign: "center",
   },
 
-  // Não usados hoje: sobraram da versão de múltipla escolha
-  optionsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 24,
+  questionLabel: {
+    fontSize: 14,
+    fontStyle: "italic",
+    fontWeight: "500",
+    color: COLORS.TEXT_MUTED,
+    textAlign: "center",
+    marginTop: 16,
+    marginBottom: 20,
   },
-  optionCard: {
-    flex: 1,
+
+  // AS LETRAS
+  tilesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+  },
+  // 56 e não 76 como antes: a peça pousa em cima do buraco, e uma peça muito
+  // maior que ele cobriria as letras vizinhas.
+  tile: {
+    width: 56,
+    height: 56,
     backgroundColor: "#fff",
-    borderRadius: 18,
-    paddingVertical: 20,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "#ccc",
+    borderColor: COLORS.BORDER_LIGHT,
   },
-  optionCardSelected: {
-    borderColor: COLORS.PRIMARY_LIGHT,
-    backgroundColor: COLORS.SURFACE_PRIMARY,
+  tilePlaced: {
+    borderColor: COLORS.SUCCESS,
   },
-  optionText: {
-    fontSize: 26,
-    fontWeight: "700",
+  tileText: {
+    fontSize: 30,
+    fontWeight: "800",
     color: COLORS.TEXT_PRIMARY,
-  },
-  optionTextSelected: {
-    color: COLORS.PRIMARY_LIGHT,
+    textAlign: "center",
   },
 
-  // ZONA 4 — confirmar
   footer: {
-    marginTop: 48,
+    marginTop: 32,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
 });

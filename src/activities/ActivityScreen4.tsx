@@ -1,99 +1,186 @@
-import { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import mainStyles from "../styles/theme";
 import BackButton from "../components/BackButton";
 import { COLORS } from "../styles/colors";
 import TipButton from "../components/TipButton";
+import DropTarget from "../components/DropTarget";
+import DraggablePiece from "../components/DraggablePiece";
+import useDragAndDrop from "../hooks/useDragAndDrop";
+import svgBoard from "../utils/svgBoard";
+import useTopic from "../hooks/useTopic";
+import { use, useEffect, useState } from "react";
+import { RouteProp, useRoute } from "@react-navigation/native";
+import { RootStackParamList } from "../types/navigation";
+import { BoardSlot, FilledSlot, QuestionSlotContent } from "../types/subject";
+import LoadingPage from "../components/LoadingPage";
+import useAppNavigation from "../hooks/useNavigation";
+import ErrorMessage from "../components/ErrorMessage";
 
 /**
- * Dados estáticos até o backend mandar o board.
- * Mesmo formato do mapa: um tabuleiro com slots nomeados, cada peça sabendo
- * em qual slot ela cai. Trocar o mapa por este corpo é só trocar os dados —
- * é a ideia de "um renderer de SVG serve pras duas atividades".
+ * COMO ESTA TELA FUNCIONA
  *
- * `bbox` é o recorte do path pra desenhar a peça sozinha, em tamanho de card.
+ * O boneco é um SVG com 6 partes. Cada parte é um "slot" — um lugar.
+ * Um slot pode estar:
+ *   - preenchido desde o começo (o tronco, que serve de âncora visual)
+ *   - vazio, esperando a criança arrastar a peça certa
+ *
+ * Os BURACOS ficam em cima do desenho, como retângulos invisíveis.
+ * As PEÇAS ficam nos cartõezinhos embaixo, e a criança arrasta até o buraco.
+ *
+ * Aqui peça e buraco têm o mesmo desenho (a peça da cabeça é redonda porque o
+ * buraco da cabeça é redondo), então os dois saem da mesma lista. Quando o
+ * backend entrar, eles passam a vir de lugares diferentes.
  */
-const STATIC_BOARD = {
-  // Recortado no corpo em si (x 90-210, y 24-312) em vez dos 300x340 cheios —
-  // sem isso sobra muito vazio dos lados e o card fica alto à toa.
-  viewBox: "84 18 132 300",
-  slots: [
-    {
-      id: "cabeca",
-      name: "Cabeça",
-      path: "M122 52 A28 28 0 1 0 178 52 A28 28 0 1 0 122 52 Z",
-      bbox: "116 18 68 68",
-      blank: true,
-    },
-    {
-      id: "tronco",
-      name: "Tronco",
-      path:
-        "M136 86 L164 86 Q184 86 184 106 L184 182 Q184 202 164 202 L136 202 Q116 202 116 182 L116 106 Q116 86 136 86 Z",
-      bbox: "110 80 80 128",
-      blank: false, // já colocado, pro aluno ter uma âncora
-    },
-    {
-      id: "braco-esquerdo",
-      name: "Braço esq.",
-      path:
-        "M102 94 Q114 94 114 106 L114 184 Q114 196 102 196 Q90 196 90 184 L90 106 Q90 94 102 94 Z",
-      bbox: "84 88 36 114",
-      blank: true,
-    },
-    {
-      id: "braco-direito",
-      name: "Braço dir.",
-      path:
-        "M198 94 Q210 94 210 106 L210 184 Q210 196 198 196 Q186 196 186 184 L186 106 Q186 94 198 94 Z",
-      bbox: "180 88 36 114",
-      blank: true,
-    },
-    {
-      id: "perna-esquerda",
-      name: "Perna esq.",
-      path:
-        "M135 206 Q148 206 148 219 L148 299 Q148 312 135 312 Q122 312 122 299 L122 219 Q122 206 135 206 Z",
-      bbox: "116 200 38 118",
-      blank: true,
-    },
-    {
-      id: "perna-direita",
-      name: "Perna dir.",
-      path:
-        "M165 206 Q178 206 178 219 L178 299 Q178 312 165 312 Q152 312 152 299 L152 219 Q152 206 165 206 Z",
-      bbox: "146 200 38 118",
-      blank: true,
-    },
-  ],
-};
 
-// Altura do tabuleiro. É o único número a mexer se ainda não couber.
-const BOARD_H = 210;
+// Altura do boneco na tela. É o único número a mexer se não couber.
+const BOARD_HEIGHT = 210;
 
-// Espaço que a peça tem dentro do card.
-const PIECE_W = 40;
-const PIECE_H = 44;
+// Traduz "onde a parte está no desenho" para "onde ela está na tela em pixels".
+// Precisa disso porque o buraco é um <Path> dentro do <Svg>, e o DropTarget é
+// uma View — View não pode envolver um Path, então os buracos ficam por cima.
 
-/**
- * Dimensiona a peça pela proporção do próprio `bbox`, em vez de espremer todas
- * num quadrado. Sem isso, um braço (36 x 114) vira uma fatia de ~10px e some.
- */
-function tamanhoDaPeca(bbox: string) {
-  const [, , w, h] = bbox.split(" ").map(Number);
-  const escala = Math.min(PIECE_W / w, PIECE_H / h);
-  return { width: w * escala, height: h * escala };
-}
+// Pixels a mais em volta do buraco. O desenho não muda de tamanho: só a área
+// que aceita a peça fica maior, porque os braços têm só 25px de largura e
+// acertar isso com o dedo de uma criança é difícil.
+const SLOT_HIT_PADDING = 8;
 
-const TOTAL = STATIC_BOARD.slots.length;
-const COLOCADAS = STATIC_BOARD.slots.filter((s) => !s.blank).length;
+// Espaço que o desenho da peça tem dentro do cartãozinho.
+const PIECE_WIDTH = 40;
+const PIECE_HEIGHT = 44;
 
-// As peças são os slots que ainda faltam — na vida real, embaralhados.
-const PECAS = STATIC_BOARD.slots.filter((s) => s.blank);
+// ---------------------------------------------------------------------------
 
 export default function ActivityScreen4() {
-  const [selecionada, setSelecionada] = useState<string | null>(null);
+  const route = useRoute<RouteProp<RootStackParamList, "ActivityScreen4">>();
+  const navigation = useAppNavigation();
+  const {
+    targets,
+    pieces,
+    placements,
+    placedCount,
+    place,
+    remove,
+    returnToBox,
+    reset,
+    isPiecePlaced,
+    isSlotFilled
+  } = useDragAndDrop();
+  const { getActivity, answer, result, answering, error, activity, loading } =
+    useTopic();
+  const [index, setIndex] = useState<number>(0);
+  const [lstWrongSlots, setLstWrongSlots] = useState<string[]>([]);
+
+  const { topicId } = route.params;
+
+  useEffect(() => {
+    getActivity(topicId).then((data) => {
+      if (data == null) return;
+
+      const start = data.lstQuestions.findIndex(
+        (q) => q.id === data.resumeQuestionId,
+      );
+      setIndex(start === -1 ? 0 : start); //Caso o usuario ja tenha terminado tudo nos conseguimos tratar
+    });
+  }, [topicId]);
+
+  const currentActivity = activity.lstQuestions[index];
+
+  if (loading || !currentActivity?.content || !currentActivity?.board) {
+    return <LoadingPage message="Carregando atividade..." />;
+  }
+
+  const designs: BoardSlot[] = JSON.parse(currentActivity.board.slots)
+
+  const questionContent: QuestionSlotContent = JSON.parse(currentActivity.content)
+
+  const completeSlots = designs.map((design) => {
+    const slots = questionContent.slots.find(
+      (slot) => slot.name === design.name,
+    );
+
+    return {
+      ...design,
+      blank: slots?.blank ?? false,
+    };
+  });
+
+  const blankSlots = completeSlots.filter((slot) => slot.blank);
+
+  const alternatives = currentActivity.lstAlternative;
+
+  const board = svgBoard(currentActivity.board?.viewBox ?? "", BOARD_HEIGHT);
+
+  const handleAnswer = async () => {
+    if (!currentActivity) return;
+
+    setLstWrongSlots([]);
+
+    const response = await answer({
+      questionId: currentActivity.id,
+      lstFilledSlots: buildFilledSlots(),
+    });
+
+    if (!response) return;
+
+    if (!response.correct) {
+      setLstWrongSlots(response.lstWrongSlots);
+
+      //Faz toda a parte de voltar a peça pro lugar quando estiver na posição errada
+    
+      placements
+        .filter((placement) => response.lstWrongSlots.includes(placement.slotName))
+        .forEach(placement => returnToBox(placement.pieceId));
+
+      return;
+    }
+
+    // Acabou o tópico inteiro: volta pra home.
+    if (response.concluded) {
+      navigation.navigate("ResultScreen", {
+        topicId,
+        activityRoute: "ActivityScreen4",
+      });
+
+      return;
+    }
+
+    reset();
+    setIndex(index + 1);
+  };
+
+  function buildFilledSlots(): FilledSlot[] {
+    return placements.map((placement) => ({
+      name: placement.slotName,
+      alternativeId: placement.pieceId
+    }))
+  }
+
+  /**
+   * Descobre em que tamanho desenhar a peça dentro do cartão.
+   *
+   * As partes têm proporções bem diferentes — a cabeça é quase quadrada (68x68)
+   * e o braço é comprido (36x114). Se todas fossem forçadas no mesmo quadrado,
+   * o braço viraria uma tirinha de 10px. Então cada uma encolhe pelo lado que
+   * limita primeiro.
+   */
+
+  function calculateAlternativeSvg(bbox: string) {
+    const numbers = bbox.split(" ").map(Number);
+    const drawingWidth = numbers[2];
+    const drawingHeight = numbers[3];
+
+    const scaleByWidth = PIECE_WIDTH / drawingWidth;
+    const scaleByHeight = PIECE_HEIGHT / drawingHeight;
+
+    // A menor das duas é a que faz caber nos dois sentidos.
+    const scale = Math.min(scaleByWidth, scaleByHeight);
+
+    return {
+      width: drawingWidth * scale,
+      height: drawingHeight * scale,
+    };
+  }
 
   return (
     <View style={mainStyles.component}>
@@ -102,69 +189,148 @@ export default function ActivityScreen4() {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.questionTitle}>Complete o corpo</Text>
+        <Text style={styles.questionTitle}>{currentActivity?.title}</Text>
         <Text style={styles.counter}>
-          {COLOCADAS} DE {TOTAL} PARTES
+          {placedCount} DE {blankSlots?.length ?? "0"} PARTES
         </Text>
+
+        <ErrorMessage message={error} />
 
         <TipButton
           tip="Arraste as partes do corpo para o lugar certo"
-          style={styles.tipButton}
+          style={mainStyles.tipButton}
           autoOpen={false}
         />
 
-        {/* ZONA 1 — card branco com o tabuleiro */}
+        {/* ================================================================
+            O board
+            Duas camadas: o desenho embaixo, os buracos invisíveis em cima.
+        ================================================================= */}
         <View style={styles.boardCard}>
-          <Svg
-            viewBox={STATIC_BOARD.viewBox}
-            width={BOARD_H * (132 / 300)}
-            height={BOARD_H}
-            preserveAspectRatio="xMidYMid meet"
+          <View
+            style={[
+              styles.boardWrapper,
+              { width: board.width, height: board.height },
+            ]}
           >
-            {STATIC_BOARD.slots.map((slot) => (
-              <Path
-                key={slot.id}
-                d={slot.path}
-                fill={slot.blank ? "#fff" : COLORS.SURFACE_ORANGE}
-                stroke={slot.blank ? COLORS.PRIMARY_LIGHT : COLORS.WARNING}
-                strokeWidth={2.5}
-                strokeDasharray={slot.blank ? "6 5" : undefined}
-                strokeLinejoin="round"
-              />
-            ))}
-          </Svg>
+            {/* Camada de baixo: o desenho */}
+            <Svg
+              viewBox={currentActivity.board?.viewBox}
+              width={board.width}
+              height={board.height}
+              preserveAspectRatio="xMidYMid meet"
+            >
+              {completeSlots?.map((slot) => {
+                const isWrong = lstWrongSlots.includes(slot.name) && !isSlotFilled(slot.name);
+                const isSlotEmpty = slot.blank && !isSlotFilled(slot.name);
+
+                if (isWrong) {
+                  return (
+                    <Path
+                      key={slot.name}
+                      d={slot.path}
+                      fill="#fdecec"
+                      stroke={COLORS.DANGER}
+                      strokeWidth={2.5}
+                      strokeLinejoin="round"
+                    />
+                  );
+                }
+
+                // Buraco vazio: contorno tracejado roxo, fundo branco.
+                if (isSlotEmpty) {
+                  return (
+                    <Path
+                      key={slot.name}
+                      d={slot.path}
+                      fill="#fff"
+                      stroke={COLORS.PRIMARY_LIGHT}
+                      strokeWidth={2.5}
+                      strokeDasharray="6 5"
+                      strokeLinejoin="round"
+                    />
+                  );
+                }
+
+                // Já preenchido (ou veio pronto): laranja sólido.
+                return (
+                  <Path
+                    key={slot.name}
+                    d={slot.path}
+                    fill={COLORS.SURFACE_ORANGE}
+                    stroke={COLORS.WARNING}
+                    strokeWidth={2.5}
+                    strokeLinejoin="round"
+                  />
+                );
+              })}
+            </Svg>
+
+            {/* Camada de cima: os buracos.
+                São Views transparentes, uma exatamente em cima de cada parte
+                vazia do desenho. Quem a criança vê é o tracejado do SVG. */}
+            {blankSlots?.map((slot) => {
+              const position = board.rectOf(slot.bbox, SLOT_HIT_PADDING);
+
+              return (
+                <DropTarget
+                  key={slot.name}
+                  id={slot.name}
+                  targets={targets}
+                  style={[styles.dropZone, position]}
+                />
+              );
+            })}
+          </View>
         </View>
 
-        {/* ZONA 2 — dica */}
         <Text style={styles.questionLabel}>
           *Arraste as partes do corpo para o lugar certo!
         </Text>
 
-        {/* ZONA 3 — peças soltas sobre o fundo */}
+        {/* ================================================================
+            AS PEÇAS
+        ================================================================= */}
         <View style={styles.piecesGrid}>
-          {PECAS.map((peca) => (
-            <TouchableOpacity
-              key={peca.id}
-              style={[
-                styles.piece,
-                selecionada === peca.id && styles.pieceSelected,
-              ]}
-              activeOpacity={0.8}
-              onPress={() => setSelecionada(peca.id)}
-            >
-              <Svg viewBox={peca.bbox} {...tamanhoDaPeca(peca.bbox)}>
-                <Path d={peca.path} fill={COLORS.WARNING} />
-              </Svg>
-              <Text style={styles.pieceLabel}>{peca.name}</Text>
-            </TouchableOpacity>
-          ))}
+          {alternatives.map((alternative) => {
+            if (!alternative.bbox || !alternative.path) return null;
+
+            const size = calculateAlternativeSvg(alternative.bbox);
+            const isPlaced = isPiecePlaced(alternative.id);
+            return (
+              <View
+                style={[styles.piece, isPlaced ? styles.piecePlaced : null]}
+              >
+                <DraggablePiece
+                  key={alternative.id}
+                  id={alternative.id}
+                  targets={targets}
+                  pieces={pieces}
+                  onDrop={place}
+                  onMiss={remove}
+                  // Cada parte vai num lugar só, então a peça pula pro centro
+                  // do buraco quando é solta.
+                  snap
+                >
+                  <Svg
+                    viewBox={alternative.bbox}
+                    width={size.width}
+                    height={size.height}
+                  >
+                    <Path d={alternative.path} fill={COLORS.WARNING} />
+                  </Svg>
+                </DraggablePiece>
+                <Text style={styles.pieceLabel}>{alternative.description}</Text>
+              </View>
+            );
+          })}
         </View>
 
-        {/* ZONA 4 — confirmar */}
         <View style={styles.footer}>
           <TouchableOpacity
             activeOpacity={0.85}
             style={mainStyles.primaryButton}
+            onPress={handleAnswer}
           >
             <Text style={mainStyles.primaryButtonText}>Confirmar</Text>
           </TouchableOpacity>
@@ -204,13 +370,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
 
-  // Só o posicionamento — a aparência mora no TipButton
-  tipButton: {
-    alignSelf: "flex-end",
-    marginBottom: 8,
-  },
-
-  // ZONA 1 — tabuleiro
   boardCard: {
     backgroundColor: "#fff",
     borderRadius: 24,
@@ -218,6 +377,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: "center",
     justifyContent: "center",
+  },
+  // A caixa que segura as duas camadas. O `relative` é o que faz os buracos
+  // se posicionarem em relação a ela, e não à tela inteira.
+  // A largura e a altura vêm do board, que é calculado dentro do componente
+  // (depende do viewBox da API) — por isso ficam inline no JSX.
+  boardWrapper: {
+    position: "relative",
+  },
+  // Invisível de propósito.
+  dropZone: {
+    position: "absolute",
   },
 
   questionLabel: {
@@ -230,7 +400,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
 
-  // ZONA 3 — peças
   piecesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -249,9 +418,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "transparent",
   },
-  pieceSelected: {
-    borderColor: COLORS.WARNING,
-    backgroundColor: COLORS.SURFACE_ORANGE,
+  piecePlaced: {
+    borderColor: COLORS.SUCCESS,
   },
   pieceLabel: {
     fontSize: 10,
@@ -259,7 +427,6 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT_MUTED,
   },
 
-  // ZONA 4 — confirmar
   footer: {
     marginTop: 20,
   },

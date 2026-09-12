@@ -58,7 +58,10 @@ export default function ActivityScreen() {
     if (!response) return;
 
     if (response.concluded) {
-      navigation.navigate("HomeScreen");
+      navigation.navigate("ResultScreen", {
+        topicId,
+        activityRoute: "ActivityScreen",
+      });
 
       return;
     }
