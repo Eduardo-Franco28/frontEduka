@@ -84,7 +84,7 @@ export default function ActivityScreen4() {
     });
   }, [topicId]);
 
-  const currentActivity = activity.lstQuestions[index];
+  const currentActivity = activity?.lstQuestions[index];
 
   if (loading || !currentActivity?.content || !currentActivity?.board) {
     return <LoadingPage message="Carregando atividade..." />;
