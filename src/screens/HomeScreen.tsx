@@ -20,12 +20,25 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <TouchableOpacity
+            style={[styles.avatarCircle, { borderColor: colors.PRIMARY, backgroundColor: colors.CARD }]}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Ir para o perfil"
+            onPress={() => navigation.navigate("ProfileScreen")}
+          >
+            <Image
+              source={require("../../assets/mascotePerfil.png")}
+              style={styles.avatarImage}
+            />
+          </TouchableOpacity>
+
+          <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: colors.TEXT_PRIMARY, fontSize: 22 * fontScale }]}>
-              Olá {user.user?.nome} 👋
+              Olá! {user.user?.nome} 👋
             </Text>
             <Text style={[styles.headerSubtitle, { color: colors.TEXT_MUTED, fontSize: 14 * fontScale }]}>
-              Pronto para aprender hoje?
+              Animado para aprender hoje?
             </Text>
           </View>
         </View>
@@ -99,9 +112,25 @@ const styles = StyleSheet.create({
   // Header
   header: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 14,
     marginBottom: 20,
+  },
+  avatarCircle: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    flexShrink: 0,
+  },
+  avatarImage: {
+    width: 36,
+    height: 36,
+  },
+  headerText: {
+    flex: 1,
   },
   headerTitle: {
     fontWeight: "700",

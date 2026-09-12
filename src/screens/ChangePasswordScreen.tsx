@@ -7,7 +7,7 @@ import Header from "../components/Header";
 import ErrorMessage from "../components/ErrorMessage";
 import useAppNavigation from "../hooks/useNavigation";
 import useAuth from "../hooks/useAuth";
-import { COLORS } from "../styles/colors";
+import useTheme from "../hooks/useTheme";
 
 export default function ChangePasswordScreen() {
   const [currentPassword, setCurrentPassword] = useState<string>("");
@@ -17,6 +17,7 @@ export default function ChangePasswordScreen() {
   const [hidePassword, setHidePassword] = useState<boolean>(true);
 
   const navigation = useAppNavigation();
+  const { colors, fontScale } = useTheme();
 
   const { updatePassword, error, user } = useAuth();
 
@@ -63,7 +64,10 @@ export default function ChangePasswordScreen() {
   };
 
   return (
-    <SafeAreaView style={mainStyles.component} edges={["top"]}>
+    <SafeAreaView
+      style={[mainStyles.component, { backgroundColor: colors.BG_APP }]}
+      edges={["top"]}
+    >
       <ScrollView
         style={mainStyles.scroll}
         contentContainerStyle={mainStyles.scrollContent}
@@ -108,9 +112,20 @@ export default function ChangePasswordScreen() {
           onPress={() => setHidePassword(!hidePassword)}
         >
           <View
-            style={[styles.checkbox, !hidePassword && styles.checkBoxChecked]}
+            style={[
+              styles.checkbox,
+              { borderColor: colors.BORDER_LIGHT, backgroundColor: colors.CARD },
+              !hidePassword && { backgroundColor: colors.PRIMARY },
+            ]}
           ></View>
-          <Text style={styles.checkboxLabel}>Mostrar senhas</Text>
+          <Text
+            style={[
+              styles.checkboxLabel,
+              { color: colors.TEXT_DARK, fontSize: 14 * fontScale },
+            ]}
+          >
+            Mostrar senhas
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -125,7 +140,7 @@ export default function ChangePasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-    checkboxRow: {
+  checkboxRow: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 8,
@@ -136,15 +151,9 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 6,
     borderWidth: 1.5,
-    borderColor: COLORS.BORDER_LIGHT,
-    backgroundColor: "#fff",
     marginRight: 10,
   },
-  checkBoxChecked: {
-    backgroundColor: COLORS.PRIMARY,
-  },
   checkboxLabel: {
-    fontSize: 14,
-    color: COLORS.TEXT_DARK,
+    fontWeight: "500",
   },
-})
+});

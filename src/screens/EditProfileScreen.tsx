@@ -8,12 +8,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import mainStyles from "../styles/theme";
-import { COLORS } from "../styles/colors";
 import Header from "../components/Header";
 import Input from "../components/Input";
 import { useState } from "react";
 import useAppNavigation from "../hooks/useNavigation";
 import useAuth from "../hooks/useAuth";
+import useTheme from "../hooks/useTheme";
 import ErrorMessage from "../components/ErrorMessage";
 
 export default function EditProfileScreen() {
@@ -24,6 +24,7 @@ export default function EditProfileScreen() {
   const [hidePassword, setHidePassword] = useState<boolean>(true);
 
   const navigation = useAppNavigation();
+  const { colors, fontScale } = useTheme();
 
   const { updateProfile, error, user } = useAuth();
 
@@ -63,7 +64,10 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={mainStyles.component} edges={["top"]}>
+    <SafeAreaView
+      style={[mainStyles.component, { backgroundColor: colors.BG_APP }]}
+      edges={["top"]}
+    >
       <ScrollView
         style={mainStyles.scroll}
         contentContainerStyle={mainStyles.scrollContent}
@@ -74,14 +78,29 @@ export default function EditProfileScreen() {
 
         {/* Profile Card */}
         <View style={styles.profileCard}>
-          <View style={styles.avatarCircle}>
+          <View
+            style={[
+              styles.avatarCircle,
+              {
+                backgroundColor: colors.SURFACE_BLUE,
+                borderColor: colors.PRIMARY_LIGHT,
+              },
+            ]}
+          >
             <Image
               style={styles.avatarEmoji}
               source={require("../../assets/mascotePerfil.png")}
             />
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{user?.nome}</Text>
+            <Text
+              style={[
+                styles.profileName,
+                { color: colors.TEXT_PRIMARY, fontSize: 20 * fontScale },
+              ]}
+            >
+              {user?.nome}
+            </Text>
           </View>
         </View>
 
@@ -112,6 +131,7 @@ export default function EditProfileScreen() {
             onChangeText={setCurrentPassword}
             autoCapitalize="none"
             autoCorrect={false}
+            secureTextEntry={hidePassword}
         />
 
         <TouchableOpacity
@@ -119,9 +139,20 @@ export default function EditProfileScreen() {
             onPress={() => setHidePassword(!hidePassword)}
         >
           <View
-            style={[styles.checkbox, !hidePassword && styles.checkBoxChecked]}
+            style={[
+              styles.checkbox,
+              { borderColor: colors.BORDER_LIGHT, backgroundColor: colors.CARD },
+              !hidePassword && { backgroundColor: colors.PRIMARY },
+            ]}
           ></View>
-          <Text style={styles.checkboxLabel}>Mostrar senhas</Text>
+          <Text
+            style={[
+              styles.checkboxLabel,
+              { color: colors.TEXT_DARK, fontSize: 14 * fontScale },
+            ]}
+          >
+            Mostrar senhas
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={mainStyles.primaryButton} onPress={handleSubmit}>
@@ -146,9 +177,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: COLORS.SURFACE_BLUE,
     borderWidth: 2,
-    borderColor: COLORS.PRIMARY_LIGHT,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
@@ -161,9 +190,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   profileName: {
-    fontSize: 20,
     fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
     marginBottom: 3,
   },
 
@@ -178,15 +205,9 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 6,
     borderWidth: 1.5,
-    borderColor: COLORS.BORDER_LIGHT,
-    backgroundColor: "#fff",
     marginRight: 10,
   },
-  checkBoxChecked: {
-    backgroundColor: COLORS.PRIMARY,
-  },
   checkboxLabel: {
-    fontSize: 14,
-    color: COLORS.TEXT_DARK,
+    fontWeight: "500",
   },
 });
