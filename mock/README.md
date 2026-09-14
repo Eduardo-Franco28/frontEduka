@@ -187,7 +187,7 @@ está rodando na sua máquina. Troque para `:3000` e refaça o passo 4.
 Se já estiver `:3000`, teste pelo navegador **do celular**. Digite:
 
 ```
-http://SEU_IP:3000/subject
+http://SEU_IP:3000/subjects
 ```
 
 - Se aparecer uma lista com Matemática, Português etc. → o servidor está certo,
@@ -230,15 +230,28 @@ mudar qualquer resposta clicando nela, sem digitar comando nenhum.
 
 As rotas que ele responde:
 
-| Rota                      | O que devolve                                      |
-| ------------------------- | -------------------------------------------------- |
-| `POST /auth/login`        | token falso + usuário "Aluno Teste"                 |
-| `POST /auth/register`     | token falso + o nome/email enviados                 |
-| `GET /auth/me`            | usuário "Aluno Teste"                               |
-| `GET /subject`            | 5 matérias                                          |
-| `GET /topic/:id/subject`  | tópicos daquela matéria                             |
-| `GET /topic/:id/activity` | 3 questões, geradas a partir do id do tópico        |
-| `POST /progress/answer`   | se acertou, se errou, e se concluiu o tópico        |
+| Rota                              | O que devolve                                          |
+| --------------------------------- | ------------------------------------------------------ |
+| `POST /auth/login`                | token falso + usuário "Aluno Teste"                     |
+| `POST /auth/register`             | token falso + o nome/email enviados                     |
+| `GET /auth/me`                    | usuário "Aluno Teste"                                   |
+| `GET /subjects`                   | 5 matérias                                              |
+| `GET /topics/:id/subject`         | tópicos daquela matéria                                 |
+| `GET /topics/:id/activity`        | as questões do tópico (veja a tabela abaixo)            |
+| `POST /progress/answer`           | se acertou, quais lugares errou, se concluiu            |
+| `GET /stats`                      | 12 (questões concluídas)                                |
+| `GET /stats/:id`                  | 3 (tópicos concluídos; o id é ignorado)                 |
+| `GET /stats/:limit/unfinished`    | 2 questões pendentes fixas                              |
+
+Onde achar cada tipo de atividade:
+
+| Matéria    | Tópico                    | Atividade                                   |
+| ---------- | ------------------------- | ------------------------------------------- |
+| Português  | 201 Substantivos          | completar a palavra (UVA e BOLA)            |
+| Ciências   | 301 Corpo humano          | encaixar as partes do corpo                 |
+| Ciências   | 304 Onde eles vivem       | separar os animais por habitat              |
+| Geografia  | 501 Regiões do Brasil     | montar o mapa                               |
+| qualquer   | qualquer outro tópico     | pontos: 3 contas de somar                   |
 
 Se o backend real mudar algum campo, alguém precisa atualizar o
 `mockoon-eduka.json` na mão — ele é um JSON solto, não é conferido contra os

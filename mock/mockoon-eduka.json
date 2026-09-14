@@ -106,7 +106,7 @@
       "type": "http",
       "documentation": "",
       "method": "get",
-      "endpoint": "subject",
+      "endpoint": "subjects",
       "responses": [
         {
           "uuid": "e153a018-620f-4b2c-af40-7999f2ec4896",
@@ -137,7 +137,7 @@
       "type": "http",
       "documentation": "Cada resposta é escolhida pela regra sobre o parâmetro :subjectId.",
       "method": "get",
-      "endpoint": "topic/:subjectId/subject",
+      "endpoint": "topics/:subjectId/subject",
       "responses": [
         {
           "uuid": "67b2eef7-64ea-44f7-a0f7-f85da50bc106",
@@ -195,7 +195,7 @@
         },
         {
           "uuid": "6ff49311-bdd8-4b73-8f17-30c9745c997f",
-          "body": "[\n  {\n    \"id\": 301,\n    \"title\": \"Corpo humano\",\n    \"subTitle\": \"Sistemas do corpo\",\n    \"subject\": 3,\n    \"percentConclued\": 100,\n    \"status\": \"CONCLUIDO\"\n  },\n  {\n    \"id\": 302,\n    \"title\": \"Plantas\",\n    \"subTitle\": \"Fotossíntese\",\n    \"subject\": 3,\n    \"percentConclued\": 20,\n    \"status\": \"EM_ANDAMENTO\"\n  },\n  {\n    \"id\": 303,\n    \"title\": \"Ciclo da água\",\n    \"subTitle\": \"Evaporação e chuva\",\n    \"subject\": 3,\n    \"percentConclued\": 0,\n    \"status\": \"NAO_INICIADO\"\n  }\n]",
+          "body": "[\n  {\n    \"id\": 301,\n    \"title\": \"Corpo humano\",\n    \"subTitle\": \"Sistemas do corpo\",\n    \"subject\": 3,\n    \"percentConclued\": 100,\n    \"status\": \"CONCLUIDO\"\n  },\n  {\n    \"id\": 302,\n    \"title\": \"Plantas\",\n    \"subTitle\": \"Fotossíntese\",\n    \"subject\": 3,\n    \"percentConclued\": 20,\n    \"status\": \"EM_ANDAMENTO\"\n  },\n  {\n    \"id\": 303,\n    \"title\": \"Ciclo da água\",\n    \"subTitle\": \"Evaporação e chuva\",\n    \"subject\": 3,\n    \"percentConclued\": 0,\n    \"status\": \"NAO_INICIADO\"\n  },\n  {\n    \"id\": 304,\n    \"title\": \"Onde eles vivem\",\n    \"subTitle\": \"Animais e seus habitats\",\n    \"subject\": 3,\n    \"percentConclued\": 0,\n    \"status\": \"NAO_INICIADO\"\n  }\n]",
           "latency": 0,
           "statusCode": 200,
           "label": "Ciências",
@@ -249,7 +249,7 @@
         },
         {
           "uuid": "eacf95ca-2c67-4029-a231-c0bd2593f55a",
-          "body": "[\n  {\n    \"id\": 501,\n    \"title\": \"Mapas\",\n    \"subTitle\": \"Escala e legenda\",\n    \"subject\": 5,\n    \"percentConclued\": 80,\n    \"status\": \"EM_ANDAMENTO\"\n  },\n  {\n    \"id\": 502,\n    \"title\": \"Relevo\",\n    \"subTitle\": \"Formas do terreno\",\n    \"subject\": 5,\n    \"percentConclued\": 0,\n    \"status\": \"NAO_INICIADO\"\n  }\n]",
+          "body": "[\n  {\n    \"id\": 501,\n    \"title\": \"Regiões do Brasil\",\n    \"subTitle\": \"Monte o mapa do país\",\n    \"subject\": 5,\n    \"percentConclued\": 80,\n    \"status\": \"EM_ANDAMENTO\"\n  },\n  {\n    \"id\": 502,\n    \"title\": \"Relevo\",\n    \"subTitle\": \"Formas do terreno\",\n    \"subject\": 5,\n    \"percentConclued\": 0,\n    \"status\": \"NAO_INICIADO\"\n  }\n]",
           "latency": 0,
           "statusCode": 200,
           "label": "Geografia",
@@ -303,14 +303,122 @@
       "type": "http",
       "documentation": "Monta 3 questões para qualquer tópico, a partir do :topicId da URL.",
       "method": "get",
-      "endpoint": "topic/:topicId/activity",
+      "endpoint": "topics/:topicId/activity",
       "responses": [
         {
-          "uuid": "eff7daf2-4f6a-4f42-858f-129e647a88d0",
-          "body": "{\n  \"resumeQuestionId\": {{add (multiply (urlParam 'topicId') 10) 1}},\n  \"lstQuestions\": [\n    {\n      \"id\": {{add (multiply (urlParam 'topicId') 10) 1}},\n      \"title\": \"Quanto é 4 + 3?\",\n      \"topic\": {{urlParam 'topicId'}},\n      \"level\": 1,\n      \"type\": \"DRAG_DOTS\",\n      \"content\": \"{\\\"teste1\\\": 4, \\\"teste2\\\": 3}\",\n      \"lstAlternative\": [\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 11}}, \"description\": \"6\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 12}}, \"description\": \"7\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 13}}, \"description\": \"8\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 14}}, \"description\": \"9\" }\n      ],\n      \"conclued\": false\n    },\n    {\n      \"id\": {{add (multiply (urlParam 'topicId') 10) 2}},\n      \"title\": \"Quanto é 5 + 2?\",\n      \"topic\": {{urlParam 'topicId'}},\n      \"level\": 2,\n      \"type\": \"DRAG_DOTS\",\n      \"content\": \"{\\\"teste1\\\": 5, \\\"teste2\\\": 2}\",\n      \"lstAlternative\": [\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 21}}, \"description\": \"6\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 22}}, \"description\": \"7\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 23}}, \"description\": \"8\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 24}}, \"description\": \"9\" }\n      ],\n      \"conclued\": false\n    },\n    {\n      \"id\": {{add (multiply (urlParam 'topicId') 10) 3}},\n      \"title\": \"Quanto é 6 + 3?\",\n      \"topic\": {{urlParam 'topicId'}},\n      \"level\": 3,\n      \"type\": \"DRAG_DOTS\",\n      \"content\": \"{\\\"teste1\\\": 6, \\\"teste2\\\": 3}\",\n      \"lstAlternative\": [\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 31}}, \"description\": \"8\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 32}}, \"description\": \"9\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 33}}, \"description\": \"10\" },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 34}}, \"description\": \"11\" }\n      ],\n      \"conclued\": false\n    }\n  ]\n}",
+          "uuid": "82ef99f8-ed88-481e-901a-b3f06ea18bd7",
+          "body": "{\n  \"resumeQuestionId\": 2011,\n  \"lstQuestions\": [\n    {\n      \"id\": 2011,\n      \"title\": \"Complete a palavra\",\n      \"topic\": 201,\n      \"level\": 1,\n      \"type\": \"DRAG_LETTERS\",\n      \"content\": \"{\\\"hint\\\": \\\"🍇\\\", \\\"slots\\\": [{\\\"name\\\": \\\"1\\\", \\\"blank\\\": true}, {\\\"name\\\": \\\"2\\\", \\\"blank\\\": false, \\\"label\\\": \\\"V\\\"}, {\\\"name\\\": \\\"3\\\", \\\"blank\\\": true}]}\",\n      \"lstAlternative\": [\n        {\n          \"id\": 201111,\n          \"description\": \"U\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        },\n        {\n          \"id\": 201123,\n          \"description\": \"A\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        },\n        {\n          \"id\": 201130,\n          \"description\": \"E\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        },\n        {\n          \"id\": 201140,\n          \"description\": \"O\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        }\n      ],\n      \"conclued\": false,\n      \"board\": null\n    },\n    {\n      \"id\": 2012,\n      \"title\": \"Complete a palavra\",\n      \"topic\": 201,\n      \"level\": 2,\n      \"type\": \"DRAG_LETTERS\",\n      \"content\": \"{\\\"hint\\\": \\\"⚽\\\", \\\"slots\\\": [{\\\"name\\\": \\\"1\\\", \\\"blank\\\": false, \\\"label\\\": \\\"B\\\"}, {\\\"name\\\": \\\"2\\\", \\\"blank\\\": true}, {\\\"name\\\": \\\"3\\\", \\\"blank\\\": false, \\\"label\\\": \\\"L\\\"}, {\\\"name\\\": \\\"4\\\", \\\"blank\\\": true}]}\",\n      \"lstAlternative\": [\n        {\n          \"id\": 201212,\n          \"description\": \"O\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        },\n        {\n          \"id\": 201224,\n          \"description\": \"A\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        },\n        {\n          \"id\": 201230,\n          \"description\": \"U\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        },\n        {\n          \"id\": 201240,\n          \"description\": \"I\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        }\n      ],\n      \"conclued\": false,\n      \"board\": null\n    }\n  ]\n}",
           "latency": 0,
           "statusCode": 200,
-          "label": "atividade do tópico",
+          "label": "palavra (DRAG_LETTERS)",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "topicId",
+              "value": "201",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "258ff6da-1ad9-4f23-a08a-f7b125f1193a",
+          "body": "{\n  \"resumeQuestionId\": 3011,\n  \"lstQuestions\": [\n    {\n      \"id\": 3011,\n      \"title\": \"Complete o corpo\",\n      \"topic\": 301,\n      \"level\": 1,\n      \"type\": \"DRAG_TO_SLOTS\",\n      \"content\": \"{\\\"slots\\\": [{\\\"name\\\": \\\"1\\\", \\\"blank\\\": true}, {\\\"name\\\": \\\"2\\\", \\\"blank\\\": false}, {\\\"name\\\": \\\"3\\\", \\\"blank\\\": true}, {\\\"name\\\": \\\"4\\\", \\\"blank\\\": true}, {\\\"name\\\": \\\"5\\\", \\\"blank\\\": true}, {\\\"name\\\": \\\"6\\\", \\\"blank\\\": true}]}\",\n      \"lstAlternative\": [\n        {\n          \"id\": 301111,\n          \"description\": \"Cabeça\",\n          \"path\": \"M122 52 A28 28 0 1 0 178 52 A28 28 0 1 0 122 52 Z\",\n          \"bbox\": \"116 18 68 68\",\n          \"icon\": null\n        },\n        {\n          \"id\": 301123,\n          \"description\": \"Braço esq.\",\n          \"path\": \"M102 94 Q114 94 114 106 L114 184 Q114 196 102 196 Q90 196 90 184 L90 106 Q90 94 102 94 Z\",\n          \"bbox\": \"84 88 36 114\",\n          \"icon\": null\n        },\n        {\n          \"id\": 301134,\n          \"description\": \"Braço dir.\",\n          \"path\": \"M198 94 Q210 94 210 106 L210 184 Q210 196 198 196 Q186 196 186 184 L186 106 Q186 94 198 94 Z\",\n          \"bbox\": \"180 88 36 114\",\n          \"icon\": null\n        },\n        {\n          \"id\": 301145,\n          \"description\": \"Perna esq.\",\n          \"path\": \"M135 206 Q148 206 148 219 L148 299 Q148 312 135 312 Q122 312 122 299 L122 219 Q122 206 135 206 Z\",\n          \"bbox\": \"116 200 38 118\",\n          \"icon\": null\n        },\n        {\n          \"id\": 301156,\n          \"description\": \"Perna dir.\",\n          \"path\": \"M165 206 Q178 206 178 219 L178 299 Q178 312 165 312 Q152 312 152 299 L152 219 Q152 206 165 206 Z\",\n          \"bbox\": \"146 200 38 118\",\n          \"icon\": null\n        }\n      ],\n      \"conclued\": false,\n      \"board\": {\n        \"id\": 1,\n        \"viewBox\": \"84 18 132 300\",\n        \"slots\": \"[{\\\"name\\\": \\\"1\\\", \\\"path\\\": \\\"M122 52 A28 28 0 1 0 178 52 A28 28 0 1 0 122 52 Z\\\", \\\"bbox\\\": \\\"116 18 68 68\\\"}, {\\\"name\\\": \\\"2\\\", \\\"path\\\": \\\"M136 86 L164 86 Q184 86 184 106 L184 182 Q184 202 164 202 L136 202 Q116 202 116 182 L116 106 Q116 86 136 86 Z\\\", \\\"bbox\\\": \\\"110 80 80 128\\\"}, {\\\"name\\\": \\\"3\\\", \\\"path\\\": \\\"M102 94 Q114 94 114 106 L114 184 Q114 196 102 196 Q90 196 90 184 L90 106 Q90 94 102 94 Z\\\", \\\"bbox\\\": \\\"84 88 36 114\\\"}, {\\\"name\\\": \\\"4\\\", \\\"path\\\": \\\"M198 94 Q210 94 210 106 L210 184 Q210 196 198 196 Q186 196 186 184 L186 106 Q186 94 198 94 Z\\\", \\\"bbox\\\": \\\"180 88 36 114\\\"}, {\\\"name\\\": \\\"5\\\", \\\"path\\\": \\\"M135 206 Q148 206 148 219 L148 299 Q148 312 135 312 Q122 312 122 299 L122 219 Q122 206 135 206 Z\\\", \\\"bbox\\\": \\\"116 200 38 118\\\"}, {\\\"name\\\": \\\"6\\\", \\\"path\\\": \\\"M165 206 Q178 206 178 219 L178 299 Q178 312 165 312 Q152 312 152 299 L152 219 Q152 206 165 206 Z\\\", \\\"bbox\\\": \\\"146 200 38 118\\\"}]\"\n      }\n    }\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "corpo (DRAG_TO_SLOTS)",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "topicId",
+              "value": "301",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "078facea-5f16-4697-9a9f-8a8e0787a890",
+          "body": "{\n  \"resumeQuestionId\": 3041,\n  \"lstQuestions\": [\n    {\n      \"id\": 3041,\n      \"title\": \"Onde eles vivem?\",\n      \"topic\": 304,\n      \"level\": 1,\n      \"type\": \"DRAG_SLOTS_TO_GROUP\",\n      \"content\": \"{\\\"slots\\\": [{\\\"name\\\": \\\"1\\\", \\\"blank\\\": true, \\\"label\\\": \\\"MAR\\\"}, {\\\"name\\\": \\\"2\\\", \\\"blank\\\": true, \\\"label\\\": \\\"FLORESTA\\\"}, {\\\"name\\\": \\\"3\\\", \\\"blank\\\": true, \\\"label\\\": \\\"SAVANA\\\"}]}\",\n      \"lstAlternative\": [\n        {\n          \"id\": 304111,\n          \"description\": \"Golfinho\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": \"🐬\"\n        },\n        {\n          \"id\": 304121,\n          \"description\": \"Peixe\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": \"🐠\"\n        },\n        {\n          \"id\": 304132,\n          \"description\": \"Macaco\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": \"🐒\"\n        },\n        {\n          \"id\": 304142,\n          \"description\": \"Tucano\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": \"🦜\"\n        },\n        {\n          \"id\": 304153,\n          \"description\": \"Zebra\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": \"🦓\"\n        },\n        {\n          \"id\": 304163,\n          \"description\": \"Leão\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": \"🦁\"\n        }\n      ],\n      \"conclued\": false,\n      \"board\": null\n    }\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "animais (DRAG_SLOTS_TO_GROUP)",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "topicId",
+              "value": "304",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "1a06a130-147f-47ae-a75e-bc85e9773288",
+          "body": "{\n  \"resumeQuestionId\": 5011,\n  \"lstQuestions\": [\n    {\n      \"id\": 5011,\n      \"title\": \"Monte o mapa\",\n      \"topic\": 501,\n      \"level\": 1,\n      \"type\": \"DRAG_TO_SLOTS\",\n      \"content\": \"{\\\"slots\\\": [{\\\"name\\\": \\\"1\\\", \\\"blank\\\": true}, {\\\"name\\\": \\\"2\\\", \\\"blank\\\": true}, {\\\"name\\\": \\\"3\\\", \\\"blank\\\": false}, {\\\"name\\\": \\\"4\\\", \\\"blank\\\": true}, {\\\"name\\\": \\\"5\\\", \\\"blank\\\": true}]}\",\n      \"lstAlternative\": [\n        {\n          \"id\": 501111,\n          \"description\": \"Norte\",\n          \"path\": \"M108 10 L140 14 L171 18 L186 40 L192 51 L205 62 L205 130 L192 158 L108 168 L73 165 L60 150 L30 145 L14 124 L11 106 L26 94 L39 82 L48 56 L59 38 L80 18 Z\",\n          \"bbox\": \"5 4 206 170\",\n          \"icon\": null\n        },\n        {\n          \"id\": 501122,\n          \"description\": \"Nordeste\",\n          \"path\": \"M205 62 L228 70 L252 74 L272 86 L286 104 L282 124 L272 146 L270 172 L269 199 L206 199 L192 158 L205 130 Z\",\n          \"bbox\": \"186 56 106 149\",\n          \"icon\": null\n        },\n        {\n          \"id\": 501134,\n          \"description\": \"Sudeste\",\n          \"path\": \"M206 199 L269 199 L258 216 L240 231 L216 246 L193 256 L155 240 L196 214 Z\",\n          \"bbox\": \"149 193 126 69\",\n          \"icon\": null\n        },\n        {\n          \"id\": 501145,\n          \"description\": \"Sul\",\n          \"path\": \"M122 248 L155 240 L193 256 L186 274 L172 296 L156 316 L146 328 L130 312 L122 292 L118 268 Z\",\n          \"bbox\": \"112 234 87 100\",\n          \"icon\": null\n        }\n      ],\n      \"conclued\": false,\n      \"board\": {\n        \"id\": 2,\n        \"viewBox\": \"0 0 300 340\",\n        \"slots\": \"[{\\\"name\\\": \\\"1\\\", \\\"path\\\": \\\"M108 10 L140 14 L171 18 L186 40 L192 51 L205 62 L205 130 L192 158 L108 168 L73 165 L60 150 L30 145 L14 124 L11 106 L26 94 L39 82 L48 56 L59 38 L80 18 Z\\\", \\\"bbox\\\": \\\"5 4 206 170\\\"}, {\\\"name\\\": \\\"2\\\", \\\"path\\\": \\\"M205 62 L228 70 L252 74 L272 86 L286 104 L282 124 L272 146 L270 172 L269 199 L206 199 L192 158 L205 130 Z\\\", \\\"bbox\\\": \\\"186 56 106 149\\\"}, {\\\"name\\\": \\\"3\\\", \\\"path\\\": \\\"M108 168 L192 158 L206 199 L196 214 L155 240 L122 248 L108 210 L101 184 Z\\\", \\\"bbox\\\": \\\"95 152 117 102\\\"}, {\\\"name\\\": \\\"4\\\", \\\"path\\\": \\\"M206 199 L269 199 L258 216 L240 231 L216 246 L193 256 L155 240 L196 214 Z\\\", \\\"bbox\\\": \\\"149 193 126 69\\\"}, {\\\"name\\\": \\\"5\\\", \\\"path\\\": \\\"M122 248 L155 240 L193 256 L186 274 L172 296 L156 316 L146 328 L130 312 L122 292 L118 268 Z\\\", \\\"bbox\\\": \\\"112 234 87 100\\\"}]\"\n      }\n    }\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "mapa (DRAG_TO_SLOTS)",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "topicId",
+              "value": "501",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "eff7daf2-4f6a-4f42-858f-129e647a88d0",
+          "body": "{\n  \"resumeQuestionId\": {{add (multiply (urlParam 'topicId') 10) 1}},\n  \"lstQuestions\": [\n    {\n      \"id\": {{add (multiply (urlParam 'topicId') 10) 1}},\n      \"title\": \"Quanto é 4 + 3?\",\n      \"topic\": {{urlParam 'topicId'}},\n      \"level\": 1,\n      \"type\": \"DRAG_DOTS\",\n      \"content\": \"{\\\"teste1\\\": 4, \\\"teste2\\\": 3}\",\n      \"lstAlternative\": [\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 11}}, \"description\": \"6\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 12}}, \"description\": \"7\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 13}}, \"description\": \"8\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 14}}, \"description\": \"9\", \"path\": null, \"bbox\": null, \"icon\": null }\n      ],\n      \"conclued\": false,\n      \"board\": null\n    },\n    {\n      \"id\": {{add (multiply (urlParam 'topicId') 10) 2}},\n      \"title\": \"Quanto é 5 + 2?\",\n      \"topic\": {{urlParam 'topicId'}},\n      \"level\": 2,\n      \"type\": \"DRAG_DOTS\",\n      \"content\": \"{\\\"teste1\\\": 5, \\\"teste2\\\": 2}\",\n      \"lstAlternative\": [\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 21}}, \"description\": \"6\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 22}}, \"description\": \"7\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 23}}, \"description\": \"8\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 24}}, \"description\": \"9\", \"path\": null, \"bbox\": null, \"icon\": null }\n      ],\n      \"conclued\": false,\n      \"board\": null\n    },\n    {\n      \"id\": {{add (multiply (urlParam 'topicId') 10) 3}},\n      \"title\": \"Quanto é 6 + 3?\",\n      \"topic\": {{urlParam 'topicId'}},\n      \"level\": 3,\n      \"type\": \"DRAG_DOTS\",\n      \"content\": \"{\\\"teste1\\\": 6, \\\"teste2\\\": 3}\",\n      \"lstAlternative\": [\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 31}}, \"description\": \"8\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 32}}, \"description\": \"9\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 33}}, \"description\": \"10\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 34}}, \"description\": \"11\", \"path\": null, \"bbox\": null, \"icon\": null }\n      ],\n      \"conclued\": false,\n      \"board\": null\n    }\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "pontos (DRAG_DOTS) - qualquer outro tópico",
           "headers": [],
           "bodyType": "INLINE",
           "filePath": "",
@@ -391,11 +499,131 @@
           "callbacks": []
         },
         {
+          "uuid": "ee72cc76-cc24-468c-bef3-d28ee61d8b23",
+          "body": "{{setVar 'wrongs' ''}}{{#if (bodyRaw 'lstFilledSlots.0')}}{{#unless (eq (modulo (bodyRaw 'lstFilledSlots.0.alternativeId') 10) (parseInt (bodyRaw 'lstFilledSlots.0.name')))}}{{#if (getVar 'wrongs')}}{{setVar 'wrongs' (concat (getVar 'wrongs') ',')}}{{/if}}{{setVar 'wrongs' (concat (getVar 'wrongs') '\"' (bodyRaw 'lstFilledSlots.0.name') '\"')}}{{/unless}}{{/if}}{{#if (bodyRaw 'lstFilledSlots.1')}}{{#unless (eq (modulo (bodyRaw 'lstFilledSlots.1.alternativeId') 10) (parseInt (bodyRaw 'lstFilledSlots.1.name')))}}{{#if (getVar 'wrongs')}}{{setVar 'wrongs' (concat (getVar 'wrongs') ',')}}{{/if}}{{setVar 'wrongs' (concat (getVar 'wrongs') '\"' (bodyRaw 'lstFilledSlots.1.name') '\"')}}{{/unless}}{{/if}}{{#if (bodyRaw 'lstFilledSlots.2')}}{{#unless (eq (modulo (bodyRaw 'lstFilledSlots.2.alternativeId') 10) (parseInt (bodyRaw 'lstFilledSlots.2.name')))}}{{#if (getVar 'wrongs')}}{{setVar 'wrongs' (concat (getVar 'wrongs') ',')}}{{/if}}{{setVar 'wrongs' (concat (getVar 'wrongs') '\"' (bodyRaw 'lstFilledSlots.2.name') '\"')}}{{/unless}}{{/if}}{{#if (bodyRaw 'lstFilledSlots.3')}}{{#unless (eq (modulo (bodyRaw 'lstFilledSlots.3.alternativeId') 10) (parseInt (bodyRaw 'lstFilledSlots.3.name')))}}{{#if (getVar 'wrongs')}}{{setVar 'wrongs' (concat (getVar 'wrongs') ',')}}{{/if}}{{setVar 'wrongs' (concat (getVar 'wrongs') '\"' (bodyRaw 'lstFilledSlots.3.name') '\"')}}{{/unless}}{{/if}}{{#if (bodyRaw 'lstFilledSlots.4')}}{{#unless (eq (modulo (bodyRaw 'lstFilledSlots.4.alternativeId') 10) (parseInt (bodyRaw 'lstFilledSlots.4.name')))}}{{#if (getVar 'wrongs')}}{{setVar 'wrongs' (concat (getVar 'wrongs') ',')}}{{/if}}{{setVar 'wrongs' (concat (getVar 'wrongs') '\"' (bodyRaw 'lstFilledSlots.4.name') '\"')}}{{/unless}}{{/if}}{{#if (bodyRaw 'lstFilledSlots.5')}}{{#unless (eq (modulo (bodyRaw 'lstFilledSlots.5.alternativeId') 10) (parseInt (bodyRaw 'lstFilledSlots.5.name')))}}{{#if (getVar 'wrongs')}}{{setVar 'wrongs' (concat (getVar 'wrongs') ',')}}{{/if}}{{setVar 'wrongs' (concat (getVar 'wrongs') '\"' (bodyRaw 'lstFilledSlots.5.name') '\"')}}{{/unless}}{{/if}}{{#if (bodyRaw 'lstFilledSlots.6')}}{{#unless (eq (modulo (bodyRaw 'lstFilledSlots.6.alternativeId') 10) (parseInt (bodyRaw 'lstFilledSlots.6.name')))}}{{#if (getVar 'wrongs')}}{{setVar 'wrongs' (concat (getVar 'wrongs') ',')}}{{/if}}{{setVar 'wrongs' (concat (getVar 'wrongs') '\"' (bodyRaw 'lstFilledSlots.6.name') '\"')}}{{/unless}}{{/if}}{{#if (bodyRaw 'lstFilledSlots.7')}}{{#unless (eq (modulo (bodyRaw 'lstFilledSlots.7.alternativeId') 10) (parseInt (bodyRaw 'lstFilledSlots.7.name')))}}{{#if (getVar 'wrongs')}}{{setVar 'wrongs' (concat (getVar 'wrongs') ',')}}{{/if}}{{setVar 'wrongs' (concat (getVar 'wrongs') '\"' (bodyRaw 'lstFilledSlots.7.name') '\"')}}{{/unless}}{{/if}}{{#if (bodyRaw 'lstFilledSlots.8')}}{{#unless (eq (modulo (bodyRaw 'lstFilledSlots.8.alternativeId') 10) (parseInt (bodyRaw 'lstFilledSlots.8.name')))}}{{#if (getVar 'wrongs')}}{{setVar 'wrongs' (concat (getVar 'wrongs') ',')}}{{/if}}{{setVar 'wrongs' (concat (getVar 'wrongs') '\"' (bodyRaw 'lstFilledSlots.8.name') '\"')}}{{/unless}}{{/if}}{{#if (bodyRaw 'lstFilledSlots.9')}}{{#unless (eq (modulo (bodyRaw 'lstFilledSlots.9.alternativeId') 10) (parseInt (bodyRaw 'lstFilledSlots.9.name')))}}{{#if (getVar 'wrongs')}}{{setVar 'wrongs' (concat (getVar 'wrongs') ',')}}{{/if}}{{setVar 'wrongs' (concat (getVar 'wrongs') '\"' (bodyRaw 'lstFilledSlots.9.name') '\"')}}{{/unless}}{{/if}}{\n  \"correct\": {{#if (getVar 'wrongs')}}false{{else}}true{{/if}},\n  \"concluded\": {{#if (getVar 'wrongs')}}false{{else}}true{{/if}},\n  \"lstWrongSlots\": [{{{getVar 'wrongs'}}}]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "arrastar pra lugares -> calcula os lugares errados pelo id",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "lstFilledSlots",
+              "value": "",
+              "operator": "null",
+              "invert": true
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
           "uuid": "99cb6406-d480-4b10-9fbe-8e21199b56e5",
           "body": "{\n  \"correct\": false,\n  \"concluded\": false\n}",
           "latency": 0,
           "statusCode": 200,
           "label": "errou",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "f1a06f3b-ae09-42b3-b31e-ffd4a92ac986",
+      "type": "http",
+      "documentation": "Quantas questões o aluno já concluiu, em todas as matérias.",
+      "method": "get",
+      "endpoint": "stats",
+      "responses": [
+        {
+          "uuid": "e5a0fd20-416a-4a60-86fd-8c55ea41bdcd",
+          "body": "12",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "questões concluídas",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "2276b61d-d0a3-4753-bbf8-6b42c12f2191",
+      "type": "http",
+      "documentation": "Quantos tópicos o aluno já concluiu. O :topicId é ignorado pelo backend; o app chama /stats/0.",
+      "method": "get",
+      "endpoint": "stats/:topicId",
+      "responses": [
+        {
+          "uuid": "96e098fc-53b5-4d16-833e-ef04821169b7",
+          "body": "3",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "tópicos concluídos",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "8e22acfa-48a4-408e-b9c8-70814284ac19",
+      "type": "http",
+      "documentation": "Últimas questões tentadas e ainda não concluídas. Lista fixa: o :limit não corta a resposta.",
+      "method": "get",
+      "endpoint": "stats/:limit/unfinished",
+      "responses": [
+        {
+          "uuid": "5a662faf-a474-47c3-84e1-aa2a0cb8ffa7",
+          "body": "[\n  {\n    \"id\": 1012,\n    \"title\": \"Quanto é?\",\n    \"topic\": 101,\n    \"level\": 1,\n    \"type\": \"DRAG_DOTS\",\n    \"content\": \"{\\\"teste1\\\": 2, \\\"teste2\\\": 5}\",\n    \"lstAlternative\": [\n      {\n        \"id\": 10121,\n        \"description\": \"6\",\n        \"path\": null,\n        \"bbox\": null,\n        \"icon\": null\n      },\n      {\n        \"id\": 10122,\n        \"description\": \"7\",\n        \"path\": null,\n        \"bbox\": null,\n        \"icon\": null\n      },\n      {\n        \"id\": 10123,\n        \"description\": \"8\",\n        \"path\": null,\n        \"bbox\": null,\n        \"icon\": null\n      },\n      {\n        \"id\": 10124,\n        \"description\": \"9\",\n        \"path\": null,\n        \"bbox\": null,\n        \"icon\": null\n      }\n    ],\n    \"conclued\": false,\n    \"board\": null\n  },\n  {\n    \"id\": 2011,\n    \"title\": \"Quanto é?\",\n    \"topic\": 201,\n    \"level\": 1,\n    \"type\": \"DRAG_DOTS\",\n    \"content\": \"{\\\"teste1\\\": 1, \\\"teste2\\\": 3}\",\n    \"lstAlternative\": [\n      {\n        \"id\": 20111,\n        \"description\": \"3\",\n        \"path\": null,\n        \"bbox\": null,\n        \"icon\": null\n      },\n      {\n        \"id\": 20112,\n        \"description\": \"4\",\n        \"path\": null,\n        \"bbox\": null,\n        \"icon\": null\n      },\n      {\n        \"id\": 20113,\n        \"description\": \"5\",\n        \"path\": null,\n        \"bbox\": null,\n        \"icon\": null\n      },\n      {\n        \"id\": 20114,\n        \"description\": \"6\",\n        \"path\": null,\n        \"bbox\": null,\n        \"icon\": null\n      }\n    ],\n    \"conclued\": false,\n    \"board\": null\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "questões pendentes",
           "headers": [],
           "bodyType": "INLINE",
           "filePath": "",
@@ -443,6 +671,18 @@
     {
       "type": "route",
       "uuid": "589a63a9-1793-4349-b82d-c126a7d191bc"
+    },
+    {
+      "type": "route",
+      "uuid": "f1a06f3b-ae09-42b3-b31e-ffd4a92ac986"
+    },
+    {
+      "type": "route",
+      "uuid": "2276b61d-d0a3-4753-bbf8-6b42c12f2191"
+    },
+    {
+      "type": "route",
+      "uuid": "8e22acfa-48a4-408e-b9c8-70814284ac19"
     }
   ],
   "proxyMode": false,
