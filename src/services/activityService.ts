@@ -7,11 +7,11 @@ export async function answer(attempt: AttemptAlternativeRequest): Promise<Answer
 }
 
 export async function getTopicsBySubject(subjectId: number): Promise<Array<TopicsResponse>> {
-    const response = await api.get<Array<TopicsResponse>>('/topic/' + subjectId + '/subject');
+    const response = await api.get<Array<TopicsResponse>>('/topics/' + subjectId + '/subject');
     return response.data;
 }
 
 export async function getByTopic(topicId: number): Promise<ActivityResponse>{
-    const response = await api.get<ActivityResponse>('/topic/' + topicId + '/activity');
+    const response = await api.get<ActivityResponse>('/topics/' + topicId + '/activity');
     return response.data;
 }

@@ -43,6 +43,10 @@ const mainStyles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "600",
   },
+  tipButton: {
+    alignSelf: "flex-end",
+    marginBottom: 8,
+  },
 });
 
 export default mainStyles;

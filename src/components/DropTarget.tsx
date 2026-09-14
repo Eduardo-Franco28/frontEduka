@@ -26,14 +26,14 @@ export default function DropTarget({
 }: DropTargetProps) {
   const ref = useRef<View | null>(null);
 
-  const medir = () => {
+  const measure = () => {
     ref.current?.measureInWindow((x, y, width, height) => {
       targets.current[id] = { x, y, width, height };
     });
   };
 
   return (
-    <View ref={ref} collapsable={false} onLayout={medir} style={style}>
+    <View ref={ref} collapsable={false} onLayout={measure} style={style}>
       {children}
     </View>
   );

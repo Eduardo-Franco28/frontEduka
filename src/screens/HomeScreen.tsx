@@ -92,7 +92,7 @@ export default function HomeScreen() {
           <TouchableOpacity
             style={mainStyles.primaryButton}
             activeOpacity={0.85}
-            onPress={() => navigation.navigate("ActivityScreen2", { topicId: 101 })}
+            onPress={() => navigation.navigate("ActivityScreen", { topicId: 101 })}
           >
             <Text style={mainStyles.primaryButtonText}>▶ Continuar jornada</Text>
           </TouchableOpacity>

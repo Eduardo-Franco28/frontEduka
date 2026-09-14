@@ -14,20 +14,15 @@ export type RootStackParamList = {
     subjectId: number;
     subjectName: string;
   };
+  // Uma tela só pra qualquer atividade: ela escolhe o componente pelo tipo
+  // de cada questão.
   ActivityScreen: {
     topicId: number
   };
-  ActivityScreen2: {
-    topicId: number
-  };
-  ActivityScreen3: {
-    topicId: number
-  };
-  ActivityScreen4: {
-    topicId: number
-  };
-  ActivityScreen5: {
-    topicId: number
+  ResultScreen: {
+    topicId: number;
+    subjectId?: number;
+    subjectName?: string;
   };
   EditProfileScreen: undefined
   ChangePasswordScreen: undefined

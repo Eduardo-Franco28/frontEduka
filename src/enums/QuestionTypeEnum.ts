@@ -1,4 +1,6 @@
-export enum QuestionType{
-    DRAG_DOTS,
-    DRAG_TO_SLOTS
+export enum QuestionType {
+  DRAG_DOTS = "DRAG_DOTS",
+  DRAG_TO_SLOTS = "DRAG_TO_SLOTS",
+  DRAG_LETTERS = "DRAG_LETTERS",
+  DRAG_SLOTS_TO_GROUP = "DRAG_SLOTS_TO_GROUP",
 }

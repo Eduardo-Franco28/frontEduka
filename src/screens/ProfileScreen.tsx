@@ -14,12 +14,31 @@ import useAuth from "../hooks/useAuth";
 import useAppNavigation from "../hooks/useNavigation";
 import useTheme from "../hooks/useTheme";
 import Header from "../components/Header";
+import useProgress from "../hooks/useProgress";
+import { useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function ProfileScreen() {
   const { logOut, user } = useAuth();
   const { colors, fontScale, isDark } = useTheme();
 
   const navigation = useAppNavigation();
+
+  const {
+    getConcludedQuestions,
+    getConcludedTopics,
+    concludedQuestions,
+    concludedTopics,
+  } = useProgress();
+
+  // Busca de novo toda vez que a tela aparece: a criança pode ter concluído
+  // uma atividade e voltado pro perfil, e o número tem que acompanhar.
+  useFocusEffect(
+    useCallback(() => {
+      getConcludedQuestions();
+      getConcludedTopics();
+    }, []),
+  );
 
   const handleLogOut = async () => {
     await logOut();
@@ -66,35 +85,34 @@ export default function ProfileScreen() {
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
+          {/* Sequência — a ofensiva ainda não existe no backend */}
           <View style={[styles.statCard, { backgroundColor: colors.CARD }]}>
-            <Text style={[styles.statValue, { color: colors.PRIMARY_LIGHT, fontSize: 22 * fontScale }]}>
-              24
-            </Text>
+            <View style={styles.statValueRow}>
+              <Text style={[styles.statValue, { color: colors.WARNING, fontSize: 22 * fontScale }]}>
+                0
+              </Text>
+              <Text style={{ fontSize: 20 * fontScale }}>🔥</Text>
+            </View>
             <Text style={[styles.statLabel, { color: colors.TEXT_MUTED, fontSize: 11 * fontScale }]}>
-              ESTRELAS
+              Sequência
             </Text>
           </View>
+
           <View style={[styles.statCard, { backgroundColor: colors.CARD }]}>
-            <Text style={[styles.statValue, { color: colors.TEXT_PRIMARY, fontSize: 22 * fontScale }]}>
-              12
+            <Text style={[styles.statValue, { color: colors.SUCCESS, fontSize: 22 * fontScale }]}>
+              {concludedQuestions}
             </Text>
             <Text style={[styles.statLabel, { color: colors.TEXT_MUTED, fontSize: 11 * fontScale }]}>
               ATIVIDADES
             </Text>
           </View>
+
           <View style={[styles.statCard, { backgroundColor: colors.CARD }]}>
-            <View style={styles.statValueRow}>
-              <Text style={[styles.statValue, { color: colors.WARNING, fontSize: 22 * fontScale }]}>
-                3
-              </Text>
-              <FontAwesomeFreeSolid
-                name="fire"
-                size={18 * fontScale}
-                color={colors.WARNING}
-              />
-            </View>
+            <Text style={[styles.statValue, { color: colors.PRIMARY_LIGHT, fontSize: 22 * fontScale }]}>
+              {concludedTopics}
+            </Text>
             <Text style={[styles.statLabel, { color: colors.TEXT_MUTED, fontSize: 11 * fontScale }]}>
-              DIAS
+              Tópicos
             </Text>
           </View>
         </View>

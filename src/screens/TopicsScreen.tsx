@@ -76,7 +76,7 @@ export default function TopicsScreen() {
   const handleActivity = (id: number) => {
     if (id === null) return;
 
-    navigation.navigate("ActivityScreen4", { topicId: id });
+    navigation.navigate("ActivityScreen", { topicId: id });
   };
 
   if (loading) {
@@ -99,7 +99,10 @@ export default function TopicsScreen() {
           <View
             style={[
               styles.headerIconBox,
-              { borderColor: subjectVisual.color, backgroundColor: colors.CARD },
+              {
+                borderColor: subjectVisual.color,
+                backgroundColor: colors.CARD,
+              },
             ]}
           >
             <FontAwesomeFreeSolid
@@ -142,7 +145,9 @@ export default function TopicsScreen() {
             { color: colors.TEXT_SUBTLE, fontSize: 15 * fontScale },
           ]}
         >
-          {hasConcluded ? "Ótimo trabalho, continue assim!" : "Hora de aprender!"}
+          {hasConcluded
+            ? "Ótimo trabalho, continue assim!"
+            : "Hora de aprender!"}
         </Text>
 
         <Text
