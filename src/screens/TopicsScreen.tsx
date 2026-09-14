@@ -76,7 +76,7 @@ export default function TopicsScreen() {
   const handleActivity = (id: number) => {
     if (id === null) return;
 
-    navigation.navigate("ActivityScreen5", { topicId: id });
+    navigation.navigate("ActivityScreen", { topicId: id });
   };
 
   if (loading) {

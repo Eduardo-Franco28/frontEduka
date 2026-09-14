@@ -11,7 +11,7 @@ export default function ResultScreen() {
   const route = useRoute<RouteProp<RootStackParamList, "ResultScreen">>();
   const { colors, fontScale } = useTheme();
 
-  const { topicId, subjectId, subjectName, activityRoute } = route.params;
+  const { topicId, subjectId, subjectName } = route.params;
 
   // Tópico terminado: o histórico é limpo para o aluno não voltar com o gesto
   // e cair de novo na última questão, que já foi respondida.
@@ -27,15 +27,10 @@ export default function ResultScreen() {
     navigation.reset({ index: 0, routes: [{ name: "HomeScreen" }] });
   };
 
-  // Sem `activityRoute` não dá para saber qual das telas de atividade abrir,
-  // então cai no voltar comum.
+  // Toda atividade abre pela mesma tela, então tentar de novo é sempre ela.
+  // `replace` pra não empilhar o resultado por baixo da atividade nova.
   const handleRetry = () => {
-    if (activityRoute) {
-      navigation.replace(activityRoute, { topicId });
-      return;
-    }
-
-    if (navigation.canGoBack()) navigation.goBack();
+    navigation.replace("ActivityScreen", { topicId });
   };
 
   return (
