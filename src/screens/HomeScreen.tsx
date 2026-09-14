@@ -1,15 +1,32 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { useState, useEffect } from "react";
 import useAppNavigation from "../hooks/useNavigation";
 import mainStyles from "../styles/theme";
 import TabBar from "../components/TabBar";
+import CarrosselMaterias from "../components/CarrosselMaterias";
 import useAuth from "../hooks/useAuth";
 import useTheme from "../hooks/useTheme";
+import { listarMateriasAtividadeDoDia } from "../services/api";
 
 export default function HomeScreen() {
   const navigation = useAppNavigation();
   const { colors, fontScale } = useTheme();
 
   const user = useAuth();
+
+  const [materias, setMaterias] = useState([]);
+
+  useEffect(() => {
+    async function carregar() {
+      try {
+        const dados = await listarMateriasAtividadeDoDia(user.token);
+        setMaterias(dados);
+      } catch (erro) {
+        console.log("Erro ao carregar matérias:", erro.message);
+      }
+    }
+    carregar();
+  }, []);
 
   return (
     <View style={[mainStyles.component, { backgroundColor: colors.BG_APP }]}>
@@ -43,30 +60,13 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Daily Activity Card */}
-        <View style={[styles.dailyCard, { backgroundColor: colors.PRIMARY_LIGHT }]}>
-          <Text style={[styles.dailyLabel, { fontSize: 12 * fontScale }]}>ATIVIDADE DO DIA</Text>
-
-          <View style={styles.dailySubject}>
-            <View style={styles.dailyIconBox}>
-              <Text style={styles.dailyIcon}>📐</Text>
-            </View>
-            <View>
-              <Text style={[styles.dailySubjectName, { fontSize: 20 * fontScale }]}>Matemática</Text>
-              <Text style={[styles.dailySubjectDesc, { fontSize: 14 * fontScale }]}>Contagem de objetos</Text>
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={[styles.dailyButton, { backgroundColor: colors.CARD }]}
-            activeOpacity={0.85}
-            onPress={() => navigation.navigate("SubjectsScreen")}
-          >
-            <Text style={[styles.dailyButtonText, { color: colors.PRIMARY_LIGHT, fontSize: 17 * fontScale }]}>
-              ▶ Continuar matérias
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Daily Activity Carousel */}
+        <CarrosselMaterias
+          materias={materias}
+          colors={colors}
+          fontScale={fontScale}
+          onPressMateria={(item) => navigation.navigate("SubjectsScreen", { materiaId: item.id })}
+        />
 
         {/* Continue studying */}
         <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY, fontSize: 18 * fontScale }]}>
@@ -138,56 +138,6 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontWeight: "500",
-  },
-
-  // Daily Activity Card
-  dailyCard: {
-    height: 280,
-    borderRadius: 22,
-    padding: 20,
-    marginBottom: 24,
-  },
-  dailyLabel: {
-    fontWeight: "700",
-    color: "rgba(255,255,255,0.7)",
-    letterSpacing: 1.2,
-    marginBottom: 34,
-  },
-  dailySubject: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    marginBottom: 20,
-  },
-  dailyIconBox: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dailyIcon: {
-    fontSize: 26,
-  },
-  dailySubjectName: {
-    fontWeight: "700",
-    color: "#fff",
-    marginBottom: 3,
-  },
-  dailySubjectDesc: {
-    color: "rgba(255,255,255,0.75)",
-  },
-  dailyButton: {
-    width: "100%",
-    height: 60,
-    borderRadius: 26,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: "auto",
-  },
-  dailyButtonText: {
-    fontWeight: "700",
   },
 
   // Section title
