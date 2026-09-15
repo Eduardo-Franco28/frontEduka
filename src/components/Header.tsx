@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import useTheme from "../hooks/useTheme";
 import BackButton from "./BackButton";
+import useTheme from "../hooks/useTheme";
 
 interface HeaderProps {
   title?: string;
@@ -20,17 +20,13 @@ export default function Header({
 
   return (
     <View style={styles.header}>
-      {showBack ? (
-        <BackButton onPress={onBack} />
-      ) : (
-        <View style={styles.side} />
-      )}
+      {showBack ? <BackButton onPress={onBack} /> : <View style={styles.side} />}
 
       {title ? (
         <Text
           style={[
             styles.headerTitle,
-            { color: colors.TEXT_PRIMARY, fontSize: 18 * fontScale },
+            { color: colors.TEXT_PRIMARY, fontSize: 20 * fontScale },
           ]}
         >
           {title}
@@ -52,10 +48,11 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   headerTitle: {
-    fontWeight: "700",
+    fontWeight: "800",
+    letterSpacing: -0.3,
   },
   // Espaçador do mesmo tamanho do botão: é o que mantém o título no centro.
   side: {
-    width: 40,
+    width: 36,
   },
 });

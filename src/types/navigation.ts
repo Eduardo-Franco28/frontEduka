@@ -27,4 +27,5 @@ export type RootStackParamList = {
   EditProfileScreen: undefined
   ChangePasswordScreen: undefined
   AccessibilityScreen: undefined
+  AchievementsScreen: undefined
 };

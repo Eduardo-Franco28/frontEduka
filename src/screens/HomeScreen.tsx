@@ -1,15 +1,51 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 import useAppNavigation from "../hooks/useNavigation";
 import mainStyles from "../styles/theme";
 import TabBar from "../components/TabBar";
+import SubjectCarousel from "../components/SubjectCarousel";
+import ErrorMessage from "../components/ErrorMessage";
 import useAuth from "../hooks/useAuth";
 import useTheme from "../hooks/useTheme";
+import useSubjectProgress, { SubjectWithProgress } from "../hooks/useSubjectProgress";
+import useProgress from "../hooks/useProgress";
 
 export default function HomeScreen() {
   const navigation = useAppNavigation();
   const { colors, fontScale } = useTheme();
+  const { user } = useAuth();
 
-  const user = useAuth();
+  const { getAll, subjects, error } = useSubjectProgress();
+  const {
+    getConcludedQuestions,
+    getConcludedTopics,
+    concludedQuestions,
+    concludedTopics,
+  } = useProgress();
+
+  // Recarrega sempre que a tela volta ao foco: o aluno pode ter concluído uma
+  // atividade e voltado pra Home, e os números têm que acompanhar.
+  useFocusEffect(
+    useCallback(() => {
+      getAll();
+      getConcludedQuestions();
+      getConcludedTopics();
+    }, []),
+  );
+
+  const handleSelectSubject = (item: SubjectWithProgress) => {
+    // Com tópico pendente vai direto para a atividade; sem ele, mostra a lista.
+    if (item.currentTopic) {
+      navigation.navigate("ActivityScreen", { topicId: item.currentTopic.id });
+      return;
+    }
+    navigation.navigate("TopicsScreen", {
+      subjectId: item.id,
+      subjectName: item.name,
+    });
+  };
 
   return (
     <View style={[mainStyles.component, { backgroundColor: colors.BG_APP }]}>
@@ -35,7 +71,7 @@ export default function HomeScreen() {
 
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: colors.TEXT_PRIMARY, fontSize: 22 * fontScale }]}>
-              Olá! {user.user?.nome} 👋
+              Olá {user?.nome} 👋
             </Text>
             <Text style={[styles.headerSubtitle, { color: colors.TEXT_MUTED, fontSize: 14 * fontScale }]}>
               Animado para aprender hoje?
@@ -43,58 +79,64 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Daily Activity Card */}
-        <View style={[styles.dailyCard, { backgroundColor: colors.PRIMARY_LIGHT }]}>
-          <Text style={[styles.dailyLabel, { fontSize: 12 * fontScale }]}>ATIVIDADE DO DIA</Text>
+        <ErrorMessage message={error} />
 
-          <View style={styles.dailySubject}>
-            <View style={styles.dailyIconBox}>
-              <Text style={styles.dailyIcon}>📐</Text>
-            </View>
-            <View>
-              <Text style={[styles.dailySubjectName, { fontSize: 20 * fontScale }]}>Matemática</Text>
-              <Text style={[styles.dailySubjectDesc, { fontSize: 14 * fontScale }]}>Contagem de objetos</Text>
-            </View>
-          </View>
+        <SubjectCarousel subjects={subjects} onPressSubject={handleSelectSubject} />
 
-          <TouchableOpacity
-            style={[styles.dailyButton, { backgroundColor: colors.CARD }]}
-            activeOpacity={0.85}
-            onPress={() => navigation.navigate("SubjectsScreen")}
-          >
-            <Text style={[styles.dailyButtonText, { color: colors.PRIMARY_LIGHT, fontSize: 17 * fontScale }]}>
-              ▶ Continuar matérias
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Continue studying */}
+        {/* Progresso */}
         <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY, fontSize: 18 * fontScale }]}>
-          Continue seus estudos
+          Seu progresso
         </Text>
 
         <View
           style={[
-            styles.continueCard,
+            styles.progressCard,
             { backgroundColor: colors.CARD, borderColor: colors.BORDER_LIGHT },
           ]}
         >
-          <View style={styles.continueTop}>
-            <View style={[styles.continueIconBox, { backgroundColor: colors.BG_WARM }]}>
-              <Text style={styles.continueIcon}>📚</Text>
+          <View style={styles.progressTop}>
+            <View style={styles.statsColumn}>
+              <View style={[styles.statBox, { backgroundColor: colors.SURFACE_GREEN }]}>
+                <Text style={[styles.statValue, { color: colors.SUCCESS, fontSize: 26 * fontScale }]}>
+                  {concludedQuestions}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.TEXT_SUBTLE, fontSize: 12 * fontScale }]}>
+                  atividades{"\n"}concluídas
+                </Text>
+              </View>
+
+              <View style={[styles.statBox, { backgroundColor: colors.SURFACE_PRIMARY }]}>
+                <Text style={[styles.statValue, { color: colors.PRIMARY, fontSize: 26 * fontScale }]}>
+                  {concludedTopics}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.TEXT_SUBTLE, fontSize: 12 * fontScale }]}>
+                  tópicos{"\n"}concluídos
+                </Text>
+              </View>
             </View>
-            <View style={styles.continueMascotBox}>
-              <Image source={require("../../assets/mascoteBracoCruzado.png")} style={styles.continueMascotEmoji} />
-            </View>
-            <View></View>
+
+            <Image
+              source={require("../../assets/mascoteBracoCruzado.png")}
+              style={styles.mascot}
+            />
           </View>
 
           <TouchableOpacity
-            style={mainStyles.primaryButton}
+            style={[styles.achievementsButton, { backgroundColor: colors.SURFACE_YELLOW }]}
             activeOpacity={0.85}
-            onPress={() => navigation.navigate("ActivityScreen", { topicId: 101 })}
+            accessibilityRole="button"
+            accessibilityLabel="Ver conquistas"
+            onPress={() => navigation.navigate("AchievementsScreen")}
           >
-            <Text style={mainStyles.primaryButtonText}>▶ Continuar jornada</Text>
+            <FontAwesomeFreeSolid name="trophy" size={16} color={colors.WARNING} />
+            <Text
+              style={[
+                styles.achievementsText,
+                { color: colors.WARNING, fontSize: 16 * fontScale },
+              ]}
+            >
+              Ver conquistas
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -140,95 +182,62 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  // Daily Activity Card
-  dailyCard: {
-    height: 280,
-    borderRadius: 22,
-    padding: 20,
-    marginBottom: 24,
-  },
-  dailyLabel: {
-    fontWeight: "700",
-    color: "rgba(255,255,255,0.7)",
-    letterSpacing: 1.2,
-    marginBottom: 34,
-  },
-  dailySubject: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    marginBottom: 20,
-  },
-  dailyIconBox: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dailyIcon: {
-    fontSize: 26,
-  },
-  dailySubjectName: {
-    fontWeight: "700",
-    color: "#fff",
-    marginBottom: 3,
-  },
-  dailySubjectDesc: {
-    color: "rgba(255,255,255,0.75)",
-  },
-  dailyButton: {
-    width: "100%",
-    height: 60,
-    borderRadius: 26,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: "auto",
-  },
-  dailyButtonText: {
-    fontWeight: "700",
-  },
-
   // Section title
   sectionTitle: {
     fontWeight: "700",
     marginBottom: 12,
   },
 
-  // Continue Card
-  continueCard: {
-    height: 280,
+  // Progresso
+  progressCard: {
     borderRadius: 22,
     padding: 16,
     marginBottom: 10,
     borderWidth: 2,
   },
-  continueTop: {
+  progressTop: {
     flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-    marginBottom: 16,
-    minHeight: 100,
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 14,
   },
-  continueIconBox: {
-    width: 52,
+  statsColumn: {
+    flex: 1,
+    gap: 10,
+  },
+  statBox: {
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  statValue: {
+    fontWeight: "800",
+    minWidth: 38,
+  },
+  statLabel: {
+    flex: 1,
+    fontWeight: "600",
+    lineHeight: 15,
+  },
+  mascot: {
+    width: 110,
+    height: 130,
+    resizeMode: "contain",
+  },
+
+  achievementsButton: {
+    width: "100%",
     height: 52,
-    borderRadius: 14,
+    borderRadius: 24,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    alignSelf: "flex-start",
+    gap: 10,
   },
-  continueIcon: {
-    fontSize: 26,
-  },
-  continueMascotBox: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 38,
-  },
-  continueMascotEmoji: {
-    width: 150,
-    height: 170,
+  achievementsText: {
+    fontWeight: "700",
   },
 });

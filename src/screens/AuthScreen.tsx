@@ -3,8 +3,10 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from "react-native";
 import { useState } from "react";
 import { useRoute, RouteProp } from "@react-navigation/native";
@@ -95,8 +97,15 @@ export default function AuthScreen() {
   };
 
   return (
-    <View style={mainStyles.component}>
-      <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={mainStyles.component}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.headerContainer}>
           <Image
             source={require("../../assets/mascoteFeliz.png")}
@@ -185,16 +194,16 @@ export default function AuthScreen() {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 24,
+    paddingVertical: 24,
     justifyContent: "center",
   },
   title: {
@@ -238,7 +247,7 @@ const styles = StyleSheet.create({
   },
   rodapeTexto: {
     fontSize: 14,
-    color: "#000",
+    color: COLORS.TEXT_DARK,
   },
   rodapeLink: {
     fontSize: 14,
