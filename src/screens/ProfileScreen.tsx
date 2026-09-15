@@ -119,7 +119,11 @@ export default function ProfileScreen() {
 
         {/* Menu Card */}
         <View style={[styles.menuCard, { backgroundColor: colors.CARD }]}>
-          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate("AchievementsScreen")}
+          >
             <FontAwesomeFreeSolid
               name="trophy"
               size={19 * fontScale}

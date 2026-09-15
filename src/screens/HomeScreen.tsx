@@ -1,32 +1,51 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { useState, useEffect } from "react";
+import { useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 import useAppNavigation from "../hooks/useNavigation";
 import mainStyles from "../styles/theme";
 import TabBar from "../components/TabBar";
-import CarrosselMaterias from "../components/CarrosselMaterias";
+import SubjectCarousel from "../components/SubjectCarousel";
+import ErrorMessage from "../components/ErrorMessage";
 import useAuth from "../hooks/useAuth";
 import useTheme from "../hooks/useTheme";
-import { listarMateriasAtividadeDoDia } from "../services/api";
+import useSubjectProgress, { SubjectWithProgress } from "../hooks/useSubjectProgress";
+import useProgress from "../hooks/useProgress";
 
 export default function HomeScreen() {
   const navigation = useAppNavigation();
   const { colors, fontScale } = useTheme();
+  const { user } = useAuth();
 
-  const user = useAuth();
+  const { getAll, subjects, error } = useSubjectProgress();
+  const {
+    getConcludedQuestions,
+    getConcludedTopics,
+    concludedQuestions,
+    concludedTopics,
+  } = useProgress();
 
-  const [materias, setMaterias] = useState([]);
+  // Recarrega sempre que a tela volta ao foco: o aluno pode ter concluído uma
+  // atividade e voltado pra Home, e os números têm que acompanhar.
+  useFocusEffect(
+    useCallback(() => {
+      getAll();
+      getConcludedQuestions();
+      getConcludedTopics();
+    }, []),
+  );
 
-  useEffect(() => {
-    async function carregar() {
-      try {
-        const dados = await listarMateriasAtividadeDoDia(user.token);
-        setMaterias(dados);
-      } catch (erro) {
-        console.log("Erro ao carregar matérias:", erro.message);
-      }
+  const handleSelectSubject = (item: SubjectWithProgress) => {
+    // Com tópico pendente vai direto para a atividade; sem ele, mostra a lista.
+    if (item.currentTopic) {
+      navigation.navigate("ActivityScreen", { topicId: item.currentTopic.id });
+      return;
     }
-    carregar();
-  }, []);
+    navigation.navigate("TopicsScreen", {
+      subjectId: item.id,
+      subjectName: item.name,
+    });
+  };
 
   return (
     <View style={[mainStyles.component, { backgroundColor: colors.BG_APP }]}>
@@ -52,7 +71,7 @@ export default function HomeScreen() {
 
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: colors.TEXT_PRIMARY, fontSize: 22 * fontScale }]}>
-              Olá! {user.user?.nome} 👋
+              Olá {user?.nome} 👋
             </Text>
             <Text style={[styles.headerSubtitle, { color: colors.TEXT_MUTED, fontSize: 14 * fontScale }]}>
               Animado para aprender hoje?
@@ -60,41 +79,64 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Daily Activity Carousel */}
-        <CarrosselMaterias
-          materias={materias}
-          colors={colors}
-          fontScale={fontScale}
-          onPressMateria={(item) => navigation.navigate("SubjectsScreen", { materiaId: item.id })}
-        />
+        <ErrorMessage message={error} />
 
-        {/* Continue studying */}
+        <SubjectCarousel subjects={subjects} onPressSubject={handleSelectSubject} />
+
+        {/* Progresso */}
         <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY, fontSize: 18 * fontScale }]}>
-          Continue seus estudos
+          Seu progresso
         </Text>
 
         <View
           style={[
-            styles.continueCard,
+            styles.progressCard,
             { backgroundColor: colors.CARD, borderColor: colors.BORDER_LIGHT },
           ]}
         >
-          <View style={styles.continueTop}>
-            <View style={[styles.continueIconBox, { backgroundColor: colors.BG_WARM }]}>
-              <Text style={styles.continueIcon}>📚</Text>
+          <View style={styles.progressTop}>
+            <View style={styles.statsColumn}>
+              <View style={[styles.statBox, { backgroundColor: colors.SURFACE_GREEN }]}>
+                <Text style={[styles.statValue, { color: colors.SUCCESS, fontSize: 26 * fontScale }]}>
+                  {concludedQuestions}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.TEXT_SUBTLE, fontSize: 12 * fontScale }]}>
+                  atividades{"\n"}concluídas
+                </Text>
+              </View>
+
+              <View style={[styles.statBox, { backgroundColor: colors.SURFACE_PRIMARY }]}>
+                <Text style={[styles.statValue, { color: colors.PRIMARY, fontSize: 26 * fontScale }]}>
+                  {concludedTopics}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.TEXT_SUBTLE, fontSize: 12 * fontScale }]}>
+                  tópicos{"\n"}concluídos
+                </Text>
+              </View>
             </View>
-            <View style={styles.continueMascotBox}>
-              <Image source={require("../../assets/mascoteBracoCruzado.png")} style={styles.continueMascotEmoji} />
-            </View>
-            <View></View>
+
+            <Image
+              source={require("../../assets/mascoteBracoCruzado.png")}
+              style={styles.mascot}
+            />
           </View>
 
           <TouchableOpacity
-            style={mainStyles.primaryButton}
+            style={[styles.achievementsButton, { backgroundColor: colors.SURFACE_YELLOW }]}
             activeOpacity={0.85}
-            onPress={() => navigation.navigate("ActivityScreen", { topicId: 101 })}
+            accessibilityRole="button"
+            accessibilityLabel="Ver conquistas"
+            onPress={() => navigation.navigate("AchievementsScreen")}
           >
-            <Text style={mainStyles.primaryButtonText}>▶ Continuar jornada</Text>
+            <FontAwesomeFreeSolid name="trophy" size={16} color={colors.WARNING} />
+            <Text
+              style={[
+                styles.achievementsText,
+                { color: colors.WARNING, fontSize: 16 * fontScale },
+              ]}
+            >
+              Ver conquistas
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -146,39 +188,56 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  // Continue Card
-  continueCard: {
-    height: 280,
+  // Progresso
+  progressCard: {
     borderRadius: 22,
     padding: 16,
     marginBottom: 10,
     borderWidth: 2,
   },
-  continueTop: {
+  progressTop: {
     flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-    marginBottom: 16,
-    minHeight: 100,
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 14,
   },
-  continueIconBox: {
-    width: 52,
+  statsColumn: {
+    flex: 1,
+    gap: 10,
+  },
+  statBox: {
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  statValue: {
+    fontWeight: "800",
+    minWidth: 38,
+  },
+  statLabel: {
+    flex: 1,
+    fontWeight: "600",
+    lineHeight: 15,
+  },
+  mascot: {
+    width: 110,
+    height: 130,
+    resizeMode: "contain",
+  },
+
+  achievementsButton: {
+    width: "100%",
     height: 52,
-    borderRadius: 14,
+    borderRadius: 24,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    alignSelf: "flex-start",
+    gap: 10,
   },
-  continueIcon: {
-    fontSize: 26,
-  },
-  continueMascotBox: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 38,
-  },
-  continueMascotEmoji: {
-    width: 150,
-    height: 170,
+  achievementsText: {
+    fontWeight: "700",
   },
 });
