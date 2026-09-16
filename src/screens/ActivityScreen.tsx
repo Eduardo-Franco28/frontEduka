@@ -15,6 +15,7 @@ import DotsActivity from "../activities/DotsActivity";
 import ShapesActivity from "../activities/ShapesActivity";
 import LettersActivity from "../activities/LettersActivity";
 import GroupsActivity from "../activities/GroupsActivity";
+import SubtractionActivity from "../activities/SubtractionActivity";
 
 /**
  * A tela de qualquer tópico.
@@ -99,6 +100,9 @@ export default function ActivityScreen() {
 
     if (question.type === QuestionType.DRAG_SLOTS_TO_GROUP)
       return <GroupsActivity key={question.id} {...props} />;
+
+    if (question.type === QuestionType.DRAG_SUBTRACTION)
+      return <SubtractionActivity key={question.id} {...props} />;
 
     // Tipo que ainda não tem componente: avisa em vez de quebrar.
     return (
