@@ -414,6 +414,33 @@
           "callbacks": []
         },
         {
+          "uuid": "609c6003-edda-49fe-99e2-797c08dec6e0",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "subtracao (DRAG_SUBTRACTION)",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "topicId",
+              "value": "102",
+              "operator": "equals",
+              "invert": false
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": [],
+          "body": "{\n  \"resumeQuestionId\": 1021,\n  \"lstQuestions\": [\n    {\n      \"id\": 1021,\n      \"title\": \"Se você dá 3 maçãs para o amigo Theo, quantas sobram?\",\n      \"topic\": 102,\n      \"level\": 1,\n      \"type\": \"DRAG_SUBTRACTION\",\n      \"content\": \"{\\\"total\\\": 8, \\\"asked\\\": 3, \\\"item\\\": \\\"🍎\\\", \\\"friend\\\": \\\"Theo\\\"}\",\n      \"lstAlternative\": [\n        {\n          \"id\": 102112,\n          \"description\": \"5\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        },\n        {\n          \"id\": 102113,\n          \"description\": \"3\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        },\n        {\n          \"id\": 102114,\n          \"description\": \"11\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        }\n      ],\n      \"conclued\": false,\n      \"board\": null\n    },\n    {\n      \"id\": 1022,\n      \"title\": \"Se você dá 2 bananas para o amigo Theo, quantas sobram?\",\n      \"topic\": 102,\n      \"level\": 2,\n      \"type\": \"DRAG_SUBTRACTION\",\n      \"content\": \"{\\\"total\\\": 6, \\\"asked\\\": 2, \\\"item\\\": \\\"🍌\\\", \\\"friend\\\": \\\"Theo\\\"}\",\n      \"lstAlternative\": [\n        {\n          \"id\": 102232,\n          \"description\": \"4\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        },\n        {\n          \"id\": 102233,\n          \"description\": \"8\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        },\n        {\n          \"id\": 102235,\n          \"description\": \"6\",\n          \"path\": null,\n          \"bbox\": null,\n          \"icon\": null\n        }\n      ],\n      \"conclued\": false,\n      \"board\": null\n    }\n  ]\n}"
+        },
+        {
           "uuid": "eff7daf2-4f6a-4f42-858f-129e647a88d0",
           "body": "{\n  \"resumeQuestionId\": {{add (multiply (urlParam 'topicId') 10) 1}},\n  \"lstQuestions\": [\n    {\n      \"id\": {{add (multiply (urlParam 'topicId') 10) 1}},\n      \"title\": \"Quanto é 4 + 3?\",\n      \"topic\": {{urlParam 'topicId'}},\n      \"level\": 1,\n      \"type\": \"DRAG_DOTS\",\n      \"content\": \"{\\\"teste1\\\": 4, \\\"teste2\\\": 3}\",\n      \"lstAlternative\": [\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 11}}, \"description\": \"6\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 12}}, \"description\": \"7\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 13}}, \"description\": \"8\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 14}}, \"description\": \"9\", \"path\": null, \"bbox\": null, \"icon\": null }\n      ],\n      \"conclued\": false,\n      \"board\": null\n    },\n    {\n      \"id\": {{add (multiply (urlParam 'topicId') 10) 2}},\n      \"title\": \"Quanto é 5 + 2?\",\n      \"topic\": {{urlParam 'topicId'}},\n      \"level\": 2,\n      \"type\": \"DRAG_DOTS\",\n      \"content\": \"{\\\"teste1\\\": 5, \\\"teste2\\\": 2}\",\n      \"lstAlternative\": [\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 21}}, \"description\": \"6\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 22}}, \"description\": \"7\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 23}}, \"description\": \"8\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 24}}, \"description\": \"9\", \"path\": null, \"bbox\": null, \"icon\": null }\n      ],\n      \"conclued\": false,\n      \"board\": null\n    },\n    {\n      \"id\": {{add (multiply (urlParam 'topicId') 10) 3}},\n      \"title\": \"Quanto é 6 + 3?\",\n      \"topic\": {{urlParam 'topicId'}},\n      \"level\": 3,\n      \"type\": \"DRAG_DOTS\",\n      \"content\": \"{\\\"teste1\\\": 6, \\\"teste2\\\": 3}\",\n      \"lstAlternative\": [\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 31}}, \"description\": \"8\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 32}}, \"description\": \"9\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 33}}, \"description\": \"10\", \"path\": null, \"bbox\": null, \"icon\": null },\n        { \"id\": {{add (multiply (urlParam 'topicId') 100) 34}}, \"description\": \"11\", \"path\": null, \"bbox\": null, \"icon\": null }\n      ],\n      \"conclued\": false,\n      \"board\": null\n    }\n  ]\n}",
           "latency": 0,

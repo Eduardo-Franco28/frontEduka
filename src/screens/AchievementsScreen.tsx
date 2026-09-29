@@ -346,6 +346,9 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontWeight: "500",
   },
+  bold: {
+    fontWeight: "800",
+  },
   nextCard: {
     flexDirection: "row",
     alignItems: "center",

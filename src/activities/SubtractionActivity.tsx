@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 import mainStyles from "../styles/theme";
 import { COLORS } from "../styles/colors";
 import TipButton from "../components/TipButton";
@@ -9,12 +10,12 @@ import useDragAndDrop from "../hooks/useDragAndDrop";
 import { ActivityProps } from "../types/activity";
 
 /**
- * DRAG_SUBTRACTION — subtrair entregando itens ao mascote.
+ * DRAG_SUBTRACTION — subtrair entregando itens a um amigo.
  *
  * Recebe UMA questão pronta da ActivityScreen. Não busca nada, não troca de
  * questão e não navega.
  *
- * A criança tem `total` itens e o mascote pede `asked`. Ela arrasta os itens
+ * A criança tem `total` itens e o amigo pede `asked`. Ela arrasta os itens
  * pedidos até ele e conta os que ficaram na cesta — esse é o resultado.
  *
  * Duas coisas diferentes das outras atividades:
@@ -24,17 +25,22 @@ import { ActivityProps } from "../types/activity";
  *
  * 2. O NÚMERO QUE SOBRA NUNCA APARECE ESCRITO. Os itens restantes ficam na
  *    cesta pra criança contar. É o exercício, não uma informação a esconder.
+ *
+ * A área de entrega é um alvo só, embora mostre um círculo por item pedido:
+ * alvo grande é mais fácil de acertar, e os círculos enchem em ordem.
  */
 
-const MASCOT_SLOT = "mascote";
+const DELIVERY_SLOT = "entrega";
 
 interface SubtractionContent {
   /** Quantos itens a criança tem no começo. */
   total: number;
-  /** Quantos o mascote pede. */
+  /** Quantos o amigo pede. */
   asked: number;
   /** Emoji do item. Sem ele, usa maçã. */
   item?: string;
+  /** Nome do amigo que pede. Sem ele, usa o mascote sem nome. */
+  friend?: string;
 }
 
 export default function SubtractionActivity({
@@ -52,7 +58,8 @@ export default function SubtractionActivity({
   const alternatives = question.lstAlternative ?? [];
 
   const item = content.item ?? "🍎";
-  const isComplete = placedCount === content.asked;
+  const friend = content.friend ?? "Amigo";
+  const isComplete = placedCount >= content.asked;
 
   const handleConfirm = async () => {
     if (alternativeId === null) return;
@@ -73,32 +80,59 @@ export default function SubtractionActivity({
       <Text style={styles.questionTitle}>{question.title}</Text>
 
       <TipButton
-        tip={`Arraste ${content.asked} para o mascote e conte quantos sobraram na cesta`}
+        tip={`Arraste ${content.asked} para ${friend} e conte quantos sobraram na cesta`}
         style={mainStyles.tipButton}
         autoOpen={false}
       />
 
-      {/* O MASCOTE — é ele que recebe os itens */}
-      <DropTarget id={MASCOT_SLOT} targets={targets} style={styles.mascotArea}>
-        <View style={styles.speechBubble}>
-          <Text style={styles.speechText}>
-            Me dá {content.asked} {item}, por favor!
-          </Text>
-        </View>
-
-        <Image
-          source={require("../../assets/mascoteFeliz.png")}
-          style={styles.mascotImage}
-        />
-
+      <View style={styles.friendCard}>
         <View style={styles.counterBadge}>
           <Text style={styles.counterText}>
-            {placedCount} de {content.asked}
+            {Math.min(placedCount, content.asked)} DE {content.asked}
           </Text>
         </View>
-      </DropTarget>
 
-      {/* A CESTA — o que ainda não foi entregue */}
+        <View style={styles.friendRow}>
+          <Image
+            source={require("../../assets/mascoteFeliz.png")}
+            style={styles.friendImage}
+          />
+
+          <View style={styles.speechBubble}>
+            <Text style={styles.friendName}>{friend.toUpperCase()}</Text>
+            <Text style={styles.speechText}>
+              Você poderia me dar {content.asked} {item}, por favor?
+            </Text>
+          </View>
+        </View>
+
+        <DropTarget
+          id={DELIVERY_SLOT}
+          targets={targets}
+          style={styles.deliveryRow}
+        >
+          <Text style={styles.deliveryLabel}>
+            DÊ AS {item} AQUI
+          </Text>
+
+          <View style={styles.deliverySlots}>
+            {Array.from({ length: content.asked }).map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.deliverySlot,
+                  index < placedCount ? styles.deliverySlotFilled : null,
+                ]}
+              >
+                {index < placedCount ? (
+                  <Text style={styles.deliveryEmoji}>{item}</Text>
+                ) : null}
+              </View>
+            ))}
+          </View>
+        </DropTarget>
+      </View>
+
       <Text style={styles.basketLabel}>SUA CESTA</Text>
 
       <View style={styles.basket}>
@@ -118,16 +152,16 @@ export default function SubtractionActivity({
                 isPiecePlaced(index) ? styles.itemBoxGiven : null,
               ]}
             >
-              <Text style={styles.itemEmoji}>{item}</Text>
+              {isPiecePlaced(index) ? null : (
+                <Text style={styles.itemEmoji}>{item}</Text>
+              )}
             </View>
           </DraggablePiece>
         ))}
       </View>
 
       <Text style={styles.instruction}>
-        {isComplete
-          ? "QUANTOS SOBRARAM NA CESTA?"
-          : `ARRASTE ${content.asked} PARA O MASCOTE`}
+        {isComplete ? "TOQUE O NÚMERO CERTO" : `ARRASTE ${content.asked} PARA ${friend.toUpperCase()}`}
       </Text>
 
       <View style={styles.optionsRow}>
@@ -183,54 +217,107 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   questionTitle: {
-    fontSize: 22,
+    fontSize: 19,
     fontWeight: "700",
     color: COLORS.TEXT_PRIMARY,
-    letterSpacing: 1.2,
     textAlign: "center",
+    lineHeight: 26,
+    marginBottom: 14,
   },
 
-  // O MASCOTE
-  mascotArea: {
+  // O AMIGO
+  friendCard: {
     backgroundColor: "#fff",
-    borderRadius: 24,
-    paddingVertical: 14,
-    alignItems: "center",
-    minHeight: 190,
+    borderRadius: 22,
+    padding: 16,
     marginBottom: 18,
   },
+  counterBadge: {
+    position: "absolute",
+    right: 14,
+    top: 14,
+    backgroundColor: COLORS.SUCCESS,
+    borderRadius: 100,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    zIndex: 2,
+  },
+  counterText: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#fff",
+    letterSpacing: 0.8,
+  },
+  friendRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 16,
+  },
+  friendImage: {
+    width: 76,
+    height: 76,
+    resizeMode: "contain",
+  },
   speechBubble: {
+    flex: 1,
     backgroundColor: COLORS.SURFACE_PRIMARY,
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    marginBottom: 6,
-    maxWidth: "85%",
+    marginTop: 18,
+  },
+  friendName: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: COLORS.PRIMARY,
+    letterSpacing: 1.2,
+    marginBottom: 3,
   },
   speechText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: COLORS.PRIMARY,
-    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.TEXT_PRIMARY,
+    lineHeight: 19,
   },
-  mascotImage: {
-    width: 110,
-    height: 110,
-    resizeMode: "contain",
+
+  // A ÁREA DE ENTREGA
+  deliveryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.BORDER_LIGHT,
+    paddingTop: 14,
   },
-  counterBadge: {
-    position: "absolute",
-    right: 12,
-    bottom: 12,
-    backgroundColor: COLORS.SURFACE_GREEN,
-    borderRadius: 100,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  counterText: {
-    fontSize: 13,
+  deliveryLabel: {
+    flex: 1,
+    fontSize: 11,
     fontWeight: "800",
-    color: COLORS.SUCCESS,
+    color: COLORS.TEXT_MUTED,
+    letterSpacing: 1.2,
+  },
+  deliverySlots: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  deliverySlot: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderColor: COLORS.BORDER_WARM,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deliverySlotFilled: {
+    borderStyle: "solid",
+    borderColor: COLORS.PRIMARY_LIGHT,
+    backgroundColor: COLORS.SURFACE_PRIMARY,
+  },
+  deliveryEmoji: {
+    fontSize: 24,
   },
 
   // A CESTA
@@ -240,18 +327,18 @@ const styles = StyleSheet.create({
     letterSpacing: 1.4,
     color: COLORS.TEXT_MUTED,
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   basket: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
     gap: 8,
-    marginBottom: 20,
+    marginBottom: 18,
   },
   itemBox: {
-    width: 52,
-    height: 52,
+    width: 56,
+    height: 56,
     backgroundColor: "#fff",
     borderRadius: 14,
     alignItems: "center",
@@ -260,14 +347,16 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   itemBoxGiven: {
-    borderColor: COLORS.SUCCESS,
+    backgroundColor: "transparent",
+    borderStyle: "dashed",
+    borderColor: COLORS.BORDER_LIGHT,
   },
   itemEmoji: {
-    fontSize: 28,
+    fontSize: 30,
   },
 
   instruction: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "800",
     color: COLORS.TEXT_MUTED,
     letterSpacing: 1.4,
