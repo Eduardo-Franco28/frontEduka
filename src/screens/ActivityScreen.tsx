@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import mainStyles from "../styles/theme";
@@ -6,6 +6,7 @@ import { COLORS } from "../styles/colors";
 import BackButton from "../components/BackButton";
 import LoadingPage from "../components/LoadingPage";
 import ErrorMessage from "../components/ErrorMessage";
+import CelebrationOverlay from "../components/CelebrationOverlay";
 import useTopic from "../hooks/useTopic";
 import useAppNavigation from "../hooks/useNavigation";
 import { RootStackParamList } from "../types/navigation";
@@ -31,6 +32,11 @@ export default function ActivityScreen() {
   const { getActivity, answer, answering, error, activity, loading } =
     useTopic();
   const [index, setIndex] = useState<number>(0);
+  const [celebrating, setCelebrating] = useState<boolean>(false);
+
+  // O que fazer quando a comemoração terminar. Fica guardado aqui porque quem
+  // decide o próximo passo é o acerto, mas quem executa é o fim da animação.
+  const afterCelebration = useRef<(() => void) | null>(null);
 
   const { topicId } = route.params;
 
@@ -72,13 +78,27 @@ export default function ActivityScreen() {
     // todo acerto. Quem sabe se o tópico acabou é a posição na lista.
     const isLastQuestion = index === totalQuestions - 1;
 
-    if (isLastQuestion) {
-      navigation.navigate("ResultScreen", { topicId });
-      return response;
-    }
+    // Comemora primeiro e só depois anda: trocar a questão junto com a
+    // animação tiraria a resposta certa da tela antes da criança ver.
+    afterCelebration.current = () => {
+      if (isLastQuestion) {
+        navigation.navigate("ResultScreen", { topicId });
+        return;
+      }
 
-    setIndex(index + 1);
+      setIndex(index + 1);
+    };
+
+    setCelebrating(true);
     return response;
+  };
+
+  const finishCelebration = () => {
+    setCelebrating(false);
+
+    const next = afterCelebration.current;
+    afterCelebration.current = null;
+    next?.();
   };
 
   /** Escolhe o componente pela mecânica da questão atual. */
@@ -118,6 +138,8 @@ export default function ActivityScreen() {
         <ErrorMessage message={error} />
         {renderActivity()}
       </View>
+
+      {celebrating && <CelebrationOverlay onDone={finishCelebration} />}
     </View>
   );
 }

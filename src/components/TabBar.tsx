@@ -7,7 +7,7 @@ import useTheme from "../hooks/useTheme";
 
 const TABS = [
   { route: "HomeScreen", label: "Início", icon: "house" },
-  { route: "SubjectsScreen", label: "Trajetória", icon: "map" },
+  { route: "SubjectsScreen", label: "Matérias", icon: "book" },
   { route: "ProfileScreen", label: "Perfil", icon: "user" },
 ] as const;
 
