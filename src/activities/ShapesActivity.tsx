@@ -128,8 +128,8 @@ export default function ShapesActivity({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.questionTitle}>{question.title}</Text>
-      <Text style={styles.counter}>
+      <Text style={mainStyles.activityTitle}>{question.title}</Text>
+      <Text style={mainStyles.activitySubtitle}>
         {placedCount} DE {blankSlots.length} PEÇAS
       </Text>
 
@@ -242,8 +242,6 @@ export default function ShapesActivity({
                 pieces={pieces}
                 onDrop={place}
                 onMiss={remove}
-                // Cada peça vai num lugar só, então ela pula pro centro do
-                // buraco quando é solta.
                 snap
               >
                 <Svg
@@ -286,21 +284,6 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT_MUTED,
     textAlign: "center",
     marginTop: 40,
-  },
-  questionTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
-    letterSpacing: 1.5,
-    textAlign: "center",
-  },
-  counter: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 1.4,
-    color: COLORS.TEXT_MUTED,
-    textAlign: "center",
-    marginTop: 6,
   },
 
   boardCard: {

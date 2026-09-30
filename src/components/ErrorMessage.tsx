@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { COLORS } from "../styles/colors";
+import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 
 interface ErrorMessageProps {
   message?: string | null;
@@ -12,8 +13,8 @@ export default function ErrorMessage({ message, onRetry, onDismiss }: ErrorMessa
 
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>⚠️</Text>
-      
+      <FontAwesomeFreeSolid name="triangle-exclamation" size={18} color={COLORS.DANGER} />
+
       <Text style={styles.message}>{message}</Text>
 
       {onRetry && (
@@ -24,7 +25,7 @@ export default function ErrorMessage({ message, onRetry, onDismiss }: ErrorMessa
 
       {onDismiss && (
         <TouchableOpacity onPress={onDismiss} activeOpacity={0.7} style={styles.close}>
-          <Text style={styles.closeText}>✕</Text>
+          <FontAwesomeFreeSolid name="xmark" size={14} color={COLORS.DANGER} />
         </TouchableOpacity>
       )}
     </View>
@@ -44,9 +45,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     marginBottom: 12,
   },
-  icon: {
-    fontSize: 18,
-  },
   message: {
     flex: 1,
     fontSize: 14,
@@ -61,10 +59,5 @@ const styles = StyleSheet.create({
   },
   close: {
     paddingHorizontal: 4,
-  },
-  closeText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: COLORS.DANGER,
   },
 });

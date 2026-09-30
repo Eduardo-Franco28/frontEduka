@@ -15,6 +15,7 @@ import useAuth from "../hooks/useAuth";
 import useAppNavigation from "../hooks/useNavigation";
 import { Escolaridade } from "../enums/UserGradesEnum";
 import { COLORS } from "../styles/colors";
+import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 
 export default function SchoolYearScreen() {
   const [anoEscolar, setAnoEscolar] = useState<Escolaridade | null>(null);
@@ -43,7 +44,7 @@ export default function SchoolYearScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.bubble}>
-          <Text style={styles.bubbleEmoji}>🦁</Text>
+          <FontAwesomeFreeSolid name="lightbulb" size={22} color={COLORS.WARNING} />
           <Text style={styles.bubbleText}>
             Em qual ano do Ensino Médio você está? Isso ajuda a escolher o
             conteúdo certo para você.
@@ -56,7 +57,7 @@ export default function SchoolYearScreen() {
           activeOpacity={0.85}
         >
           <View style={[styles.iconBox, { backgroundColor: "#f0eef8" }]}>
-            <Text style={styles.icon}>📓</Text>
+            <FontAwesomeFreeSolid name="book" size={22} color={COLORS.PRIMARY} />
           </View>
           <View style={styles.cardInfo}>
             <Text style={styles.cardTitle}>1° Ano do Ensino Médio</Text>
@@ -65,7 +66,7 @@ export default function SchoolYearScreen() {
           <View
             style={[styles.checkbox, Escolaridade.PRIMEIRO_MEDIO === anoEscolar && styles.checkboxSelected]}
           >
-            {Escolaridade.PRIMEIRO_MEDIO === anoEscolar && <Text style={styles.checkmark}>✓</Text>}
+            {Escolaridade.PRIMEIRO_MEDIO === anoEscolar && <FontAwesomeFreeSolid name="check" size={12} color="#fff" />}
           </View>
         </TouchableOpacity>
 
@@ -75,7 +76,7 @@ export default function SchoolYearScreen() {
           activeOpacity={0.85}
         >
           <View style={[styles.iconBox, { backgroundColor: COLORS.SURFACE_GREEN_LIGHT }]}>
-            <Text style={styles.icon}>📗</Text>
+            <FontAwesomeFreeSolid name="book-open" size={22} color={COLORS.SUCCESS} />
           </View>
           <View style={styles.cardInfo}>
             <Text style={styles.cardTitle}>2° Ano do Ensino Médio</Text>
@@ -86,7 +87,7 @@ export default function SchoolYearScreen() {
           <View
             style={[styles.checkbox, Escolaridade.SEGUNDO_MEDIO === anoEscolar && styles.checkboxSelected]}
           >
-            {Escolaridade.SEGUNDO_MEDIO === anoEscolar && <Text style={styles.checkmark}>✓</Text>}
+            {Escolaridade.SEGUNDO_MEDIO === anoEscolar && <FontAwesomeFreeSolid name="check" size={12} color="#fff" />}
           </View>
         </TouchableOpacity>
 
@@ -96,7 +97,7 @@ export default function SchoolYearScreen() {
           activeOpacity={0.85}
         >
           <View style={[styles.iconBox, { backgroundColor: COLORS.SURFACE_BLUE }]}>
-            <Text style={styles.icon}>📘</Text>
+            <FontAwesomeFreeSolid name="book-bookmark" size={22} color={COLORS.INFO} />
           </View>
           <View style={styles.cardInfo}>
             <Text style={styles.cardTitle}>3° Ano do Ensino Médio</Text>
@@ -107,7 +108,7 @@ export default function SchoolYearScreen() {
           <View
             style={[styles.checkbox, Escolaridade.TERCEIRO_MEDIO === anoEscolar && styles.checkboxSelected]}
           >
-            {Escolaridade.TERCEIRO_MEDIO === anoEscolar && <Text style={styles.checkmark}>✓</Text>}
+            {Escolaridade.TERCEIRO_MEDIO === anoEscolar && <FontAwesomeFreeSolid name="check" size={12} color="#fff" />}
           </View>
         </TouchableOpacity>
       </ScrollView>
@@ -157,10 +158,6 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 20,
   },
-  bubbleEmoji: {
-    fontSize: 24,
-    lineHeight: 28,
-  },
   bubbleText: {
     flex: 1,
     fontSize: 14,
@@ -191,9 +188,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
-  icon: {
-    fontSize: 22,
-  },
   cardInfo: {
     flex: 1,
   },
@@ -223,12 +217,6 @@ const styles = StyleSheet.create({
   checkboxSelected: {
     backgroundColor: COLORS.INFO,
     borderColor: COLORS.INFO,
-  },
-  checkmark: {
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: "700",
-    lineHeight: 15,
   },
 
   // Footer

@@ -21,7 +21,7 @@ export interface RegisterRequest {
 }
 
 export interface NewProfileRequest {
-    name: string,
+    nome: string,
     email: string,
     currentPassword: string
 }

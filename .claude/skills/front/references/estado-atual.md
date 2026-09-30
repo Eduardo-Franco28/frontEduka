@@ -124,9 +124,6 @@ Se pedirem "arrume os detalhes das telas de perfil", é aqui que estão:
 5. **`result` do `useTopic` é desestruturado nas duas telas de atividade e nunca
    usado** — a decisão é tomada com o retorno direto de `answer()`.
 
-6. **`Routes()` no `App.tsx` faz `const { user } = useAuth()` sem usar `user`.**
-   Quem decide o destino é a `WelcomeScreen`.
-
 ## Código morto
 
 Pode remover se estiver limpando de propósito, mas não remova "de passagem":

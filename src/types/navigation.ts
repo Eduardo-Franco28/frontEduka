@@ -1,5 +1,4 @@
 export type RootStackParamList = {
-  WelcomeScreen: undefined;
   FirstScreen: undefined;
   AuthScreen: { isLogin: boolean };
   HomeScreen: undefined;

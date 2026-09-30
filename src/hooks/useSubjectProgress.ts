@@ -11,8 +11,6 @@ export interface SubjectWithProgress {
   currentTopic: TopicsResponse | null;
   concludedTopics: number;
   totalTopics: number;
-  // Falso enquanto os tópicos daquela matéria ainda estão chegando. Serve para
-  // a tela mostrar o card já com nome e cor, sem esperar o progresso.
   progressLoaded: boolean;
 }
 

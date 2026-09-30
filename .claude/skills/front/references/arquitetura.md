@@ -86,8 +86,11 @@ GestureHandlerRootView
   `src/components/Header.tsx`.
 - Stack única e plana: não há stacks aninhadas nem tab navigator. O `TabBar` é um
   componente próprio que só chama `navigation.navigate`.
-- A rota inicial é `WelcomeScreen`, que decide para onde ir olhando `user`:
-  `HomeScreen` se logado, `FirstScreen` se não.
+- Não existe tela de boas-vindas: a abertura é a `SplashLoading`, mostrada pelo
+  `AuthProvider` enquanto a sessão é verificada. Quando ela termina, o
+  `initialRouteName` do `App.tsx` escolhe `HomeScreen` se há `user`, e
+  `FirstScreen` (entrar ou criar conta) se não há. Logout volta pra
+  `FirstScreen`.
 - Tipagem vem de `RootStackParamList` (`src/types/navigation.ts`) através do hook
   `useAppNavigation()`. Rota que não estiver lá não compila.
 

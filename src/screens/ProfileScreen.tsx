@@ -45,7 +45,7 @@ export default function ProfileScreen() {
 
     navigation.reset({
       index: 0,
-      routes: [{ name: "WelcomeScreen" }],
+      routes: [{ name: "FirstScreen" }],
     });
   };
 
@@ -91,7 +91,7 @@ export default function ProfileScreen() {
               <Text style={[styles.statValue, { color: colors.WARNING, fontSize: 22 * fontScale }]}>
                 0
               </Text>
-              <Text style={{ fontSize: 20 * fontScale }}>🔥</Text>
+              <FontAwesomeFreeSolid name="fire" size={18 * fontScale} color={colors.WARNING} />
             </View>
             <Text style={[styles.statLabel, { color: colors.TEXT_MUTED, fontSize: 11 * fontScale }]}>
               Sequência
@@ -117,31 +117,32 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Menu Card */}
-        <View style={[styles.menuCard, { backgroundColor: colors.CARD }]}>
-          <TouchableOpacity
-            style={styles.menuItem}
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate("AchievementsScreen")}
-          >
-            <FontAwesomeFreeSolid
-              name="trophy"
-              size={19 * fontScale}
-              color={colors.PRIMARY_LIGHT}
-              style={styles.menuIcon}
-            />
-            <Text style={[styles.menuLabel, { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale }]}>
+        {/* Conquistas — em destaque, fora do menu de configurações */}
+        <TouchableOpacity
+          style={[styles.achievementsCard, { backgroundColor: colors.SURFACE_YELLOW }]}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Ver conquistas"
+          onPress={() => navigation.navigate("AchievementsScreen")}
+        >
+          <View style={[styles.achievementsIconBox, { backgroundColor: colors.WARNING }]}>
+            <FontAwesomeFreeSolid name="trophy" size={24 * fontScale} color="#fff" />
+          </View>
+
+          <View style={styles.achievementsText}>
+            <Text style={[styles.achievementsTitle, { color: colors.TEXT_PRIMARY, fontSize: 17 * fontScale }]}>
               Conquistas
             </Text>
-            <FontAwesomeFreeSolid
-              name="chevron-right"
-              size={14 * fontScale}
-              color={colors.TEXT_MUTED}
-            />
-          </TouchableOpacity>
+            <Text style={[styles.achievementsSubtitle, { color: colors.TEXT_MUTED, fontSize: 13 * fontScale }]}>
+              Veja suas medalhas e recordes
+            </Text>
+          </View>
 
-          <View style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]} />
+          <FontAwesomeFreeSolid name="chevron-right" size={16 * fontScale} color={colors.WARNING} />
+        </TouchableOpacity>
 
+        {/* Menu Card */}
+        <View style={[styles.menuCard, { backgroundColor: colors.CARD }]}>
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
@@ -292,6 +293,34 @@ const styles = StyleSheet.create({
   statLabel: {
     fontWeight: "700",
     letterSpacing: 0.8,
+  },
+
+  // Conquistas
+  achievementsCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    borderRadius: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  achievementsIconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  achievementsText: {
+    flex: 1,
+    gap: 2,
+  },
+  achievementsTitle: {
+    fontWeight: "800",
+  },
+  achievementsSubtitle: {
+    fontWeight: "500",
   },
 
   // Menu

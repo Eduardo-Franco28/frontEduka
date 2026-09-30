@@ -47,6 +47,24 @@ const mainStyles = StyleSheet.create({
     alignSelf: "flex-end",
     marginBottom: 8,
   },
+
+  // Título e subtítulo de toda atividade. O subtítulo é a linha pequena logo
+  // abaixo do título: um contador ("2 DE 5 PEÇAS") ou uma instrução curta.
+  activityTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: COLORS.TEXT_PRIMARY,
+    letterSpacing: 1.5,
+    textAlign: "center",
+  },
+  activitySubtitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 1.4,
+    color: COLORS.TEXT_MUTED,
+    textAlign: "center",
+    marginTop: 6,
+  },
 });
 
 export default mainStyles;

@@ -10,6 +10,7 @@ import Animated, {
 import mainStyles from "../styles/theme";
 import { COLORS } from "../styles/colors";
 import { ActivityProps } from "../types/activity";
+import TipButton from "../components/TipButton";
 
 /**
  * DRAG_DOTS — arrastar as bolinhas e marcar o resultado da conta.
@@ -87,15 +88,19 @@ export default function DotsActivity({
     // Pequeno delay só pra garantir que a UI nativa se estabilizou
     setTimeout(() => {
       targetRef.current?.measure((_x, _y, _w, _h, pageXTarget, pageYTarget) => {
-        dotsRef4.current?.measure((_x2, _y2, _w2, _h2, pageXDots4, pageYDots4) => {
-          finalPositionDotX4.value = pageXTarget - pageXDots4;
-          finalPositionDotY4.value = pageYTarget - pageYDots4;
-        });
+        dotsRef4.current?.measure(
+          (_x2, _y2, _w2, _h2, pageXDots4, pageYDots4) => {
+            finalPositionDotX4.value = pageXTarget - pageXDots4;
+            finalPositionDotY4.value = pageYTarget - pageYDots4;
+          },
+        );
 
-        dotsRef3.current?.measure((_x3, _y3, _w3, _h3, pageXDots3, pageYDots3) => {
-          finalPositionDotX3.value = pageXTarget - pageXDots3 + 20;
-          finalPositionDotY3.value = pageYTarget - pageYDots3 - 6;
-        });
+        dotsRef3.current?.measure(
+          (_x3, _y3, _w3, _h3, pageXDots3, pageYDots3) => {
+            finalPositionDotX3.value = pageXTarget - pageXDots3 + 20;
+            finalPositionDotY3.value = pageYTarget - pageYDots3 - 6;
+          },
+        );
       });
     }, 100);
   };
@@ -160,7 +165,14 @@ export default function DotsActivity({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.questionTitle}>{question.title}</Text>
+      <Text style={mainStyles.activityTitle}>{question.title}</Text>
+      <Text style={mainStyles.activitySubtitle}>Conte as bolinha e descubra o resultado</Text>
+
+      <TipButton
+        tip="Arraste as bolinhas para completar"
+        style={mainStyles.tipButton}
+        autoOpen={false}
+      />
 
       <View style={styles.questionCard}>
         <View style={styles.questionEquation}>
@@ -211,12 +223,7 @@ export default function DotsActivity({
             />
           </View>
         </View>
-        <Text style={styles.questionLabel}>
-          *Arraste as bolinhas para completar a soma!
-        </Text>
       </View>
-
-      <Text style={styles.instruction}>TOQUE O NÚMERO CERTO</Text>
 
       <View style={styles.optionsRow}>
         {alternatives.map((alt) => (
@@ -256,7 +263,6 @@ export default function DotsActivity({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
   },
   questionCard: {
     backgroundColor: "#fff",
@@ -266,14 +272,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     minHeight: 320,
-  },
-  questionTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
-    letterSpacing: 1.5,
-    textAlign: "center",
-    marginBottom: 24,
   },
   questionLabel: {
     fontSize: 16,

@@ -1,16 +1,19 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 import useAppNavigation from "../hooks/useNavigation";
+import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 import mainStyles from "../styles/theme";
 import TabBar from "../components/TabBar";
-import SubjectCarousel from "../components/SubjectCarousel";
+import SubjectCarousel, {
+  CARD_HEIGHT,
+  CARD_PADDING,
+  CARD_RADIUS,
+} from "../components/SubjectCarousel";
 import ErrorMessage from "../components/ErrorMessage";
 import useAuth from "../hooks/useAuth";
 import useTheme from "../hooks/useTheme";
 import useSubjectProgress, { SubjectWithProgress } from "../hooks/useSubjectProgress";
-import useProgress from "../hooks/useProgress";
 
 export default function HomeScreen() {
   const navigation = useAppNavigation();
@@ -18,20 +21,12 @@ export default function HomeScreen() {
   const { user } = useAuth();
 
   const { getAll, subjects, error } = useSubjectProgress();
-  const {
-    getConcludedQuestions,
-    getConcludedTopics,
-    concludedQuestions,
-    concludedTopics,
-  } = useProgress();
 
   // Recarrega sempre que a tela volta ao foco: o aluno pode ter concluído uma
-  // atividade e voltado pra Home, e os números têm que acompanhar.
+  // atividade e voltado pra Home, e o carrossel tem que acompanhar.
   useFocusEffect(
     useCallback(() => {
       getAll();
-      getConcludedQuestions();
-      getConcludedTopics();
     }, []),
   );
 
@@ -71,7 +66,7 @@ export default function HomeScreen() {
 
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: colors.TEXT_PRIMARY, fontSize: 22 * fontScale }]}>
-              Olá {user?.nome} 👋
+              Olá, {user?.nome} 👋
             </Text>
             <Text style={[styles.headerSubtitle, { color: colors.TEXT_MUTED, fontSize: 14 * fontScale }]}>
               Animado para aprender hoje?
@@ -83,60 +78,33 @@ export default function HomeScreen() {
 
         <SubjectCarousel subjects={subjects} onPressSubject={handleSelectSubject} />
 
-        {/* Progresso */}
+        {/* Continue seus estudos */}
         <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY, fontSize: 18 * fontScale }]}>
-          Seu progresso
+          Continue seus estudos
         </Text>
 
         <View
           style={[
-            styles.progressCard,
+            styles.continueCard,
             { backgroundColor: colors.CARD, borderColor: colors.BORDER_LIGHT },
           ]}
         >
-          <View style={styles.progressTop}>
-            <View style={styles.statsColumn}>
-              <View style={[styles.statBox, { backgroundColor: colors.SURFACE_GREEN }]}>
-                <Text style={[styles.statValue, { color: colors.SUCCESS, fontSize: 26 * fontScale }]}>
-                  {concludedQuestions}
-                </Text>
-                <Text style={[styles.statLabel, { color: colors.TEXT_SUBTLE, fontSize: 12 * fontScale }]}>
-                  atividades{"\n"}concluídas
-                </Text>
-              </View>
-
-              <View style={[styles.statBox, { backgroundColor: colors.SURFACE_PRIMARY }]}>
-                <Text style={[styles.statValue, { color: colors.PRIMARY, fontSize: 26 * fontScale }]}>
-                  {concludedTopics}
-                </Text>
-                <Text style={[styles.statLabel, { color: colors.TEXT_SUBTLE, fontSize: 12 * fontScale }]}>
-                  tópicos{"\n"}concluídos
-                </Text>
-              </View>
-            </View>
-
-            <Image
-              source={require("../../assets/mascoteBracoCruzado.png")}
-              style={styles.mascot}
-            />
-          </View>
+          <Image
+            source={require("../../assets/mascoteBracoCruzado.png")}
+            style={styles.mascot}
+          />
 
           <TouchableOpacity
-            style={[styles.achievementsButton, { backgroundColor: colors.SURFACE_YELLOW }]}
+            style={mainStyles.primaryButton}
             activeOpacity={0.85}
             accessibilityRole="button"
-            accessibilityLabel="Ver conquistas"
-            onPress={() => navigation.navigate("AchievementsScreen")}
+            accessibilityLabel="Ver matérias"
+            onPress={() => navigation.navigate("SubjectsScreen")}
           >
-            <FontAwesomeFreeSolid name="trophy" size={16} color={colors.WARNING} />
-            <Text
-              style={[
-                styles.achievementsText,
-                { color: colors.WARNING, fontSize: 16 * fontScale },
-              ]}
-            >
-              Ver conquistas
-            </Text>
+            <View style={styles.buttonContent}>
+              <FontAwesomeFreeSolid name="play" size={14 * fontScale} color="#fff" />
+              <Text style={mainStyles.primaryButtonText}>Ver matérias</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -178,6 +146,11 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 2,
   },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
   headerSubtitle: {
     fontWeight: "500",
   },
@@ -188,56 +161,22 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  // Progresso
-  progressCard: {
-    borderRadius: 22,
-    padding: 16,
+  // Continue seus estudos
+  // Mesmo tamanho do card do carrossel: as medidas vêm dele, então se o
+  // carrossel mudar, este card acompanha.
+  continueCard: {
+    height: CARD_HEIGHT,
+    borderRadius: CARD_RADIUS,
+    padding: CARD_PADDING,
     marginBottom: 10,
     borderWidth: 2,
-  },
-  progressTop: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    marginBottom: 14,
+    gap: 14,
   },
-  statsColumn: {
-    flex: 1,
-    gap: 10,
-  },
-  statBox: {
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  statValue: {
-    fontWeight: "800",
-    minWidth: 38,
-  },
-  statLabel: {
-    flex: 1,
-    fontWeight: "600",
-    lineHeight: 15,
-  },
+  // O mascote ocupa o espaço que sobra acima do botão.
   mascot: {
-    width: 110,
-    height: 130,
+    flex: 1,
+    width: 160,
     resizeMode: "contain",
-  },
-
-  achievementsButton: {
-    width: "100%",
-    height: 52,
-    borderRadius: 24,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-  achievementsText: {
-    fontWeight: "700",
   },
 });

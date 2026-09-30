@@ -103,9 +103,6 @@ export default function ActivityScreen() {
 
   /** Escolhe o componente pela mecânica da questão atual. */
   function renderActivity() {
-    // O `key` zera a atividade ao trocar de questão: id novo, o React joga o
-    // componente velho fora e monta um do zero — peças na caixa, nada pintado.
-    // Sem ele, duas questões seguidas do mesmo tipo reaproveitariam o estado.
     const props = { question, answering, onAnswer: handleAnswer };
 
     if (question.type === QuestionType.DRAG_DOTS)
@@ -120,7 +117,9 @@ export default function ActivityScreen() {
     if (question.type === QuestionType.DRAG_SLOTS_TO_GROUP)
       return <GroupsActivity key={question.id} {...props} />;
 
-    // Tipo que ainda não tem componente: avisa em vez de quebrar.
+    if (question.type === QuestionType.DRAG_SLOTS_TO_GROUP)
+      return <GroupsActivity key={question.id} {...props} />;
+
     return (
       <Text style={styles.unsupported}>
         Esta atividade ainda não está disponível.

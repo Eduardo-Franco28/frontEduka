@@ -3,6 +3,7 @@ import mainStyles from "../styles/theme";
 import useAppNavigation from "../hooks/useNavigation";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../styles/colors";
+import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 
 export default function FirstScreen() {
   const navigation = useAppNavigation();
@@ -31,7 +32,10 @@ export default function FirstScreen() {
               colors={[COLORS.PRIMARY, COLORS.SECONDARY]}
               style={mainStyles.primaryButton}
             >
-              <Text style={mainStyles.primaryButtonText}>Começar agora →</Text>
+              <View style={styles.buttonContent}>
+                <Text style={mainStyles.primaryButtonText}>Começar agora</Text>
+                <FontAwesomeFreeSolid name="arrow-right" size={16} color="#fff" />
+              </View>
             </LinearGradient>
           </TouchableOpacity>
 
@@ -48,6 +52,12 @@ export default function FirstScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Texto + seta do botão, lado a lado.
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
   container: {
     flex: 1,
     alignItems: "center",

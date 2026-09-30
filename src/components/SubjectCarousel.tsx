@@ -18,8 +18,18 @@ import useTheme from "../hooks/useTheme";
 const { width } = Dimensions.get("window");
 const CARD_GAP = 12;
 const CARD_WIDTH = width - 32;
-const CARD_HEIGHT = 290;
+// Exportados pra outros cards da Home terem o mesmo tamanho do carrossel.
+export const CARD_HEIGHT = 290;
+export const CARD_RADIUS = 24;
 const SNAP_INTERVAL = CARD_WIDTH + CARD_GAP;
+
+// As setas ficam por cima do card, na altura do meio dele. O quadro do tópico é
+// o que está nessa altura, então ele recua dos lados o suficiente pra seta não
+// cobrir o texto: CARD_PADDING + TOPIC_INSET tem que passar de ARROW_INSET + ARROW_SIZE.
+const ARROW_SIZE = 34;
+const ARROW_INSET = 4;
+export const CARD_PADDING = 22;
+const TOPIC_INSET = 20;
 
 interface SubjectCarouselProps {
   subjects: Array<SubjectWithProgress>;
@@ -138,9 +148,12 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
                   )}
 
                   {finished && (
-                    <Text style={[styles.topicTitle, { fontSize: 17 * fontScale }]}>
-                      Tudo concluído por aqui! 🎉
-                    </Text>
+                    <View style={styles.finishedRow}>
+                      <FontAwesomeFreeSolid name="circle-check" size={18 * fontScale} color="#fff" />
+                      <Text style={[styles.topicTitle, { fontSize: 17 * fontScale }]}>
+                        Tudo concluído por aqui!
+                      </Text>
+                    </View>
                   )}
 
                   {!waiting && topic !== null && (
@@ -208,7 +221,7 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
           accessibilityLabel="Matéria anterior"
           onPress={() => goTo(activeIndex - 1)}
         >
-          <FontAwesomeFreeSolid name="chevron-left" size={16} color={colors.TEXT_PRIMARY} />
+          <FontAwesomeFreeSolid name="chevron-left" size={13} color={colors.TEXT_PRIMARY} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -219,7 +232,7 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
           accessibilityLabel="Próxima matéria"
           onPress={() => goTo(activeIndex + 1)}
         >
-          <FontAwesomeFreeSolid name="chevron-right" size={16} color={colors.TEXT_PRIMARY} />
+          <FontAwesomeFreeSolid name="chevron-right" size={13} color={colors.TEXT_PRIMARY} />
         </TouchableOpacity>
       </View>
 
@@ -257,8 +270,8 @@ const styles = StyleSheet.create({
   },
   card: {
     height: CARD_HEIGHT,
-    borderRadius: 24,
-    padding: 22,
+    borderRadius: CARD_RADIUS,
+    padding: CARD_PADDING,
     overflow: "hidden",
   },
 
@@ -315,6 +328,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.15)",
     borderRadius: 16,
     padding: 14,
+    marginHorizontal: TOPIC_INSET,
     marginBottom: "auto",
     minHeight: 86,
     justifyContent: "center",
@@ -328,6 +342,11 @@ const styles = StyleSheet.create({
   topicTitle: {
     fontWeight: "700",
     color: "#fff",
+  },
+  finishedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   waitingRow: {
     flexDirection: "row",
@@ -361,8 +380,9 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 
+  // Mesma largura do quadro do tópico: os dois recuam igual dos lados.
   button: {
-    width: "100%",
+    marginHorizontal: TOPIC_INSET,
     height: 54,
     borderRadius: 24,
     flexDirection: "row",
@@ -384,12 +404,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 6,
+    paddingHorizontal: ARROW_INSET,
   },
   arrow: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: ARROW_SIZE,
+    height: ARROW_SIZE,
+    borderRadius: ARROW_SIZE / 2,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",

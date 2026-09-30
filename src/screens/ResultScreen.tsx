@@ -5,6 +5,7 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import useAppNavigation from "../hooks/useNavigation";
 import useTheme from "../hooks/useTheme";
+import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 
 export default function ResultScreen() {
   const navigation = useAppNavigation();
@@ -39,7 +40,12 @@ export default function ResultScreen() {
       edges={["top", "bottom"]}
     >
       <View style={styles.content}>
-        <Text style={[styles.confetti, { fontSize: 44 * fontScale }]}>🎉</Text>
+        <FontAwesomeFreeSolid
+          name="trophy"
+          size={44 * fontScale}
+          color={colors.WARNING}
+          style={styles.trophy}
+        />
 
         <Image
           source={require("../../assets/mascoteFeliz.png")}
@@ -69,9 +75,12 @@ export default function ResultScreen() {
             colors={[colors.PRIMARY, colors.SECONDARY]}
             style={styles.button}
           >
-            <Text style={[styles.primaryText, { fontSize: 17 * fontScale }]}>
-              Próxima atividade →
-            </Text>
+            <View style={styles.buttonContent}>
+              <Text style={[styles.primaryText, { fontSize: 17 * fontScale }]}>
+                Próxima atividade
+              </Text>
+              <FontAwesomeFreeSolid name="arrow-right" size={16 * fontScale} color="#fff" />
+            </View>
           </LinearGradient>
         </TouchableOpacity>
 
@@ -97,6 +106,12 @@ export default function ResultScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Texto + seta do botão, lado a lado.
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
   component: {
     flex: 1,
     paddingHorizontal: 24,
@@ -109,8 +124,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
   },
-  confetti: {
-    lineHeight: 56,
+  trophy: {
+    marginBottom: 12,
   },
   mascote: {
     width: 130,

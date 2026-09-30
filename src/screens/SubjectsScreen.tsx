@@ -25,7 +25,10 @@ export default function SubjectsScreen() {
   const handleSelectSubject = (id: number, subject: string) => {
     if (id === null) return;
 
-    navigation.navigate("TopicsScreen", { subjectId: id, subjectName: subject });
+    navigation.navigate("TopicsScreen", {
+      subjectId: id,
+      subjectName: subject,
+    });
   };
 
   useEffect(() => {
@@ -44,15 +47,19 @@ export default function SubjectsScreen() {
       >
         <ErrorMessage message={error} />
 
-        {/* Step dots */}
-        <View style={styles.dotsRow}>
-          <View style={[styles.dot, { backgroundColor: colors.BORDER_WARM }]} />
-          <View style={[styles.dot, { backgroundColor: colors.BORDER_WARM }]} />
-          <View style={[styles.dot, styles.dotActive, { backgroundColor: colors.PRIMARY }]} />
-        </View>
-
         {/* Icon + Title */}
-        <Text style={styles.titleEmoji}>📚</Text>
+        <View
+          style={[
+            styles.titleIconBox,
+            { backgroundColor: colors.SURFACE_PRIMARY },
+          ]}
+        >
+          <FontAwesomeFreeSolid
+            name="graduation-cap"
+            size={38 * fontScale}
+            color={colors.PRIMARY}
+          />
+        </View>
         <Text
           style={[
             styles.title,
@@ -75,8 +82,14 @@ export default function SubjectsScreen() {
                 accessibilityLabel={item.name}
                 onPress={() => handleSelectSubject(item.id, item.name)}
               >
-                <View style={[styles.cardIconBox, { backgroundColor: visual.bg }]}>
-                  <FontAwesomeFreeSolid name={visual.icon} size={28} color={visual.color} />
+                <View
+                  style={[styles.cardIconBox, { backgroundColor: visual.bg }]}
+                >
+                  <FontAwesomeFreeSolid
+                    name={visual.icon}
+                    size={28}
+                    color={visual.color}
+                  />
                 </View>
                 <Text
                   style={[
@@ -120,9 +133,13 @@ const styles = StyleSheet.create({
   },
 
   // Title
-  titleEmoji: {
-    fontSize: 48,
-    marginBottom: 12,
+  titleIconBox: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
   },
   title: {
     fontWeight: "800",
@@ -137,6 +154,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 12,
     width: "100%",
+    justifyContent: "center",
   },
 
   // Card
@@ -159,5 +177,6 @@ const styles = StyleSheet.create({
   },
   cardLabel: {
     fontWeight: "600",
+    textAlign: "center",
   },
 });

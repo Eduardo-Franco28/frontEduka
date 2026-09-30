@@ -20,19 +20,19 @@ const SUBJECT_VISUALS: Record<string, SubjectVisual> = {
     color: COLORS.INFO,
     gradient: ["#4a71a4", "#7aa5d8"],
   },
-  "Português": {
+  "Linguagens": {
     icon: "book-open",
     bg: COLORS.SURFACE_ORANGE,
     color: "#c0455e",
     gradient: ["#b83a55", "#e8798f"],
   },
-  "Ciências": {
+  "Ciências da Natureza": {
     icon: "flask",
     bg: COLORS.SURFACE_GREEN,
     color: COLORS.SUCCESS,
     gradient: ["#2f8f5f", "#6bc294"],
   },
-  "História": {
+  "Ciências Humanas": {
     icon: "landmark",
     bg: COLORS.SURFACE_YELLOW,
     color: COLORS.WARNING,

@@ -83,7 +83,9 @@ export default function GroupsActivity({
 
     // Toda peça que foi pro grupo errado volta pra fileira de baixo.
     placements
-      .filter((placement) => response.lstWrongSlots.includes(placement.slotName))
+      .filter((placement) =>
+        response.lstWrongSlots.includes(placement.slotName),
+      )
       .forEach((placement) => returnToBox(placement.pieceId));
   };
 
@@ -108,8 +110,8 @@ export default function GroupsActivity({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.questionTitle}>{question.title}</Text>
-      <Text style={styles.counter}>
+      <Text style={mainStyles.activityTitle}>{question.title}</Text>
+      <Text style={mainStyles.activitySubtitle}>
         {placedCount} DE {items.length} PEÇAS
       </Text>
 
@@ -169,27 +171,27 @@ export default function GroupsActivity({
       {/* AS PEÇAS */}
       <View style={styles.piecesGrid}>
         {items.map((item) => (
-          <DraggablePiece
-            key={item.id}
-            id={item.id}
-            targets={targets}
-            pieces={pieces}
-            onDrop={place}
-            onMiss={remove}
-            // Um grupo recebe várias peças: com snap elas empilhariam todas
-            // no centro do cartão.
-            snap={false}
+          <View
+            style={[
+              styles.piece,
+              isPiecePlaced(item.id) ? styles.piecePlaced : null,
+            ]}
           >
-            <View
-              style={[
-                styles.piece,
-                isPiecePlaced(item.id) ? styles.piecePlaced : null,
-              ]}
+            <DraggablePiece
+              key={item.id}
+              id={item.id}
+              targets={targets}
+              pieces={pieces}
+              onDrop={place}
+              onMiss={remove}
+              // Um grupo recebe várias peças: com snap elas empilhariam todas
+              // no centro do cartão.
+              snap={false}
             >
               <Text style={styles.pieceEmoji}>{item.icon}</Text>
-              <Text style={styles.pieceLabel}>{item.description}</Text>
-            </View>
-          </DraggablePiece>
+            </DraggablePiece>
+            <Text style={styles.pieceLabel}>{item.description}</Text>
+          </View>
         ))}
       </View>
 
@@ -213,21 +215,6 @@ export default function GroupsActivity({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  questionTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
-    letterSpacing: 1.5,
-    textAlign: "center",
-  },
-  counter: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 1.4,
-    color: COLORS.TEXT_MUTED,
-    textAlign: "center",
-    marginTop: 6,
   },
 
   // OS GRUPOS

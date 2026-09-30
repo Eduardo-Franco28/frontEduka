@@ -12,7 +12,8 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../styles/colors";
 
-export const SPLASH_DURATION_MS = 10000;
+// Quanto a abertura fica na tela antes de ir pra Home (ou pro login).
+export const SPLASH_DURATION_MS = 5500;
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -46,7 +47,7 @@ function Bubble({ size, left, delay, duration }: BubbleProps) {
         delay,
         easing: Easing.linear,
         useNativeDriver: true,
-      })
+      }),
     );
 
     animation.start();
@@ -92,7 +93,7 @@ function Halo({ toScale, delay }: { toScale: number; delay: number }) {
         delay,
         easing: Easing.out(Easing.ease),
         useNativeDriver: true,
-      })
+      }),
     );
 
     animation.start();
@@ -195,7 +196,7 @@ export default function SplashLoading({ onSkip }: SplashLoadingProps) {
           >
             {/* O balanco e o brilho ja estao no GIF: nao animar de novo aqui. */}
             <Image
-              source={require("../../assets/mascote-splash.gif")}
+              source={require("../../assets/pinguim_transparente.gif")}
               style={styles.mascot}
               resizeMode="contain"
             />

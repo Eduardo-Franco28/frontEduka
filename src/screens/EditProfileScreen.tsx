@@ -17,8 +17,11 @@ import useTheme from "../hooks/useTheme";
 import ErrorMessage from "../components/ErrorMessage";
 
 export default function EditProfileScreen() {
-  const [name, setName] = useState<string>("")
-  const [email, setEmail] = useState<string>("")
+  const { updateProfile, error, loading, user } = useAuth();
+
+  // Os campos já vêm com os dados atuais: a pessoa só mexe no que quer mudar.
+  const [nome, setNome] = useState<string>(user?.nome ?? "")
+  const [email, setEmail] = useState<string>(user?.email ?? "")
   const [currentPassword, setCurrentPassword] = useState<string>("")
   const [errorMessage, setErrorMessage] = useState<string>("")
   const [hidePassword, setHidePassword] = useState<boolean>(true);
@@ -26,23 +29,24 @@ export default function EditProfileScreen() {
   const navigation = useAppNavigation();
   const { colors, fontScale } = useTheme();
 
-  const { updateProfile, error, user } = useAuth();
+  // Sem mudança nenhuma, não há o que salvar: o botão fica travado.
+  const nothingChanged =
+    nome.trim() === user?.nome && email.trim() === user?.email;
 
    const handleSubmit = async () => {
+    setErrorMessage("");
+
     if (!validar()) return;
 
     let response;
 
-      response = await updateProfile({ name: name.trim(), email: email.trim(), currentPassword: currentPassword.trim() });
+      response = await updateProfile({ nome: nome.trim(), email: email.trim(), currentPassword: currentPassword.trim() });
 
-      if (!response) {
-        setErrorMessage("Verique se os campos foram preenchidos corretamente.");
-        return;
-      }
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "ProfileScreen" }],
-      });
+      if (!response) return;
+
+      // O contexto já atualizou o usuário e guardou o token novo. É só voltar:
+      // o Perfil está logo atrás e mostra o nome novo sozinho.
+      navigation.goBack();
   };
 
   const validar = () => {
@@ -56,7 +60,7 @@ export default function EditProfileScreen() {
       return false;
     }
     
-    if (name.trim() == "") {
+    if (nome.trim() == "") {
       setErrorMessage("Nome não pode ser vazio");
       return false;
     }
@@ -104,14 +108,14 @@ export default function EditProfileScreen() {
           </View>
         </View>
 
-        <ErrorMessage message={errorMessage ?? error} />
+        <ErrorMessage message={errorMessage || error} />
 
         <Input 
-            label="Username"
+            label="Nome"
             placeholder="Digite seu nome"
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="none"
+            value={nome}
+            onChangeText={setNome}
+            autoCapitalize="words"
             autoCorrect={false}
         />
 
@@ -155,7 +159,11 @@ export default function EditProfileScreen() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={mainStyles.primaryButton} onPress={handleSubmit}>
+        <TouchableOpacity
+          style={[mainStyles.primaryButton, (nothingChanged || loading) && styles.buttonDisabled]}
+          onPress={handleSubmit}
+          disabled={nothingChanged || loading}
+        >
             <Text style={mainStyles.primaryButtonText}>Confirmar</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -164,6 +172,10 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+
   // Profile card
   profileCard: {
     borderRadius: 20,

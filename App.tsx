@@ -7,7 +7,6 @@ import HomeScreen from "./src/screens/HomeScreen";
 import SubjectsScreen from "./src/screens/SubjectsScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import TopicsScreen from "./src/screens/TopicsScreen";
-import WelcomeScreen from "./src/screens/WelcomeScreen";
 import ActivityScreen from "./src/screens/ActivityScreen";
 import { AuthProvider } from "./src/contexts/AuthContext";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
@@ -23,11 +22,15 @@ const Stack = createNativeStackNavigator();
 function Routes() {
   const { user } = useAuth();
 
+  // Estas rotas só montam depois da abertura (SplashLoading, no AuthProvider),
+  // e a abertura só termina quando a sessão já foi verificada. Então aqui o
+  // `user` já é a resposta final: logado vai pra Home, senão pra tela que
+  // oferece entrar ou criar conta.
   return (
     <Stack.Navigator
+      initialRouteName={user ? "HomeScreen" : "FirstScreen"}
       screenOptions={{ headerShown: false }}
     >
-      <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="SubjectsScreen" component={SubjectsScreen} />
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />

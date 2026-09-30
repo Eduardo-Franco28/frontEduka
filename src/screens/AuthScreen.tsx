@@ -16,6 +16,7 @@ import useAppNavigation from "../hooks/useNavigation";
 import useAuth from "../hooks/useAuth";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../styles/colors";
+import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 import ErrorMessage from "../components/ErrorMessage";
 import Input from "../components/Input";
 
@@ -174,9 +175,12 @@ export default function AuthScreen() {
             colors={[COLORS.PRIMARY, COLORS.SECONDARY]}
             style={mainStyles.primaryButton}
           >
-            <Text style={mainStyles.primaryButtonText}>
-              {isLogin ? "Entrar" : "Criar Conta"} →
-            </Text>
+            <View style={styles.buttonContent}>
+              <Text style={mainStyles.primaryButtonText}>
+                {isLogin ? "Entrar" : "Criar Conta"}
+              </Text>
+              <FontAwesomeFreeSolid name="arrow-right" size={16} color="#fff" />
+            </View>
           </LinearGradient>
         </TouchableOpacity>
 
@@ -200,6 +204,12 @@ export default function AuthScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Texto + seta do botão, lado a lado.
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
   container: {
     flexGrow: 1,
     paddingHorizontal: 24,
