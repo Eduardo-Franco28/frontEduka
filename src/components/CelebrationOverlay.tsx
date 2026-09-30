@@ -24,18 +24,114 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 // Papéis picados fixos em vez de sorteados: a criança vê a mesma comemoração
 // toda vez, e repetição previsível acalma em vez de surpreender.
 const CONFETTI = [
-  { left: "6%", color: "#5B6AF0", size: 12, delay: 0, duration: 2400, spin: 420, drift: 18 },
-  { left: "14%", color: "#3da678", size: 9, delay: 300, duration: 2600, spin: -380, drift: -14 },
-  { left: "22%", color: "#FFD766", size: 14, delay: 140, duration: 2250, spin: 300, drift: 22 },
-  { left: "31%", color: "#8B97F8", size: 10, delay: 500, duration: 2500, spin: -460, drift: -20 },
-  { left: "39%", color: "#e8893a", size: 12, delay: 70, duration: 2350, spin: 360, drift: 16 },
-  { left: "47%", color: "#5b82b5", size: 9, delay: 400, duration: 2650, spin: -320, drift: -18 },
-  { left: "55%", color: "#3da678", size: 13, delay: 210, duration: 2300, spin: 440, drift: 20 },
-  { left: "63%", color: "#FFD766", size: 10, delay: 580, duration: 2450, spin: -400, drift: -16 },
-  { left: "71%", color: "#5B6AF0", size: 12, delay: 110, duration: 2550, spin: 340, drift: 14 },
-  { left: "79%", color: "#8B97F8", size: 9, delay: 440, duration: 2280, spin: -420, drift: -22 },
-  { left: "87%", color: "#e8893a", size: 13, delay: 260, duration: 2600, spin: 380, drift: 18 },
-  { left: "94%", color: "#5b82b5", size: 10, delay: 540, duration: 2380, spin: -360, drift: -12 },
+  {
+    left: "6%",
+    color: "#5B6AF0",
+    size: 12,
+    delay: 0,
+    duration: 2400,
+    spin: 420,
+    drift: 18,
+  },
+  {
+    left: "14%",
+    color: "#3da678",
+    size: 9,
+    delay: 300,
+    duration: 2600,
+    spin: -380,
+    drift: -14,
+  },
+  {
+    left: "22%",
+    color: "#FFD766",
+    size: 14,
+    delay: 140,
+    duration: 2250,
+    spin: 300,
+    drift: 22,
+  },
+  {
+    left: "31%",
+    color: "#8B97F8",
+    size: 10,
+    delay: 500,
+    duration: 2500,
+    spin: -460,
+    drift: -20,
+  },
+  {
+    left: "39%",
+    color: "#e8893a",
+    size: 12,
+    delay: 70,
+    duration: 2350,
+    spin: 360,
+    drift: 16,
+  },
+  {
+    left: "47%",
+    color: "#5b82b5",
+    size: 9,
+    delay: 400,
+    duration: 2650,
+    spin: -320,
+    drift: -18,
+  },
+  {
+    left: "55%",
+    color: "#3da678",
+    size: 13,
+    delay: 210,
+    duration: 2300,
+    spin: 440,
+    drift: 20,
+  },
+  {
+    left: "63%",
+    color: "#FFD766",
+    size: 10,
+    delay: 580,
+    duration: 2450,
+    spin: -400,
+    drift: -16,
+  },
+  {
+    left: "71%",
+    color: "#5B6AF0",
+    size: 12,
+    delay: 110,
+    duration: 2550,
+    spin: 340,
+    drift: 14,
+  },
+  {
+    left: "79%",
+    color: "#8B97F8",
+    size: 9,
+    delay: 440,
+    duration: 2280,
+    spin: -420,
+    drift: -22,
+  },
+  {
+    left: "87%",
+    color: "#e8893a",
+    size: 13,
+    delay: 260,
+    duration: 2600,
+    spin: 380,
+    drift: 18,
+  },
+  {
+    left: "94%",
+    color: "#5b82b5",
+    size: 10,
+    delay: 540,
+    duration: 2380,
+    spin: -360,
+    drift: -12,
+  },
 ];
 
 const SPARKS = [
@@ -63,7 +159,15 @@ interface ConfettiProps {
   drift: number;
 }
 
-function Confetti({ left, color, size, delay, duration, spin, drift }: ConfettiProps) {
+function Confetti({
+  left,
+  color,
+  size,
+  delay,
+  duration,
+  spin,
+  drift,
+}: ConfettiProps) {
   const progress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -169,7 +273,9 @@ function Sparkle({
   );
 }
 
-export default function CelebrationOverlay({ onDone }: CelebrationOverlayProps) {
+export default function CelebrationOverlay({
+  onDone,
+}: CelebrationOverlayProps) {
   const { colors, fontScale } = useTheme();
 
   const mascotScale = useRef(new Animated.Value(0.6)).current;
@@ -244,7 +350,7 @@ export default function CelebrationOverlay({ onDone }: CelebrationOverlayProps) 
         >
           {/* A proporção segue a do GIF (340x434): esticar deforma o pinguim. */}
           <Image
-            source={require("../../assets/mascote-pulando.gif")}
+            source={require("../../assets/pinguim_sorrindo_ciclo.gif")}
             style={styles.mascot}
             resizeMode="contain"
           />
@@ -253,7 +359,11 @@ export default function CelebrationOverlay({ onDone }: CelebrationOverlayProps) 
         <Animated.Text
           style={[
             styles.title,
-            { color: colors.PRIMARY, fontSize: 34 * fontScale, opacity: textOpacity },
+            {
+              color: colors.PRIMARY,
+              fontSize: 34 * fontScale,
+              opacity: textOpacity,
+            },
           ]}
         >
           Você acertou!
@@ -262,7 +372,11 @@ export default function CelebrationOverlay({ onDone }: CelebrationOverlayProps) 
         <Animated.Text
           style={[
             styles.hint,
-            { color: colors.TEXT_MUTED, fontSize: 14 * fontScale, opacity: textOpacity },
+            {
+              color: colors.TEXT_MUTED,
+              fontSize: 14 * fontScale,
+              opacity: textOpacity,
+            },
           ]}
         >
           Toque para continuar

@@ -40,12 +40,7 @@ export default function ResultScreen() {
       edges={["top", "bottom"]}
     >
       <View style={styles.content}>
-        <FontAwesomeFreeSolid
-          name="trophy"
-          size={44 * fontScale}
-          color={colors.WARNING}
-          style={styles.trophy}
-        />
+        <Text style={[styles.confetti, { fontSize: 44 * fontScale }]}>🎉</Text>
 
         <Image
           source={require("../../assets/mascoteFeliz.png")}
@@ -112,20 +107,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
+  // A comemoração e os botões formam um bloco só, centralizado na tela: os
+  // botões ficam logo abaixo do "Muito bem!", e não colados no rodapé.
   component: {
     flex: 1,
     paddingHorizontal: 24,
+    justifyContent: "center",
   },
 
-  // Bloco comemorativo: ocupa o espaço livre e fica centralizado nele
   content: {
-    flex: 1,
     alignItems: "center",
-    justifyContent: "center",
     gap: 8,
   },
-  trophy: {
-    marginBottom: 12,
+  confetti: {
+    lineHeight: 56,
   },
   mascote: {
     width: 130,
@@ -140,7 +135,7 @@ const styles = StyleSheet.create({
   // Botões
   buttonsContainer: {
     gap: 14,
-    paddingBottom: 32,
+    marginTop: 40,
   },
   button: {
     width: "100%",

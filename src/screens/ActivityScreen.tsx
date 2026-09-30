@@ -82,7 +82,10 @@ export default function ActivityScreen() {
     // animação tiraria a resposta certa da tela antes da criança ver.
     afterCelebration.current = () => {
       if (isLastQuestion) {
-        navigation.navigate("ResultScreen", { topicId });
+        // `replace`, e não `navigate`: a atividade sai da pilha e o resultado
+        // ocupa o lugar dela. Assim o voltar do celular leva pro tópico, e não
+        // de volta pra uma atividade que já terminou.
+        navigation.replace("ResultScreen", { topicId });
         return;
       }
 
