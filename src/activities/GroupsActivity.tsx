@@ -172,13 +172,13 @@ export default function GroupsActivity({
       <View style={styles.piecesGrid}>
         {items.map((item) => (
           <View
+            key={item.id}
             style={[
               styles.piece,
               isPiecePlaced(item.id) ? styles.piecePlaced : null,
             ]}
           >
             <DraggablePiece
-              key={item.id}
               id={item.id}
               targets={targets}
               pieces={pieces}
