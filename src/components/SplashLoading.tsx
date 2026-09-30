@@ -15,7 +15,17 @@ import { COLORS } from "../styles/colors";
 // Quanto a abertura fica na tela antes de ir pra Home (ou pro login).
 export const SPLASH_DURATION_MS = 5500;
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
+
+// Proporcao do proprio GIF (397x346). Se a caixa nao tiver essa proporcao, o
+// `contain` sobra espaco em cima e embaixo e o pinguim encolhe no meio dela.
+const MASCOT_RATIO = 397 / 346;
+const MASCOT_WIDTH = Math.round(Math.min(380, SCREEN_WIDTH * 0.92));
+const MASCOT_HEIGHT = Math.round(MASCOT_WIDTH / MASCOT_RATIO);
+const HALO_SIZE = Math.round(MASCOT_HEIGHT * 0.78);
+
+const RAY_COUNT = 12;
+const RAY_LENGTH = Math.round(MASCOT_WIDTH * 1.05);
 
 const BUBBLES = [
   { size: 70, left: "8%", delay: 0, duration: 7000 },
@@ -23,6 +33,18 @@ const BUBBLES = [
   { size: 96, left: "58%", delay: 700, duration: 9000 },
   { size: 54, left: "80%", delay: 2600, duration: 7600 },
   { size: 34, left: "44%", delay: 3800, duration: 8000 },
+];
+
+// Brilhos espalhados pelo fundo. Sao losangos simples de propósito: icone de
+// fonte pode nao ter carregado ainda nessa tela, que e a primeira do app.
+const TWINKLES = [
+  { top: "14%", left: "12%", size: 14, delay: 200, duration: 2600 },
+  { top: "22%", left: "82%", size: 10, delay: 900, duration: 3000 },
+  { top: "68%", left: "18%", size: 12, delay: 1500, duration: 2800 },
+  { top: "74%", left: "76%", size: 16, delay: 400, duration: 3200 },
+  { top: "40%", left: "6%", size: 9, delay: 2100, duration: 2400 },
+  { top: "52%", left: "92%", size: 11, delay: 1200, duration: 2900 },
+  { top: "9%", left: "50%", size: 12, delay: 2600, duration: 3100 },
 ];
 
 interface SplashLoadingProps {
@@ -118,8 +140,110 @@ function Halo({ toScale, delay }: { toScale: number; delay: number }) {
   );
 }
 
+/** Raios girando bem devagar atras do mascote. */
+function Sunburst() {
+  const spin = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.timing(spin, {
+        toValue: 1,
+        duration: 26000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    );
+
+    animation.start();
+    return () => animation.stop();
+  }, [spin]);
+
+  const rotate = spin.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[styles.sunburst, { transform: [{ rotate }] }]}
+    >
+      {Array.from({ length: RAY_COUNT }).map((_, index) => (
+        <View
+          key={index}
+          style={[
+            styles.ray,
+            { transform: [{ rotate: `${(180 / RAY_COUNT) * index}deg` }] },
+          ]}
+        />
+      ))}
+    </Animated.View>
+  );
+}
+
+interface TwinkleProps {
+  top: string;
+  left: string;
+  size: number;
+  delay: number;
+  duration: number;
+}
+
+function Twinkle({ top, left, size, delay, duration }: TwinkleProps) {
+  const progress = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.timing(progress, {
+        toValue: 1,
+        duration,
+        delay,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver: true,
+      }),
+    );
+
+    animation.start();
+    return () => animation.stop();
+  }, [progress, duration, delay]);
+
+  const scale = progress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.2, 1, 0.2],
+  });
+
+  const opacity = progress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 0.85, 0],
+  });
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{
+        position: "absolute",
+        top: top as never,
+        left: left as never,
+        opacity,
+        transform: [{ scale }],
+      }}
+    >
+      <View
+        style={{
+          width: size,
+          height: size,
+          borderRadius: size * 0.22,
+          backgroundColor: "#ffffff",
+          transform: [{ rotate: "45deg" }],
+        }}
+      />
+    </Animated.View>
+  );
+}
+
 export default function SplashLoading({ onSkip }: SplashLoadingProps) {
   const mascotScale = useRef(new Animated.Value(0.5)).current;
+  const mascotBreath = useRef(new Animated.Value(1)).current;
   const mascotOpacity = useRef(new Animated.Value(0)).current;
   const titleOpacity = useRef(new Animated.Value(0)).current;
   const subtitleOpacity = useRef(new Animated.Value(0)).current;
@@ -152,6 +276,25 @@ export default function SplashLoading({ onSkip }: SplashLoadingProps) {
       }),
     ]);
 
+    // Respiracao lenta somada a escala de entrada: os dois `scale` se
+    // multiplicam, entao isso nao briga com a animacao que ja vem no GIF.
+    const breath = Animated.loop(
+      Animated.sequence([
+        Animated.timing(mascotBreath, {
+          toValue: 1.04,
+          duration: 1800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(mascotBreath, {
+          toValue: 1,
+          duration: 1800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+
     // A barra anima a largura, e largura nao roda no driver nativo.
     const bar = Animated.timing(barProgress, {
       toValue: 1,
@@ -161,13 +304,22 @@ export default function SplashLoading({ onSkip }: SplashLoadingProps) {
     });
 
     entrance.start();
+    breath.start();
     bar.start();
 
     return () => {
       entrance.stop();
+      breath.stop();
       bar.stop();
     };
-  }, [mascotOpacity, mascotScale, titleOpacity, subtitleOpacity, barProgress]);
+  }, [
+    mascotOpacity,
+    mascotScale,
+    mascotBreath,
+    titleOpacity,
+    subtitleOpacity,
+    barProgress,
+  ]);
 
   const barWidth = barProgress.interpolate({
     inputRange: [0, 1],
@@ -184,14 +336,20 @@ export default function SplashLoading({ onSkip }: SplashLoadingProps) {
           <Bubble key={index} {...bubble} />
         ))}
 
+        {TWINKLES.map((twinkle, index) => (
+          <Twinkle key={index} {...twinkle} />
+        ))}
+
         <View style={styles.mascotArea}>
+          <Sunburst />
           <Halo toScale={1.9} delay={0} />
           <Halo toScale={1.5} delay={1300} />
+          <Halo toScale={2.2} delay={800} />
 
           <Animated.View
             style={{
               opacity: mascotOpacity,
-              transform: [{ scale: mascotScale }],
+              transform: [{ scale: mascotScale }, { scale: mascotBreath }],
             }}
           >
             {/* O balanco e o brilho ja estao no GIF: nao animar de novo aqui. */}
@@ -236,21 +394,36 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   mascotArea: {
-    width: 260,
-    height: 260,
+    width: MASCOT_WIDTH,
+    height: MASCOT_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
   },
+  sunburst: {
+    position: "absolute",
+    width: RAY_LENGTH,
+    height: RAY_LENGTH,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ray: {
+    position: "absolute",
+    width: 3,
+    height: RAY_LENGTH,
+    borderRadius: 2,
+    backgroundColor: "#ffffff",
+    opacity: 0.08,
+  },
   halo: {
     position: "absolute",
-    width: 200,
-    height: 200,
-    borderRadius: 100,
+    width: HALO_SIZE,
+    height: HALO_SIZE,
+    borderRadius: HALO_SIZE / 2,
     backgroundColor: "#ffffff",
   },
   mascot: {
-    width: 240,
-    height: 240,
+    width: MASCOT_WIDTH,
+    height: MASCOT_HEIGHT,
   },
   title: {
     fontSize: 46,
