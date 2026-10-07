@@ -6,6 +6,7 @@ import { QuestionResponse } from "../types/subject";
 export default function useProgress() {
   const [concludedQuestions, setConcludedQuestions] = useState<number>(0);
   const [concludedTopics, setConcludedTopics] = useState<number>(0);
+  const [sequence, setSequence] = useState<number>(0);
   const [unfinishedQuestions, setUnfinishedQuestions] = useState<
     Array<QuestionResponse>
   >([]);
@@ -54,6 +55,27 @@ export default function useProgress() {
     }
   };
 
+  const getSequence = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await progressService.getSequence();
+      setSequence(response);
+      return response;
+    } catch (error) {
+      const errorMessage = getMessageError(
+        error,
+        "Erro ao buscar a sequência",
+      );
+      console.error("Progress error:", errorMessage);
+      setError(errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getUnfinishedQuestions = async (limit?: number) => {
     setLoading(true);
     setError(null);
@@ -78,9 +100,11 @@ export default function useProgress() {
   return {
     getConcludedQuestions,
     getConcludedTopics,
+    getSequence,
     getUnfinishedQuestions,
     concludedQuestions,
     concludedTopics,
+    sequence,
     unfinishedQuestions,
     loading,
     error,

@@ -1,9 +1,9 @@
 ---
 name: front
-description: Padrões do app React Native/Expo do Eduka (TCC) — como criar telas, componentes, hooks, services, tipos e estilos seguindo a arquitetura que já existe. Use SEMPRE que for mexer em qualquer coisa dentro de src/ ou App.tsx: nova tela, novo endpoint, novo componente, novo tipo de atividade, ajuste de UI, refactor ou correção de bug no front.
+description: Padrões do app React Native/Expo do IntegraMente (TCC) — como criar telas, componentes, hooks, services, tipos e estilos seguindo a arquitetura que já existe. Use SEMPRE que for mexer em qualquer coisa dentro de src/ ou App.tsx: nova tela, novo endpoint, novo componente, novo tipo de atividade, ajuste de UI, refactor ou correção de bug no front.
 ---
 
-# Como mexer no front do Eduka
+# Como mexer no front do IntegraMente
 
 App React Native + Expo (TypeScript, `strict: true`), navegação por stack nativa,
 axios para API, Context só para autenticação. Tudo em português no código voltado
@@ -137,7 +137,7 @@ Depois, se a mudança for visual ou de fluxo, o app roda contra o mock (não
 precisa do backend real):
 
 ```bash
-npx @mockoon/cli start --data ./mock/mockoon-eduka.json --port 3000
+npx @mockoon/cli start --data ./mock/mockoon-integramente.json --port 3000
 ```
 
 ```bash
@@ -145,7 +145,7 @@ npx expo start -c
 ```
 
 Se você mudou um contrato de API, o mock precisa acompanhar — existe a skill
-`/mock` para isso. Chame ela em vez de editar `mock/mockoon-eduka.json` no braço.
+`/mock` para isso. Chame ela em vez de editar `mock/mockoon-integramente.json` no braço.
 
 ## Inconsistências aceitas (não "conserte" por conta própria)
 

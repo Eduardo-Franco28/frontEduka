@@ -27,8 +27,10 @@ export default function ProfileScreen() {
   const {
     getConcludedQuestions,
     getConcludedTopics,
+    getSequence,
     concludedQuestions,
     concludedTopics,
+    sequence,
   } = useProgress();
 
   // Busca de novo toda vez que a tela aparece: a criança pode ter concluído
@@ -37,6 +39,7 @@ export default function ProfileScreen() {
     useCallback(() => {
       getConcludedQuestions();
       getConcludedTopics();
+      getSequence();
     }, []),
   );
 
@@ -85,11 +88,11 @@ export default function ProfileScreen() {
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
-          {/* Sequência — a ofensiva ainda não existe no backend */}
+          {/* Sequência: dias seguidos em que a criança jogou */}
           <View style={[styles.statCard, { backgroundColor: colors.CARD }]}>
             <View style={styles.statValueRow}>
               <Text style={[styles.statValue, { color: colors.WARNING, fontSize: 22 * fontScale }]}>
-                0
+                {sequence}
               </Text>
               <FontAwesomeFreeSolid name="fire" size={18 * fontScale} color={colors.WARNING} />
             </View>

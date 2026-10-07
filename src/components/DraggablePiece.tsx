@@ -30,6 +30,14 @@ interface DraggablePieceProps {
   pieces?: PieceRegistry;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
+  /**
+   * Estilo de um cartão em volta da peça. Quando existe, o cartão INTEIRO vira
+   * a área de toque, mas só a peça (o `children`) sai andando: o cartão fica no
+   * lugar, marcando de onde ela saiu. Sem ele, só a peça responde ao toque.
+   */
+  frameStyle?: StyleProp<ViewStyle>;
+  /** O que vai no cartão embaixo da peça e não se move junto, como o nome. */
+  footer?: ReactNode;
   children: ReactNode;
 }
 
@@ -44,6 +52,8 @@ export default function DraggablePiece({
   pieces,
   disabled = false,
   style,
+  frameStyle,
+  footer,
   children,
 }: DraggablePieceProps) {
   const ref = useRef<View | null>(null);
@@ -146,15 +156,32 @@ export default function DraggablePiece({
     elevation: isDragging.value ? 8 : 0,
   }));
 
+  // O cartão precisa subir junto enquanto arrasta: o zIndex só vale entre
+  // irmãos, então sem isso a peça passaria por baixo dos cartões vizinhos.
+  const frameAnimatedStyle = useAnimatedStyle(() => ({
+    zIndex: isDragging.value ? 100 : 1,
+  }));
+
+  const piece = (
+    <Animated.View
+      ref={ref}
+      collapsable={false}
+      onLayout={measureHome}
+      style={[animatedStyle, style]}
+    >
+      {children}
+    </Animated.View>
+  );
+
+  if (!frameStyle) {
+    return <GestureDetector gesture={gesture}>{piece}</GestureDetector>;
+  }
+
   return (
     <GestureDetector gesture={gesture}>
-      <Animated.View
-        ref={ref}
-        collapsable={false}
-        onLayout={measureHome}
-        style={[animatedStyle, style]}
-      >
-        {children}
+      <Animated.View style={[frameStyle, frameAnimatedStyle]}>
+        {piece}
+        {footer}
       </Animated.View>
     </GestureDetector>
   );

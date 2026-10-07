@@ -7,6 +7,7 @@ import TipButton from "../components/TipButton";
 import DropTarget from "../components/DropTarget";
 import DraggablePiece from "../components/DraggablePiece";
 import useDragAndDrop from "../hooks/useDragAndDrop";
+import usePieceScale from "../hooks/usePieceScale";
 import { ActivityProps } from "../types/activity";
 
 /**
@@ -52,6 +53,8 @@ export default function SubtractionActivity({
     useDragAndDrop();
 
   const [alternativeId, setAlternativeId] = useState<number | null>(null);
+  // Peças e alvos crescem com o tamanho escolhido na Acessibilidade.
+  const scaled = usePieceScale();
   const [wrong, setWrong] = useState<boolean>(false);
 
   const content: SubtractionContent = JSON.parse(question.content);
@@ -121,11 +124,16 @@ export default function SubtractionActivity({
                 key={index}
                 style={[
                   styles.deliverySlot,
+                  {
+                    width: scaled(44),
+                    height: scaled(44),
+                    borderRadius: scaled(44) / 2,
+                  },
                   index < placedCount ? styles.deliverySlotFilled : null,
                 ]}
               >
                 {index < placedCount ? (
-                  <Text style={styles.deliveryEmoji}>{item}</Text>
+                  <Text style={[styles.deliveryEmoji, { fontSize: scaled(24) }]}>{item}</Text>
                 ) : null}
               </View>
             ))}
@@ -149,11 +157,12 @@ export default function SubtractionActivity({
             <View
               style={[
                 styles.itemBox,
+                { width: scaled(56), height: scaled(56) },
                 isPiecePlaced(index) ? styles.itemBoxGiven : null,
               ]}
             >
               {isPiecePlaced(index) ? null : (
-                <Text style={styles.itemEmoji}>{item}</Text>
+                <Text style={[styles.itemEmoji, { fontSize: scaled(30) }]}>{item}</Text>
               )}
             </View>
           </DraggablePiece>

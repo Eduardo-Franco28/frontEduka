@@ -1,8 +1,8 @@
-# EduKa
+# IntegraMente
 
 ## Descrição
 
-EduKa é um aplicativo educacional desenvolvido em React Native com Expo.
+IntegraMente é um aplicativo educacional desenvolvido em React Native com Expo.
 
 Este projeto foi desenvolvido como Trabalho de Conclusão de Curso (TCC) pelos alunos do Colégio Raphael di Santo.
 

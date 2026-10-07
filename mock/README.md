@@ -84,7 +84,7 @@ Abra o terminal **na pasta do projeto** (no VS Code: menu Terminal → Novo
 Terminal) e rode:
 
 ```bash
-npx @mockoon/cli start --data ./mock/mockoon-eduka.json --port 3000
+npx @mockoon/cli start --data ./mock/mockoon-integramente.json --port 3000
 ```
 
 Na primeira vez ele vai perguntar se quer instalar. Digite `y` e Enter.
@@ -169,7 +169,7 @@ Já tem alguma coisa usando essa porta. Use outra, trocando nos **dois** lugares
 No terminal do passo 3:
 
 ```bash
-npx @mockoon/cli start --data ./mock/mockoon-eduka.json --port 3001
+npx @mockoon/cli start --data ./mock/mockoon-integramente.json --port 3001
 ```
 
 E no arquivo `.env.local`, troque para a mesma porta:
@@ -218,7 +218,7 @@ Existe uma versão com telinha, se preferir:
 
 1. Baixe em <https://mockoon.com/download/> e instale.
 2. Abra o programa → menu **File → Open environment**.
-3. Escolha o arquivo `mock/mockoon-eduka.json` (está nesta pasta).
+3. Escolha o arquivo `mock/mockoon-integramente.json` (está nesta pasta).
 4. Clique no botão de play (▶).
 
 Isso substitui o passo 3. A vantagem é que dá para ver as requisições chegando e
@@ -254,6 +254,6 @@ Onde achar cada tipo de atividade:
 | qualquer   | qualquer outro tópico     | pontos: 3 contas de somar                   |
 
 Se o backend real mudar algum campo, alguém precisa atualizar o
-`mockoon-eduka.json` na mão — ele é um JSON solto, não é conferido contra os
+`mockoon-integramente.json` na mão — ele é um JSON solto, não é conferido contra os
 tipos em `src/types/`. Para isso existe uma skill no projeto: rode `/mock` no
 Claude Code que ele cuida disso.

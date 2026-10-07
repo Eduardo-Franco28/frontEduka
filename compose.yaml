@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    container_name: docker_integramente
+    ports:
+      - "8081:8081"
+    environment:
+      EXPO_PUBLIC_API_URL: "http://${HOST_IP}:8080"
+      REACT_NATIVE_PACKAGER_HOSTNAME: ${HOST_IP}
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app
+      - /app/node_modules

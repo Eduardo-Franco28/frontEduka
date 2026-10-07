@@ -1,11 +1,11 @@
 ---
 name: mock
-description: Atualizar o backend falso (Mockoon) do Eduka em mock/mockoon-eduka.json — adicionar ou corrigir rotas, matérias, tópicos e questões, e validar que tudo responde certo. Use quando o backend real mudar um contrato, quando faltar dado de teste no app, ou quando alguém disser que o mock está desatualizado/quebrado.
+description: Atualizar o backend falso (Mockoon) do IntegraMente em mock/mockoon-integramente.json — adicionar ou corrigir rotas, matérias, tópicos e questões, e validar que tudo responde certo. Use quando o backend real mudar um contrato, quando faltar dado de teste no app, ou quando alguém disser que o mock está desatualizado/quebrado.
 ---
 
-# Atualizar o mock do Eduka
+# Atualizar o mock do IntegraMente
 
-O arquivo `mock/mockoon-eduka.json` é um *environment* do Mockoon: um servidor
+O arquivo `mock/mockoon-integramente.json` é um *environment* do Mockoon: um servidor
 falso que responde as mesmas rotas do backend real, para desenvolver o front sem
 backend e sem banco. Quem usa isso no dia a dia segue o `mock/README.md`.
 
@@ -14,7 +14,7 @@ Mockoon, então nunca o regenere do zero sem antes ler o que está lá.
 
 ## Antes de mexer
 
-1. Leia `mock/mockoon-eduka.json` para ver o estado atual.
+1. Leia `mock/mockoon-integramente.json` para ver o estado atual.
 2. Confira o contrato real nos tipos e nos services — é o que o app espera:
    - `src/types/subject.ts`, `src/types/auth.ts`, `src/types/activity.ts`
    - `src/services/authService.ts`, `subjectService.ts`, `activityService.ts`,
@@ -162,7 +162,7 @@ O CLI já está instalado no projeto. Suba o servidor em uma porta livre (a 3000
 costuma estar ocupada):
 
 ```bash
-npx --no-install @mockoon/cli start --data ./mock/mockoon-eduka.json --port 3333
+npx --no-install @mockoon/cli start --data ./mock/mockoon-integramente.json --port 3333
 ```
 
 Se acusar porta ocupada, ache e mate o processo:

@@ -7,6 +7,7 @@ import TipButton from "../components/TipButton";
 import DropTarget from "../components/DropTarget";
 import DraggablePiece from "../components/DraggablePiece";
 import useDragAndDrop from "../hooks/useDragAndDrop";
+import usePieceScale from "../hooks/usePieceScale";
 import svgBoard from "../utils/svgBoard";
 import { ActivityProps } from "../types/activity";
 import { BoardSlot, FilledSlot, QuestionSlotContent } from "../types/subject";
@@ -55,6 +56,8 @@ export default function ShapesActivity({
     isPiecePlaced,
   } = useDragAndDrop();
   const [lstWrongSlots, setLstWrongSlots] = useState<string[]>([]);
+  // Peças e alvos crescem com o tamanho escolhido na Acessibilidade.
+  const scaled = usePieceScale();
 
   // Encaixar formas sem desenho não tem o que mostrar. Esta checagem vem
   // depois dos hooks: nenhum hook pode ficar abaixo de um return.
@@ -119,8 +122,8 @@ export default function ShapesActivity({
 
     // A menor das duas é a que faz caber nos dois sentidos.
     const scale = Math.min(
-      PIECE_WIDTH / drawingWidth,
-      PIECE_HEIGHT / drawingHeight,
+      scaled(PIECE_WIDTH) / drawingWidth,
+      scaled(PIECE_HEIGHT) / drawingHeight,
     );
 
     return { width: drawingWidth * scale, height: drawingHeight * scale };
@@ -229,31 +232,36 @@ export default function ShapesActivity({
           const size = pieceSize(alternative.bbox);
 
           return (
-            <View
+            <DraggablePiece
               key={alternative.id}
-              style={[
+              id={alternative.id}
+              targets={targets}
+              pieces={pieces}
+              onDrop={place}
+              onMiss={remove}
+              // Cada peça vai num lugar só, então ela pula pro centro do
+              // buraco quando é solta.
+              snap
+              // O cartão inteiro é a área de toque; só o desenho sai andando.
+              frameStyle={[
                 styles.piece,
+                { width: scaled(70), height: scaled(80) },
                 isPiecePlaced(alternative.id) ? styles.piecePlaced : null,
               ]}
+              footer={
+                <Text style={[styles.pieceLabel, { fontSize: scaled(10) }]}>
+                  {alternative.description}
+                </Text>
+              }
             >
-              <DraggablePiece
-                id={alternative.id}
-                targets={targets}
-                pieces={pieces}
-                onDrop={place}
-                onMiss={remove}
-                snap
+              <Svg
+                viewBox={alternative.bbox}
+                width={size.width}
+                height={size.height}
               >
-                <Svg
-                  viewBox={alternative.bbox}
-                  width={size.width}
-                  height={size.height}
-                >
-                  <Path d={alternative.path} fill={COLORS.WARNING} />
-                </Svg>
-              </DraggablePiece>
-              <Text style={styles.pieceLabel}>{alternative.description}</Text>
-            </View>
+                <Path d={alternative.path} fill={COLORS.WARNING} />
+              </Svg>
+            </DraggablePiece>
           );
         })}
       </View>

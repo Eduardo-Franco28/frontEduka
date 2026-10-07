@@ -16,6 +16,12 @@ export async function countConcludedTopics(): Promise<number> {
   return response.data;
 }
 
+/** Quantos dias seguidos o aluno jogou, até hoje. */
+export async function getSequence(): Promise<number> {
+  const response = await api.get<number>("/stats/sequence");
+  return response.data;
+}
+
 /** As últimas questões que o aluno tentou e ainda não acertou. */
 export async function getUnfinishedQuestions(
   limit: number = 5,

@@ -1,7 +1,7 @@
 {
   "uuid": "c6ab0cff-1730-4982-a8f7-c711681c59c4",
   "lastMigration": 33,
-  "name": "Eduka - Backend Falso",
+  "name": "IntegraMente - Backend Falso",
   "endpointPrefix": "",
   "latency": 300,
   "port": 3000,
@@ -17,7 +17,7 @@
       "responses": [
         {
           "uuid": "214effdd-d829-4189-a43f-e4069ef30496",
-          "body": "{\n  \"token\": \"mock-token-eduka\",\n  \"userResponse\": {\n    \"id\": 1,\n    \"nome\": \"Aluno Teste\",\n    \"email\": \"aluno@eduka.com\"\n  }\n}",
+          "body": "{\n  \"token\": \"mock-token-integramente\",\n  \"userResponse\": {\n    \"id\": 1,\n    \"nome\": \"Aluno Teste\",\n    \"email\": \"aluno@integramente.com\"\n  }\n}",
           "latency": 0,
           "statusCode": 200,
           "label": "login ok",
@@ -48,7 +48,7 @@
       "responses": [
         {
           "uuid": "e0a6f5dd-5c14-45f0-b5f6-21a80e527125",
-          "body": "{\n  \"token\": \"mock-token-eduka\",\n  \"userResponse\": {\n    \"id\": 1,\n    \"nome\": \"{{body 'name'}}\",\n    \"email\": \"{{body 'email'}}\"\n  }\n}",
+          "body": "{\n  \"token\": \"mock-token-integramente\",\n  \"userResponse\": {\n    \"id\": 1,\n    \"nome\": \"{{body 'name'}}\",\n    \"email\": \"{{body 'email'}}\"\n  }\n}",
           "latency": 0,
           "statusCode": 200,
           "label": "cadastro ok",
@@ -79,7 +79,7 @@
       "responses": [
         {
           "uuid": "bd4988fe-1b0b-499e-8eaa-71b8244df5d2",
-          "body": "{\n  \"id\": 1,\n  \"nome\": \"Aluno Teste\",\n  \"email\": \"aluno@eduka.com\"\n}",
+          "body": "{\n  \"id\": 1,\n  \"nome\": \"Aluno Teste\",\n  \"email\": \"aluno@integramente.com\"\n}",
           "latency": 0,
           "statusCode": 200,
           "label": "usuário logado",
@@ -608,6 +608,37 @@
       "streamingInterval": 0
     },
     {
+      "uuid": "dd8b2427-246e-4411-9b5c-970a4b3c7fb6",
+      "type": "http",
+      "documentation": "Quantos dias seguidos o aluno jogou, até hoje.",
+      "method": "get",
+      "endpoint": "stats/sequence",
+      "responses": [
+        {
+          "uuid": "b5214140-6fb2-4ecd-beae-dd66a889ff51",
+          "body": "24",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "sequência de dias",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
       "uuid": "2276b61d-d0a3-4753-bbf8-6b42c12f2191",
       "type": "http",
       "documentation": "Quantos tópicos o aluno já concluiu. O :topicId é ignorado pelo backend; o app chama /stats/0.",
@@ -702,6 +733,10 @@
     {
       "type": "route",
       "uuid": "f1a06f3b-ae09-42b3-b31e-ffd4a92ac986"
+    },
+    {
+      "type": "route",
+      "uuid": "dd8b2427-246e-4411-9b5c-970a4b3c7fb6"
     },
     {
       "type": "route",

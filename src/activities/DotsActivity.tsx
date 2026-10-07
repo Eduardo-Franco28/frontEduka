@@ -8,6 +8,7 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import mainStyles from "../styles/theme";
+import usePieceScale from "../hooks/usePieceScale";
 import { COLORS } from "../styles/colors";
 import { ActivityProps } from "../types/activity";
 import TipButton from "../components/TipButton";
@@ -31,6 +32,9 @@ export default function DotsActivity({
   onAnswer,
 }: ActivityProps) {
   const [alternativeId, setAlternativeId] = useState<number | null>(null);
+  // Peças e alvos crescem com o tamanho escolhido na Acessibilidade.
+  const scaled = usePieceScale();
+  const dotSize = { width: scaled(16), height: scaled(16), borderRadius: scaled(8) };
   const [canAnswer, setIsCanAnswer] = useState(false);
 
   const isAswerAble4 = useSharedValue(false);
@@ -97,8 +101,8 @@ export default function DotsActivity({
 
         dotsRef3.current?.measure(
           (_x3, _y3, _w3, _h3, pageXDots3, pageYDots3) => {
-            finalPositionDotX3.value = pageXTarget - pageXDots3 + 20;
-            finalPositionDotY3.value = pageYTarget - pageYDots3 - 6;
+            finalPositionDotX3.value = pageXTarget - pageXDots3 + scaled(20);
+            finalPositionDotY3.value = pageYTarget - pageYDots3 - scaled(6);
           },
         );
       });
@@ -183,14 +187,14 @@ export default function DotsActivity({
               ref={dotsRef4}
               collapsable={false}
               onLayout={calculateDistance}
-              style={styles.dotsWrapper}
+              style={[styles.dotsWrapper, { minHeight: scaled(70) }]}
             >
               <GestureDetector gesture={dragGesture4}>
-                <Animated.View style={[animatedStyle4, styles.dotsVertical]}>
-                  <View style={[styles.dotV, styles.dotVActive]} />
-                  <View style={[styles.dotV, styles.dotVActive]} />
-                  <View style={[styles.dotV, styles.dotVActive]} />
-                  <View style={[styles.dotV, styles.dotVActive]} />
+                <Animated.View style={[animatedStyle4, styles.dotsVertical, { gap: scaled(6) }]}>
+                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
+                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
+                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
+                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
                 </Animated.View>
               </GestureDetector>
             </View>
@@ -201,12 +205,12 @@ export default function DotsActivity({
           {/* Segundo número */}
           <View style={styles.numberGroup}>
             <Text style={styles.questionText}>{content.teste2}</Text>
-            <View ref={dotsRef3} collapsable={false} style={styles.dotsWrapper}>
+            <View ref={dotsRef3} collapsable={false} style={[styles.dotsWrapper, { minHeight: scaled(70) }]}>
               <GestureDetector gesture={dragGesture3}>
-                <Animated.View style={[animatedStyle3, styles.dotsVertical]}>
-                  <View style={[styles.dotV, styles.dotVActive]} />
-                  <View style={[styles.dotV, styles.dotVActive]} />
-                  <View style={[styles.dotV, styles.dotVActive]} />
+                <Animated.View style={[animatedStyle3, styles.dotsVertical, { gap: scaled(6) }]}>
+                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
+                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
+                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
                 </Animated.View>
               </GestureDetector>
             </View>
@@ -219,7 +223,7 @@ export default function DotsActivity({
             <View
               ref={targetRef}
               collapsable={false}
-              style={styles.targetBox}
+              style={[styles.targetBox, { width: scaled(60), height: scaled(60) }]}
             />
           </View>
         </View>

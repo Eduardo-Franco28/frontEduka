@@ -7,6 +7,7 @@ import TipButton from "../components/TipButton";
 import DropTarget from "../components/DropTarget";
 import DraggablePiece from "../components/DraggablePiece";
 import useDragAndDrop from "../hooks/useDragAndDrop";
+import usePieceScale from "../hooks/usePieceScale";
 import { ActivityProps } from "../types/activity";
 import { FilledSlot, QuestionSlotContent } from "../types/subject";
 
@@ -61,6 +62,8 @@ export default function GroupsActivity({
     isPiecePlaced,
   } = useDragAndDrop();
   const [lstWrongSlots, setLstWrongSlots] = useState<string[]>([]);
+  // Peças e alvos crescem com o tamanho escolhido na Acessibilidade.
+  const scaled = usePieceScale();
 
   const content: QuestionSlotContent = JSON.parse(question.content);
 
@@ -135,6 +138,7 @@ export default function GroupsActivity({
               targets={targets}
               style={[
                 styles.group,
+                { height: scaled(112) },
                 // O vermelho não espera o grupo esvaziar: ele recebe várias
                 // peças, então "vazio" não é sinal de nada. O aviso sai no
                 // próximo Confirmar.
@@ -149,14 +153,17 @@ export default function GroupsActivity({
               >
                 <View style={styles.groupBadge}>
                   <Text
-                    style={[styles.groupBadgeText, { color: palette.badge }]}
+                    style={[
+                      styles.groupBadgeText,
+                      { color: palette.badge, fontSize: scaled(10) },
+                    ]}
                   >
                     {group.label ?? group.name.toUpperCase()}
                   </Text>
                 </View>
 
                 {total > 0 ? (
-                  <Text style={styles.groupCount}>{total}</Text>
+                  <Text style={[styles.groupCount, { fontSize: scaled(20) }]}>{total}</Text>
                 ) : null}
               </LinearGradient>
             </DropTarget>
@@ -171,27 +178,32 @@ export default function GroupsActivity({
       {/* AS PEÇAS */}
       <View style={styles.piecesGrid}>
         {items.map((item) => (
-          <View
+          <DraggablePiece
             key={item.id}
-            style={[
+            id={item.id}
+            targets={targets}
+            pieces={pieces}
+            onDrop={place}
+            onMiss={remove}
+            // Um grupo recebe várias peças: com snap elas empilhariam todas
+            // no centro do cartão.
+            snap={false}
+            // O cartão inteiro é a área de toque; só o emoji sai andando.
+            frameStyle={[
               styles.piece,
+              { width: scaled(66), height: scaled(78) },
               isPiecePlaced(item.id) ? styles.piecePlaced : null,
             ]}
+            footer={
+              <Text style={[styles.pieceLabel, { fontSize: scaled(10) }]}>
+                {item.description}
+              </Text>
+            }
           >
-            <DraggablePiece
-              id={item.id}
-              targets={targets}
-              pieces={pieces}
-              onDrop={place}
-              onMiss={remove}
-              // Um grupo recebe várias peças: com snap elas empilhariam todas
-              // no centro do cartão.
-              snap={false}
-            >
-              <Text style={styles.pieceEmoji}>{item.icon}</Text>
-            </DraggablePiece>
-            <Text style={styles.pieceLabel}>{item.description}</Text>
-          </View>
+            <Text style={[styles.pieceEmoji, { fontSize: scaled(30) }]}>
+              {item.icon}
+            </Text>
+          </DraggablePiece>
         ))}
       </View>
 

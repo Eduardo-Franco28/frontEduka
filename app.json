@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Eduka",
-    "slug": "Eduka",
+    "name": "IntegraMente",
+    "slug": "integramente",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -15,7 +15,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.Eduka"
+      "package": "com.anonymous.integramente"
     },
     "web": {},
     "plugins": [

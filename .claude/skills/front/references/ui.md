@@ -1,4 +1,4 @@
-# Estilo visual do Eduka
+# Estilo visual do IntegraMente
 
 Visual infantil/educacional: fundo lilás claro, cards brancos com cantos bem
 arredondados, botões grandes (60px de altura), emoji no lugar de ícone, mascote

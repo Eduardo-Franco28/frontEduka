@@ -6,6 +6,7 @@ import TipButton from "../components/TipButton";
 import DropTarget from "../components/DropTarget";
 import DraggablePiece from "../components/DraggablePiece";
 import useDragAndDrop from "../hooks/useDragAndDrop";
+import usePieceScale from "../hooks/usePieceScale";
 import { ActivityProps } from "../types/activity";
 import { FilledSlot, QuestionSlotContent } from "../types/subject";
 
@@ -42,6 +43,8 @@ export default function LettersActivity({
     isPiecePlaced,
   } = useDragAndDrop();
   const [lstWrongSlots, setLstWrongSlots] = useState<string[]>([]);
+  // Peças e alvos crescem com o tamanho escolhido na Acessibilidade.
+  const scaled = usePieceScale();
 
   const content: QuestionSlotContent = JSON.parse(question.content);
 
@@ -102,7 +105,18 @@ export default function LettersActivity({
             // Letra que já vem pronta: só texto, não recebe nada.
             if (!slot.blank) {
               return (
-                <Text key={slot.name} style={styles.answerLetter}>
+                <Text
+                  key={slot.name}
+                  style={[
+                    styles.answerLetter,
+                    {
+                      width: scaled(46),
+                      height: scaled(56),
+                      fontSize: scaled(46),
+                      lineHeight: scaled(52),
+                    },
+                  ]}
+                >
                   {slot.label}
                 </Text>
               );
@@ -120,6 +134,7 @@ export default function LettersActivity({
                 targets={targets}
                 style={[
                   styles.answerSlot,
+                  { width: scaled(52), height: scaled(56) },
                   isWrong ? styles.answerSlotWrong : null,
                   !isWrong && isSlotFilled(slot.name)
                     ? styles.answerSlotFilled
@@ -152,10 +167,13 @@ export default function LettersActivity({
             <View
               style={[
                 styles.tile,
+                { width: scaled(56), height: scaled(56) },
                 isPiecePlaced(alternative.id) ? styles.tilePlaced : null,
               ]}
             >
-              <Text style={styles.tileText}>{alternative.description}</Text>
+              <Text style={[styles.tileText, { fontSize: scaled(30) }]}>
+                {alternative.description}
+              </Text>
             </View>
           </DraggablePiece>
         ))}
@@ -188,7 +206,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 24,
     paddingVertical: 28,
-    paddingHorizontal: 20,
+    paddingHorizontal: 12,
     minHeight: 200,
     alignItems: "center",
     justifyContent: "center",
@@ -197,7 +215,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 12,
+    gap: 8,
   },
   answerHint: {
     fontSize: 40,
