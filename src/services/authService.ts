@@ -1,5 +1,5 @@
 import { api } from "../configs/api";
-import {LoginRequest, RegisterRequest, AuthResponse, User, NewProfileRequest, NewPasswordRequest} from "../types/auth";
+import {LoginRequest, RegisterRequest, AuthResponse, User, NewProfileRequest, NewPasswordRequest, PinRequest} from "../types/auth";
 
 export async function login(data: LoginRequest): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>('/auth/login', data);
@@ -8,6 +8,11 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
 
 export async function register(data: RegisterRequest): Promise<AuthResponse>{
     const response = await api.post<AuthResponse>('/auth/register', data);
+    return response.data;
+}
+
+export async function verifyPin(data: PinRequest): Promise<Boolean> {
+    const response = await api.post<Boolean>('/auth/pin', data);
     return response.data;
 }
 

@@ -46,13 +46,13 @@ export interface ActivityResponse {
 }
 
 export interface AnsweredAlternativeResponse{
-  correct: boolean,
+  correct: boolean;
   concluded: boolean
   lstWrongSlots: Array<string>;
 }
 
 export interface AttemptAlternativeRequest{
-  questionId: number,
+  questionId: number;
   lstAlternativeId?: Array<number>
   lstFilledSlots?: Array<FilledSlot>;
 }

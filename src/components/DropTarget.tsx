@@ -28,7 +28,9 @@ export default function DropTarget({
 
   const measure = () => {
     ref.current?.measureInWindow((x, y, width, height) => {
-      targets.current[id] = { x, y, width, height };
+      // Guarda junto a própria função de medir: a peça chama ela no começo do
+      // arrasto, porque a tela pode ter rolado depois desta medida.
+      targets.current[id] = { x, y, width, height, remeasure: measure };
     });
   };
 

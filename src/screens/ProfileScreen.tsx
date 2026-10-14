@@ -17,10 +17,13 @@ import Header from "../components/Header";
 import useProgress from "../hooks/useProgress";
 import { useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
+import usePin from "../hooks/usePin";
+import PinModal from "../components/PinModal";
 
 export default function ProfileScreen() {
   const { logOut, user } = useAuth();
   const { colors, fontScale, isDark } = useTheme();
+  const { openPin, pinModalProps} = usePin();
 
   const navigation = useAppNavigation();
 
@@ -33,8 +36,6 @@ export default function ProfileScreen() {
     sequence,
   } = useProgress();
 
-  // Busca de novo toda vez que a tela aparece: a criança pode ter concluído
-  // uma atividade e voltado pro perfil, e o número tem que acompanhar.
   useFocusEffect(
     useCallback(() => {
       getConcludedQuestions();
@@ -149,7 +150,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
-            onPress={() => navigation.navigate("AccessibilityScreen")}
+            onPress={() => openPin(() => navigation.navigate("AccessibilityScreen"))}
           >
             <FontAwesomeFreeSolid
               name="universal-access"
@@ -172,7 +173,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
-            onPress={() => navigation.navigate("EditProfileScreen")}
+            onPress={() => openPin(() => navigation.navigate("EditProfileScreen"))}
           >
             <FontAwesomeFreeSolid
               name="user-pen"
@@ -195,7 +196,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
-            onPress={() => navigation.navigate("ChangePasswordScreen")}
+            onPress={() => openPin(() => navigation.navigate("ChangePasswordScreen"))}
           >
             <FontAwesomeFreeSolid
               name="lock"
@@ -218,7 +219,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
-            onPress={handleLogOut}
+            onPress={() => openPin(handleLogOut)}
           >
             <FontAwesomeFreeSolid
               name="right-from-bracket"
@@ -234,6 +235,8 @@ export default function ProfileScreen() {
       </ScrollView>
 
       <TabBar />
+
+      <PinModal {...pinModalProps}/>
     </View>
   );
 }

@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { RouteProp, useRoute } from "@react-navigation/native";
+// A ScrollView do gesture-handler, e não a do react-native: ela participa do
+// mesmo sistema de gestos das peças, então arrastar e rolar não brigam.
+import { ScrollView } from "react-native-gesture-handler";
 import mainStyles from "../styles/theme";
 import { COLORS } from "../styles/colors";
 import BackButton from "../components/BackButton";
@@ -120,9 +123,6 @@ export default function ActivityScreen() {
     if (question.type === QuestionType.DRAG_SLOTS_TO_GROUP)
       return <GroupsActivity key={question.id} {...props} />;
 
-    if (question.type === QuestionType.DRAG_SLOTS_TO_GROUP)
-      return <GroupsActivity key={question.id} {...props} />;
-
     return (
       <Text style={styles.unsupported}>
         Esta atividade ainda não está disponível.
@@ -136,10 +136,16 @@ export default function ActivityScreen() {
         <BackButton />
       </View>
 
-      <View style={styles.content}>
+      {/* Rola quando a atividade não cabe na tela, por exemplo com as peças
+          maiores do tamanho "Muito grande" da Acessibilidade. */}
+      <ScrollView
+        style={mainStyles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <ErrorMessage message={error} />
         {renderActivity()}
-      </View>
+      </ScrollView>
 
       {celebrating && <CelebrationOverlay onDone={finishCelebration} />}
     </View>
@@ -154,9 +160,13 @@ const styles = StyleSheet.create({
     paddingTop: 52,
     paddingBottom: 16,
   },
+  // flexGrow, e não flex: numa ScrollView, flex: 1 impediria o conteúdo de
+  // passar da altura da tela. Com flexGrow, a atividade curta ainda ocupa a
+  // tela inteira, e a comprida cresce e rola.
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 16,
+    paddingBottom: 24,
   },
   unsupported: {
     fontSize: 16,

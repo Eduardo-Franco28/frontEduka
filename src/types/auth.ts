@@ -18,15 +18,20 @@ export interface RegisterRequest {
     name: string;
     email: string;
     password: string;
+    pin: string
 }
 
 export interface NewProfileRequest {
-    nome: string,
-    email: string,
-    currentPassword: string
+    nome: string;
+    email: string;
+    currentPassword: string;
 }
 
 export interface NewPasswordRequest {
-    currentPassword: string,
+    currentPassword: string;
     newPassword: string
+}
+
+export interface PinRequest {
+    pin: string;
 }

@@ -22,6 +22,10 @@ import TipButton from "../components/TipButton";
  * É a única que não é corrigida por lugar: a resposta é a alternativa marcada
  * (`lstAlternativeId`), não onde as peças caíram. O arrastar aqui ainda é o
  * antigo, feito na mão — não usa o useDragAndDrop.
+ *
+ * As bolinhas não encaixam no alvo: quando um grupo cai perto dele, o grupo
+ * some de onde estava e o alvo desenha as bolinhas dele dentro. Assim funciona
+ * com qualquer par de números, sem calcular posição.
  */
 
 const DISTANCE = 60;
@@ -35,10 +39,11 @@ export default function DotsActivity({
   // Peças e alvos crescem com o tamanho escolhido na Acessibilidade.
   const scaled = usePieceScale();
   const dotSize = { width: scaled(16), height: scaled(16), borderRadius: scaled(8) };
-  const [canAnswer, setIsCanAnswer] = useState(false);
 
-  const isAswerAble4 = useSharedValue(false);
-  const isAswerAble3 = useSharedValue(false);
+  // Cada grupo já caiu no alvo? Só dá pra marcar a resposta com os dois lá.
+  const [placedFirst, setPlacedFirst] = useState(false);
+  const [placedSecond, setPlacedSecond] = useState(false);
+  const canAnswer = placedFirst && placedSecond;
 
   // Animações dos blocos
   const translateX4 = useSharedValue(0);
@@ -63,11 +68,10 @@ export default function DotsActivity({
   /** Volta as bolinhas pro lugar e limpa a escolha. */
   const resetDots = () => {
     setAlternativeId(null);
-    setIsCanAnswer(false);
+    setPlacedFirst(false);
+    setPlacedSecond(false);
 
     // Shared values não zeram sozinhos.
-    isAswerAble3.value = false;
-    isAswerAble4.value = false;
     translateX3.value = 0;
     translateY3.value = 0;
     translateX4.value = 0;
@@ -101,8 +105,8 @@ export default function DotsActivity({
 
         dotsRef3.current?.measure(
           (_x3, _y3, _w3, _h3, pageXDots3, pageYDots3) => {
-            finalPositionDotX3.value = pageXTarget - pageXDots3 + scaled(20);
-            finalPositionDotY3.value = pageYTarget - pageYDots3 - scaled(6);
+            finalPositionDotX3.value = pageXTarget - pageXDots3;
+            finalPositionDotY3.value = pageYTarget - pageYDots3;
           },
         );
       });
@@ -110,6 +114,8 @@ export default function DotsActivity({
   };
 
   const dragGesture4 = Gesture.Pan()
+    // Ganha da rolagem da tela: tocou nas bolinhas, são elas que se movem.
+    .minDistance(0)
     .onChange((event) => {
       translateX4.value = event.translationX;
       translateY4.value = event.translationY;
@@ -120,11 +126,10 @@ export default function DotsActivity({
           Math.pow(translateY4.value - finalPositionDotY4.value, 2),
       );
       if (distance < DISTANCE) {
-        translateX4.value = withSpring(finalPositionDotX4.value);
-        translateY4.value = withSpring(finalPositionDotY4.value);
-        if (!isAswerAble4.value) isAswerAble4.value = true;
-
-        if (isAswerAble3.value) runOnJS(setIsCanAnswer)(true);
+        // O grupo some daqui e o alvo desenha as bolinhas dele.
+        translateX4.value = 0;
+        translateY4.value = 0;
+        runOnJS(setPlacedFirst)(true);
       } else {
         translateX4.value = withSpring(0);
         translateY4.value = withSpring(0);
@@ -132,6 +137,8 @@ export default function DotsActivity({
     });
 
   const dragGesture3 = Gesture.Pan()
+    // Ganha da rolagem da tela: tocou nas bolinhas, são elas que se movem.
+    .minDistance(0)
     .onChange((event) => {
       translateX3.value = event.translationX;
       translateY3.value = event.translationY;
@@ -142,11 +149,9 @@ export default function DotsActivity({
           Math.pow(translateY3.value - finalPositionDotY3.value, 2),
       );
       if (distance < DISTANCE) {
-        translateX3.value = withSpring(finalPositionDotX3.value);
-        translateY3.value = withSpring(finalPositionDotY3.value);
-        if (!isAswerAble3.value) isAswerAble3.value = true;
-
-        if (isAswerAble4.value) runOnJS(setIsCanAnswer)(true);
+        translateX3.value = 0;
+        translateY3.value = 0;
+        runOnJS(setPlacedSecond)(true);
       } else {
         translateX3.value = withSpring(0);
         translateY3.value = withSpring(0);
@@ -189,14 +194,13 @@ export default function DotsActivity({
               onLayout={calculateDistance}
               style={[styles.dotsWrapper, { minHeight: scaled(70) }]}
             >
-              <GestureDetector gesture={dragGesture4}>
-                <Animated.View style={[animatedStyle4, styles.dotsVertical, { gap: scaled(6) }]}>
-                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
-                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
-                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
-                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
-                </Animated.View>
-              </GestureDetector>
+              {!placedFirst && (
+                <GestureDetector gesture={dragGesture4}>
+                  <Animated.View style={[animatedStyle4, styles.dotsVertical, { gap: scaled(6) }]}>
+                    {renderDots(content.teste1, dotSize)}
+                  </Animated.View>
+                </GestureDetector>
+              )}
             </View>
           </View>
 
@@ -206,13 +210,13 @@ export default function DotsActivity({
           <View style={styles.numberGroup}>
             <Text style={styles.questionText}>{content.teste2}</Text>
             <View ref={dotsRef3} collapsable={false} style={[styles.dotsWrapper, { minHeight: scaled(70) }]}>
-              <GestureDetector gesture={dragGesture3}>
-                <Animated.View style={[animatedStyle3, styles.dotsVertical, { gap: scaled(6) }]}>
-                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
-                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
-                  <View style={[styles.dotV, styles.dotVActive, dotSize]} />
-                </Animated.View>
-              </GestureDetector>
+              {!placedSecond && (
+                <GestureDetector gesture={dragGesture3}>
+                  <Animated.View style={[animatedStyle3, styles.dotsVertical, { gap: scaled(6) }]}>
+                    {renderDots(content.teste2, dotSize)}
+                  </Animated.View>
+                </GestureDetector>
+              )}
             </View>
           </View>
 
@@ -220,11 +224,22 @@ export default function DotsActivity({
 
           {/* O alvo */}
           <View style={styles.targetGroup}>
+            {/* Largura fixa pras bolinhas quebrarem linha; a altura cresce se precisar. */}
             <View
               ref={targetRef}
               collapsable={false}
-              style={[styles.targetBox, { width: scaled(60), height: scaled(60) }]}
-            />
+              style={[
+                styles.targetBox,
+                styles.targetDots,
+                { width: scaled(60), minHeight: scaled(60) },
+              ]}
+            >
+              {renderDots(
+                (placedFirst ? content.teste1 : 0) +
+                  (placedSecond ? content.teste2 : 0),
+                dotSize,
+              )}
+            </View>
           </View>
         </View>
       </View>
@@ -262,6 +277,13 @@ export default function DotsActivity({
       </TouchableOpacity>
     </View>
   );
+}
+
+/** Desenha `amount` bolinhas. */
+function renderDots(amount: number, dotSize: object) {
+  return Array.from({ length: amount }).map((dot, index) => (
+    <View key={index} style={[styles.dotV, styles.dotVActive, dotSize]} />
+  ));
 }
 
 const styles = StyleSheet.create({
@@ -334,9 +356,15 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.PRIMARY_LIGHT,
   },
   targetBox: {
-    width: 60,
-    height: 60,
     borderRadius: 12,
+  },
+  // Sem height fixa: começa no minHeight e cresce se as bolinhas não couberem.
+  targetDots: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignContent: "center",
+    justifyContent: "center",
+    gap: 4,
   },
   instruction: {
     fontSize: 12,

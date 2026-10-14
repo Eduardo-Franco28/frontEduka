@@ -1,17 +1,25 @@
 {
-  "expo": {
+  "expo": {n
     "name": "IntegraMente",
     "slug": "integramente",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "icon": "./assets/icon/icon.png",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.integramente",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/icon/android-icon-foreground.png",
+        "backgroundImage": "./assets/icon/android-icon-background.png",
+        "monochromeImage": "./assets/icon/android-icon-monochrome.png",
+        "backgroundColor": "#4962D8"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -22,6 +30,11 @@
       "expo-secure-store",
       "@react-native-vector-icons/fontawesome-free-solid",
       "@react-native-vector-icons/evil-icons"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "1c880faa-0a88-44fc-9144-ba5c85614e59"
+      }
+    }
   }
 }

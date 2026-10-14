@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { Rect, Placement } from "../types/dragAndDrop";
+import { Placement, TargetEntry } from "../types/dragAndDrop";
 
 /**
  * Guarda o cadastro dos alvos e o que o aluno já montou.
@@ -9,7 +9,7 @@ import { Rect, Placement } from "../types/dragAndDrop";
  */
 export default function useDragAndDrop() {
   // Ref e não state: os alvos mudam durante o layout e não devem re-renderizar.
-  const targets = useRef<Record<string, Rect>>({});
+  const targets = useRef<Record<string, TargetEntry>>({});
 
   // Cada peça cadastra aqui a função que a faz voltar pra caixa. Precisa disso
   // porque a posição do desenho mora dentro do DraggablePiece — daqui de fora

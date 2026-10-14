@@ -25,14 +25,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const [initializing, setInitializing] = useState<boolean>(true);
 
-  // Guarda o resolve da espera da abertura: é o que o toque na tela chama
-  // para não ter que assistir a animação inteira.
   const skipSplash = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      // A abertura tem tempo próprio: sem isso ela pisca, porque quando não
-      // há token guardado a verificação termina em milissegundos.
       const splash = new Promise<void>((resolve) => {
         skipSplash.current = resolve;
         setTimeout(resolve, SPLASH_DURATION_MS);
@@ -55,7 +51,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await storageService.remove(STORAGE_KEY);
         setUser(null);
       } finally {
-        // Mesmo pulando, a verificação da sessão precisa ter terminado.
         await splash;
         setInitializing(false);
       }

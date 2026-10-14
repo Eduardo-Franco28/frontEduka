@@ -1,14 +1,6 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from "react-native";
-import { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { useRef, useState } from "react";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../types/navigation";
 import mainStyles from "../styles/theme";
@@ -19,6 +11,8 @@ import { COLORS } from "../styles/colors";
 import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 import ErrorMessage from "../components/ErrorMessage";
 import Input from "../components/Input";
+import PinModal from "../components/PinModal";
+import { PinOperation } from "../enums/PinOperationEnum";
 
 export default function AuthScreen() {
   const [name, setName] = useState<string>("");
@@ -27,6 +21,7 @@ export default function AuthScreen() {
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [hidePassword, setHidePassword] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showPin, setShowPin] = useState<boolean>(false);
 
   const route = useRoute<RouteProp<RootStackParamList, "AuthScreen">>();
   const navigation = useAppNavigation();
@@ -34,16 +29,13 @@ export default function AuthScreen() {
   const { login, register, error, loading, user } = useAuth();
 
   const isLogin = route.params.isLogin;
+  const isRegistering = useRef(false);
 
   const handleSubmit = async () => {
     if (!validar()) return;
 
-    let response;
-
-    const passwordFormat = password.trim();
-
     if (isLogin) {
-      response = await login({ email, password: passwordFormat });
+      const response = await login({ email, password: password.trim() });
 
       if (!response) {
         setErrorMessage("Verifique seu e-mail e senha.");
@@ -53,18 +45,38 @@ export default function AuthScreen() {
         index: 0,
         routes: [{ name: "HomeScreen" }],
       });
-    } else {
-      response = await register({ name, email, password: passwordFormat });
-
-      if (!response) {
-        setErrorMessage("Não foi possível criar sua conta. Tente novamente.");
-        return;
-      }
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "HomeScreen" }],
-      });
+      return;
     }
+
+    // Cadastro: com o formulário ok, pede o PIN antes de criar a conta.
+    setShowPin(true);
+  };
+
+  // Chamado pelo PinModal com o PIN digitado.
+  const handleRegister = async (pin: string) => {
+    if(isRegistering.current) return;
+
+    isRegistering.current = true;
+
+    setShowPin(false);
+
+    const response = await register({
+      name,
+      email,
+      password: password.trim(),
+      pin,
+    });
+
+    isRegistering.current = false;
+
+    if (!response) {
+      setErrorMessage("Não foi possível criar sua conta. Tente novamente.");
+      return;
+    }
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "HomeScreen" }],
+    });
   };
 
   const validar = () => {
@@ -98,14 +110,12 @@ export default function AuthScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={mainStyles.component}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView
+    <View style={mainStyles.component}>
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        bottomOffset={24}
       >
         <View style={styles.headerContainer}>
           <Image
@@ -198,8 +208,15 @@ export default function AuthScreen() {
             </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
+
+      <PinModal
+        visible={showPin}
+        operation={PinOperation.CREATE}
+        onClose={() => setShowPin(false)}
+        onConfirm={handleRegister}
+      />
+    </View>
   );
 }
 

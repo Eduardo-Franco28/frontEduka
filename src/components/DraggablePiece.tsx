@@ -92,6 +92,15 @@ export default function DraggablePiece({
   };
 
   /**
+   * Mede de novo a peça e todos os alvos. A tela pode ter rolado desde a última
+   * medida, e aí as posições guardadas já não batem com as de agora.
+   */
+  const measureAll = () => {
+    measureHome();
+    Object.values(targets.current).forEach((target) => target.remeasure());
+  };
+
+  /**
    * Roda na thread do JS (via runOnJS). Fazer a geometria aqui evita ler o
    * registro de alvos — que é um objeto comum — de dentro de um worklet.
    */
@@ -133,10 +142,13 @@ export default function DraggablePiece({
 
   const gesture = Gesture.Pan()
     .enabled(!disabled)
+    // Ativa no primeiro movimento do dedo. Dentro de uma tela que rola, isso faz
+    // o arrasto da peça ganhar da rolagem: tocou na peça, é a peça que se move.
+    .minDistance(0)
     .onBegin(() => {
       isDragging.value = true;
       // Mede de novo a cada arrasto: a tela pode ter rolado ou mudado de layout.
-      runOnJS(measureHome)();
+      runOnJS(measureAll)();
     })
     .onChange((e) => {
       dx.value += e.changeX;

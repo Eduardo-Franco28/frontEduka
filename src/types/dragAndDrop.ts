@@ -9,10 +9,21 @@ export interface Rect {
 }
 
 /**
+ * Um alvo cadastrado: onde ele está na tela, e como medir de novo.
+ *
+ * O `remeasure` existe por causa da rolagem: a posição é medida quando o alvo
+ * aparece, mas se a tela rolar ela muda sem o alvo saber. A peça chama isso no
+ * começo de cada arrasto, pra comparar com a posição de agora.
+ */
+export interface TargetEntry extends Rect {
+  remeasure: () => void;
+}
+
+/**
  * Onde os alvos se cadastram. A chave é o `name` do slot — o mesmo que vai no
  * `lstFilledSlots` da tentativa.
  */
-export type TargetRegistry = MutableRefObject<Record<string, Rect>>;
+export type TargetRegistry = MutableRefObject<Record<string, TargetEntry>>;
 
 /**
  * Uma peça que foi colocada num buraco.
