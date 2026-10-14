@@ -31,6 +31,18 @@ const ARROW_INSET = 4;
 export const CARD_PADDING = 22;
 const TOPIC_INSET = 20;
 
+// Enquanto as matérias não chegam, o carrossel mostra um card com esta matéria
+// de mentira: mesmo visual, sem dados. Sem nome conhecido, ela usa o visual
+// padrão, nas cores do app.
+const LOADING_SUBJECT: SubjectWithProgress = {
+  id: 0,
+  name: "Carregando...",
+  currentTopic: null,
+  concludedTopics: 0,
+  totalTopics: 0,
+  progressLoaded: false,
+};
+
 interface SubjectCarouselProps {
   subjects: Array<SubjectWithProgress>;
   onPressSubject: (subject: SubjectWithProgress) => void;
@@ -42,18 +54,11 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
   const scrollX = useRef(new Animated.Value(0)).current;
   const { colors, fontScale } = useTheme();
 
-  if (subjects.length === 0) {
-    return (
-      <View style={styles.wrapper}>
-        <View style={[styles.placeholder, { backgroundColor: colors.SURFACE_PRIMARY }]}>
-          <ActivityIndicator color={colors.PRIMARY} />
-        </View>
-      </View>
-    );
-  }
+  const isLoading = subjects.length === 0;
+  const items = isLoading ? [LOADING_SUBJECT] : subjects;
 
   const goTo = (index: number) => {
-    if (index < 0 || index > subjects.length - 1) return;
+    if (index < 0 || index > items.length - 1) return;
 
     listRef.current?.scrollToOffset({
       offset: index * SNAP_INTERVAL,
@@ -63,13 +68,13 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
   };
 
   const isFirst = activeIndex === 0;
-  const isLastCard = activeIndex === subjects.length - 1;
+  const isLastCard = activeIndex === items.length - 1;
 
   return (
     <View style={styles.wrapper}>
       <Animated.FlatList
         ref={listRef}
-        data={subjects}
+        data={items}
         horizontal
         showsHorizontalScrollIndicator={false}
         snapToInterval={SNAP_INTERVAL}
@@ -86,7 +91,7 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
         }}
         renderItem={({ item, index }: { item: SubjectWithProgress; index: number }) => {
           const visual = getSubjectVisual(item.name);
-          const isLast = index === subjects.length - 1;
+          const isLast = index === items.length - 1;
           const topic = item.currentTopic;
           const waiting = !item.progressLoaded;
           const finished = item.progressLoaded && topic === null;
@@ -198,6 +203,8 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
                   activeOpacity={0.85}
                   accessibilityRole="button"
                   accessibilityLabel={`Abrir ${item.name}`}
+                  // A matéria de mentira não abre nada.
+                  disabled={isLoading}
                   onPress={() => onPressSubject(item)}
                 >
                   <FontAwesomeFreeSolid
@@ -245,7 +252,7 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
       </View>
 
       <View style={styles.dots}>
-        {subjects.map((item, index) => (
+        {items.map((item, index) => (
           <TouchableOpacity
             key={item.id}
             activeOpacity={0.7}
@@ -260,7 +267,7 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
                 {
                   backgroundColor:
                     index === activeIndex
-                      ? getSubjectVisual(subjects[activeIndex].name).gradient[0]
+                      ? getSubjectVisual(items[activeIndex].name).gradient[0]
                       : colors.BORDER_WARM,
                 },
               ]}
@@ -275,13 +282,6 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
 const styles = StyleSheet.create({
   wrapper: {
     marginBottom: 24,
-  },
-  placeholder: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    borderRadius: CARD_RADIUS,
-    alignItems: "center",
-    justifyContent: "center",
   },
   card: {
     height: CARD_HEIGHT,

@@ -54,7 +54,7 @@ export default function AuthScreen() {
 
   // Chamado pelo PinModal com o PIN digitado.
   const handleRegister = async (pin: string) => {
-    if(isRegistering.current) return;
+    if (isRegistering.current) return;
 
     isRegistering.current = true;
 
@@ -187,7 +187,7 @@ export default function AuthScreen() {
           >
             <View style={styles.buttonContent}>
               <Text style={mainStyles.primaryButtonText}>
-                {isLogin ? "Entrar" : "Criar Conta"}
+                {loading ? "Carregando..." : isLogin ? "Entrar" : "Criar conta"}
               </Text>
               <FontAwesomeFreeSolid name="arrow-right" size={16} color="#fff" />
             </View>
@@ -204,7 +204,7 @@ export default function AuthScreen() {
             }
           >
             <Text style={styles.rodapeLink}>
-              <Text>{loading ? "Carregando..." : isLogin ? "Entrar" : "Criar conta"}</Text>
+              {isLogin ? "Entrar" : "Criar Conta"}
             </Text>
           </TouchableOpacity>
         </View>
