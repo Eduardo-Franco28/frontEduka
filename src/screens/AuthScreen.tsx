@@ -204,7 +204,7 @@ export default function AuthScreen() {
             }
           >
             <Text style={styles.rodapeLink}>
-              {isLogin ? " Criar conta" : " Entrar na conta"}
+              <Text>{loading ? "Carregando..." : isLogin ? "Entrar" : "Criar conta"}</Text>
             </Text>
           </TouchableOpacity>
         </View>

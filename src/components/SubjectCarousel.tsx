@@ -42,7 +42,15 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
   const scrollX = useRef(new Animated.Value(0)).current;
   const { colors, fontScale } = useTheme();
 
-  if (subjects.length === 0) return null;
+  if (subjects.length === 0) {
+    return (
+      <View style={styles.wrapper}>
+        <View style={[styles.placeholder, { backgroundColor: colors.SURFACE_PRIMARY }]}>
+          <ActivityIndicator color={colors.PRIMARY} />
+        </View>
+      </View>
+    );
+  }
 
   const goTo = (index: number) => {
     if (index < 0 || index > subjects.length - 1) return;
@@ -267,6 +275,13 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
 const styles = StyleSheet.create({
   wrapper: {
     marginBottom: 24,
+  },
+  placeholder: {
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
+    borderRadius: CARD_RADIUS,
+    alignItems: "center",
+    justifyContent: "center",
   },
   card: {
     height: CARD_HEIGHT,

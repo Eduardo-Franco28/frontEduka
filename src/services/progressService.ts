@@ -1,5 +1,12 @@
 import { api } from "../configs/api";
 import { QuestionResponse } from "../types/subject";
+import { StatsResponse } from "../types/progress";
+
+/** Os três números do perfil de uma vez: questões, tópicos e sequência. */
+export async function getSummary(): Promise<StatsResponse> {
+  const response = await api.get<StatsResponse>("/stats/summary");
+  return response.data;
+}
 
 /** Quantas questões o aluno já concluiu, em todas as matérias. */
 export async function countConcludedQuestions(): Promise<number> {

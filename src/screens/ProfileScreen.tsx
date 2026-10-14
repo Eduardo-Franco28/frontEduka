@@ -23,24 +23,16 @@ import PinModal from "../components/PinModal";
 export default function ProfileScreen() {
   const { logOut, user } = useAuth();
   const { colors, fontScale, isDark } = useTheme();
-  const { openPin, pinModalProps} = usePin();
+  const { openPin, pinModalProps } = usePin();
 
   const navigation = useAppNavigation();
 
-  const {
-    getConcludedQuestions,
-    getConcludedTopics,
-    getSequence,
-    concludedQuestions,
-    concludedTopics,
-    sequence,
-  } = useProgress();
+  const { getSummary, summary } = useProgress();
 
+  // Os três números chegam juntos, numa chamada só.
   useFocusEffect(
     useCallback(() => {
-      getConcludedQuestions();
-      getConcludedTopics();
-      getSequence();
+      getSummary();
     }, []),
   );
 
@@ -55,11 +47,6 @@ export default function ProfileScreen() {
 
   return (
     <View style={[mainStyles.component, { backgroundColor: colors.BG_APP }]}>
-      <StatusBar
-        barStyle={isDark ? "light-content" : "dark-content"}
-        backgroundColor={colors.BG_WARM}
-      />
-
       <ScrollView
         style={mainStyles.scroll}
         contentContainerStyle={[mainStyles.scrollContent, styles.scrollContent]}
@@ -92,30 +79,64 @@ export default function ProfileScreen() {
           {/* Sequência: dias seguidos em que a criança jogou */}
           <View style={[styles.statCard, { backgroundColor: colors.CARD }]}>
             <View style={styles.statValueRow}>
-              <Text style={[styles.statValue, { color: colors.WARNING, fontSize: 22 * fontScale }]}>
-                {sequence}
+              <Text
+                style={[
+                  styles.statValue,
+                  { color: colors.WARNING, fontSize: 22 * fontScale },
+                ]}
+              >
+                {summary?.sequence ?? "–"}
               </Text>
-              <FontAwesomeFreeSolid name="fire" size={18 * fontScale} color={colors.WARNING} />
+              <FontAwesomeFreeSolid
+                name="fire"
+                size={18 * fontScale}
+                color={colors.WARNING}
+              />
             </View>
-            <Text style={[styles.statLabel, { color: colors.TEXT_MUTED, fontSize: 11 * fontScale }]}>
+            <Text
+              style={[
+                styles.statLabel,
+                { color: colors.TEXT_MUTED, fontSize: 11 * fontScale },
+              ]}
+            >
               Sequência
             </Text>
           </View>
 
           <View style={[styles.statCard, { backgroundColor: colors.CARD }]}>
-            <Text style={[styles.statValue, { color: colors.SUCCESS, fontSize: 22 * fontScale }]}>
-              {concludedQuestions}
+            <Text
+              style={[
+                styles.statValue,
+                { color: colors.SUCCESS, fontSize: 22 * fontScale },
+              ]}
+            >
+              {summary?.questions ?? "–"}
             </Text>
-            <Text style={[styles.statLabel, { color: colors.TEXT_MUTED, fontSize: 11 * fontScale }]}>
+            <Text
+              style={[
+                styles.statLabel,
+                { color: colors.TEXT_MUTED, fontSize: 11 * fontScale },
+              ]}
+            >
               ATIVIDADES
             </Text>
           </View>
 
           <View style={[styles.statCard, { backgroundColor: colors.CARD }]}>
-            <Text style={[styles.statValue, { color: colors.PRIMARY_LIGHT, fontSize: 22 * fontScale }]}>
-              {concludedTopics}
+            <Text
+              style={[
+                styles.statValue,
+                { color: colors.PRIMARY_LIGHT, fontSize: 22 * fontScale },
+              ]}
+            >
+              {summary?.topics ?? "–"}
             </Text>
-            <Text style={[styles.statLabel, { color: colors.TEXT_MUTED, fontSize: 11 * fontScale }]}>
+            <Text
+              style={[
+                styles.statLabel,
+                { color: colors.TEXT_MUTED, fontSize: 11 * fontScale },
+              ]}
+            >
               Tópicos
             </Text>
           </View>
@@ -123,26 +144,52 @@ export default function ProfileScreen() {
 
         {/* Conquistas — em destaque, fora do menu de configurações */}
         <TouchableOpacity
-          style={[styles.achievementsCard, { backgroundColor: colors.SURFACE_YELLOW }]}
+          style={[
+            styles.achievementsCard,
+            { backgroundColor: colors.SURFACE_YELLOW },
+          ]}
           activeOpacity={0.85}
           accessibilityRole="button"
           accessibilityLabel="Ver conquistas"
           onPress={() => navigation.navigate("AchievementsScreen")}
         >
-          <View style={[styles.achievementsIconBox, { backgroundColor: colors.WARNING }]}>
-            <FontAwesomeFreeSolid name="trophy" size={24 * fontScale} color="#fff" />
+          <View
+            style={[
+              styles.achievementsIconBox,
+              { backgroundColor: colors.WARNING },
+            ]}
+          >
+            <FontAwesomeFreeSolid
+              name="trophy"
+              size={24 * fontScale}
+              color="#fff"
+            />
           </View>
 
           <View style={styles.achievementsText}>
-            <Text style={[styles.achievementsTitle, { color: colors.TEXT_PRIMARY, fontSize: 17 * fontScale }]}>
+            <Text
+              style={[
+                styles.achievementsTitle,
+                { color: colors.TEXT_PRIMARY, fontSize: 17 * fontScale },
+              ]}
+            >
               Conquistas
             </Text>
-            <Text style={[styles.achievementsSubtitle, { color: colors.TEXT_MUTED, fontSize: 13 * fontScale }]}>
+            <Text
+              style={[
+                styles.achievementsSubtitle,
+                { color: colors.TEXT_MUTED, fontSize: 13 * fontScale },
+              ]}
+            >
               Veja suas medalhas e recordes
             </Text>
           </View>
 
-          <FontAwesomeFreeSolid name="chevron-right" size={16 * fontScale} color={colors.WARNING} />
+          <FontAwesomeFreeSolid
+            name="chevron-right"
+            size={16 * fontScale}
+            color={colors.WARNING}
+          />
         </TouchableOpacity>
 
         {/* Menu Card */}
@@ -150,7 +197,9 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
-            onPress={() => openPin(() => navigation.navigate("AccessibilityScreen"))}
+            onPress={() =>
+              openPin(() => navigation.navigate("AccessibilityScreen"))
+            }
           >
             <FontAwesomeFreeSolid
               name="universal-access"
@@ -158,7 +207,12 @@ export default function ProfileScreen() {
               color={colors.PRIMARY_LIGHT}
               style={styles.menuIcon}
             />
-            <Text style={[styles.menuLabel, { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale }]}>
+            <Text
+              style={[
+                styles.menuLabel,
+                { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale },
+              ]}
+            >
               Acessibilidade
             </Text>
             <FontAwesomeFreeSolid
@@ -168,12 +222,16 @@ export default function ProfileScreen() {
             />
           </TouchableOpacity>
 
-          <View style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]} />
+          <View
+            style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]}
+          />
 
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
-            onPress={() => openPin(() => navigation.navigate("EditProfileScreen"))}
+            onPress={() =>
+              openPin(() => navigation.navigate("EditProfileScreen"))
+            }
           >
             <FontAwesomeFreeSolid
               name="user-pen"
@@ -181,7 +239,12 @@ export default function ProfileScreen() {
               color={colors.PRIMARY_LIGHT}
               style={styles.menuIcon}
             />
-            <Text style={[styles.menuLabel, { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale }]}>
+            <Text
+              style={[
+                styles.menuLabel,
+                { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale },
+              ]}
+            >
               Editar perfil
             </Text>
             <FontAwesomeFreeSolid
@@ -191,12 +254,16 @@ export default function ProfileScreen() {
             />
           </TouchableOpacity>
 
-          <View style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]} />
+          <View
+            style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]}
+          />
 
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
-            onPress={() => openPin(() => navigation.navigate("ChangePasswordScreen"))}
+            onPress={() =>
+              openPin(() => navigation.navigate("ChangePasswordScreen"))
+            }
           >
             <FontAwesomeFreeSolid
               name="lock"
@@ -204,7 +271,12 @@ export default function ProfileScreen() {
               color={colors.PRIMARY_LIGHT}
               style={styles.menuIcon}
             />
-            <Text style={[styles.menuLabel, { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale }]}>
+            <Text
+              style={[
+                styles.menuLabel,
+                { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale },
+              ]}
+            >
               Alterar senha
             </Text>
             <FontAwesomeFreeSolid
@@ -214,7 +286,9 @@ export default function ProfileScreen() {
             />
           </TouchableOpacity>
 
-          <View style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]} />
+          <View
+            style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]}
+          />
 
           <TouchableOpacity
             style={styles.menuItem}
@@ -227,7 +301,12 @@ export default function ProfileScreen() {
               color={colors.DANGER}
               style={styles.menuIcon}
             />
-            <Text style={[styles.menuLabel, { color: colors.DANGER, fontSize: 15 * fontScale }]}>
+            <Text
+              style={[
+                styles.menuLabel,
+                { color: colors.DANGER, fontSize: 15 * fontScale },
+              ]}
+            >
               Sair
             </Text>
           </TouchableOpacity>
@@ -236,7 +315,7 @@ export default function ProfileScreen() {
 
       <TabBar />
 
-      <PinModal {...pinModalProps}/>
+      <PinModal {...pinModalProps} />
     </View>
   );
 }

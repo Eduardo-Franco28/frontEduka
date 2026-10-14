@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import mainStyles from "../styles/theme";
 import useSubject from "../hooks/useSubject";
 import ErrorMessage from "../components/ErrorMessage";
+import LoadingPage from "../components/LoadingPage";
 import TabBar from "../components/TabBar";
 import useAppNavigation from "../hooks/useNavigation";
 import useTheme from "../hooks/useTheme";
@@ -34,6 +35,10 @@ export default function SubjectsScreen() {
   useEffect(() => {
     getAll();
   }, []);
+
+  if (loading && !subject) {
+    return <LoadingPage message="Carregando matérias..." />;
+  }
 
   return (
     <SafeAreaView

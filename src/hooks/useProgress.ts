@@ -2,6 +2,7 @@ import { useState } from "react";
 import getMessageError from "../utils/getMessageErrorUtils";
 import * as progressService from "../services/progressService";
 import { QuestionResponse } from "../types/subject";
+import { StatsResponse } from "../types/progress";
 
 export default function useProgress() {
   const [concludedQuestions, setConcludedQuestions] = useState<number>(0);
@@ -10,8 +11,31 @@ export default function useProgress() {
   const [unfinishedQuestions, setUnfinishedQuestions] = useState<
     Array<QuestionResponse>
   >([]);
+  // null = ainda não chegou. A tela mostra "–" em vez de um 0 que não é verdade.
+  const [summary, setSummary] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const getSummary = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await progressService.getSummary();
+      setSummary(response);
+      return response;
+    } catch (error) {
+      const errorMessage = getMessageError(
+        error,
+        "Erro ao buscar seu progresso",
+      );
+      console.error("Progress error:", errorMessage);
+      setError(errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getConcludedQuestions = async () => {
     setLoading(true);
@@ -98,6 +122,8 @@ export default function useProgress() {
   };
 
   return {
+    getSummary,
+    summary,
     getConcludedQuestions,
     getConcludedTopics,
     getSequence,
