@@ -14,8 +14,6 @@ export default function ResultScreen() {
 
   const { topicId, subjectId, subjectName } = route.params;
 
-  // Tópico terminado: o histórico é limpo para o aluno não voltar com o gesto
-  // e cair de novo na última questão, que já foi respondida.
   const handleNext = () => {
     if (subjectId && subjectName) {
       navigation.reset({
@@ -28,11 +26,13 @@ export default function ResultScreen() {
     navigation.reset({ index: 0, routes: [{ name: "HomeScreen" }] });
   };
 
-  // Toda atividade abre pela mesma tela, então tentar de novo é sempre ela.
-  // `replace` pra não empilhar o resultado por baixo da atividade nova.
   const handleRetry = () => {
     navigation.replace("ActivityScreen", { topicId });
   };
+
+  const handleExit = () => {
+    navigation.reset({ index: 0, routes: [{ name: "HomeScreen" }] });
+  }
 
   return (
     <SafeAreaView
@@ -95,20 +95,34 @@ export default function ResultScreen() {
             Tentar de novo
           </Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: colors.CARD }]}
+          onPress={handleExit}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Sair do tópico"
+        >
+          <Text
+            style={[
+              styles.secondaryText,
+              { color: colors.PRIMARY, fontSize: 17 * fontScale },
+            ]}
+          >
+           Sair do tópico
+          </Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  // Texto + seta do botão, lado a lado.
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-  // A comemoração e os botões formam um bloco só, centralizado na tela: os
-  // botões ficam logo abaixo do "Muito bem!", e não colados no rodapé.
   component: {
     flex: 1,
     paddingHorizontal: 24,
@@ -132,7 +146,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // Botões
   buttonsContainer: {
     gap: 14,
     marginTop: 40,

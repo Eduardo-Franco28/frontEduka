@@ -13,8 +13,6 @@ export type RootStackParamList = {
     subjectId: number;
     subjectName: string;
   };
-  // Uma tela só pra qualquer atividade: ela escolhe o componente pelo tipo
-  // de cada questão.
   ActivityScreen: {
     topicId: number
   };

@@ -19,7 +19,6 @@ import ErrorMessage from "../components/ErrorMessage";
 export default function EditProfileScreen() {
   const { updateProfile, error, loading, user } = useAuth();
 
-  // Os campos já vêm com os dados atuais: a pessoa só mexe no que quer mudar.
   const [nome, setNome] = useState<string>(user?.nome ?? "")
   const [email, setEmail] = useState<string>(user?.email ?? "")
   const [currentPassword, setCurrentPassword] = useState<string>("")
@@ -29,7 +28,6 @@ export default function EditProfileScreen() {
   const navigation = useAppNavigation();
   const { colors, fontScale } = useTheme();
 
-  // Sem mudança nenhuma, não há o que salvar: o botão fica travado.
   const nothingChanged =
     nome.trim() === user?.nome && email.trim() === user?.email;
 
@@ -44,8 +42,6 @@ export default function EditProfileScreen() {
 
       if (!response) return;
 
-      // O contexto já atualizou o usuário e guardou o token novo. É só voltar:
-      // o Perfil está logo atrás e mostra o nome novo sozinho.
       navigation.goBack();
   };
 
@@ -80,7 +76,6 @@ export default function EditProfileScreen() {
 
         <Header title="Editar Perfil"/>
 
-        {/* Profile Card */}
         <View style={styles.profileCard}>
           <View
             style={[
@@ -176,7 +171,6 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
 
-  // Profile card
   profileCard: {
     borderRadius: 20,
     padding: 16,

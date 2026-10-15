@@ -11,29 +11,6 @@ import usePieceScale from "../hooks/usePieceScale";
 import { ActivityProps } from "../types/activity";
 import { FilledSlot, QuestionSlotContent } from "../types/subject";
 
-/**
- * DRAG_SLOTS_TO_GROUP — classificar em grupos.
- *
- * Recebe UMA questão pronta da ActivityScreen. Não busca nada, não troca de
- * questão e não navega: só desenha, deixa arrastar e manda a resposta.
- *
- * Os grupos são os lugares e os itens são as peças. Três diferenças que só
- * existem aqui:
- *
- * 1. UM GRUPO RECEBE VÁRIAS PEÇAS. O mar fica com golfinho e peixe. Quem
- *    permite isso no backend é o próprio tipo da questão.
- *
- * 2. SEM SNAP. Se as peças pulassem pro centro do grupo, as duas do mar
- *    empilhariam no mesmo ponto e a de baixo desapareceria.
- *
- * 3. A PEÇA É UM EMOJI, não um desenho: vem do campo `icon` da alternativa.
- *
- * As cores dos grupos são design, não dado: a paleta abaixo é aplicada na
- * ordem em que os grupos chegam.
- */
-
-// Um par de cores por grupo, na ordem em que eles vêm do backend.
-// Se um dia entrar um quarto grupo, a paleta recomeça do primeiro.
 const GROUP_PALETTE = [
   { colors: [COLORS.SURFACE_BLUE, COLORS.INFO] as const, badge: COLORS.INFO },
   {
@@ -62,7 +39,6 @@ export default function GroupsActivity({
     isPiecePlaced,
   } = useDragAndDrop();
   const [lstWrongSlots, setLstWrongSlots] = useState<string[]>([]);
-  // Peças e alvos crescem com o tamanho escolhido na Acessibilidade.
   const scaled = usePieceScale();
 
   const content: QuestionSlotContent = JSON.parse(question.content);
@@ -70,8 +46,6 @@ export default function GroupsActivity({
   const groups = content.slots;
   const items = question.lstAlternative ?? [];
 
-  // Aqui "terminou" é ter colocado todas as peças, não uma por grupo — são 6
-  // animais em 3 lugares. É a mesma conta que o backend faz.
   const isComplete = placedCount === items.length;
 
   const handleConfirm = async () => {
@@ -79,12 +53,10 @@ export default function GroupsActivity({
 
     const response = await onAnswer({ lstFilledSlots: buildFilledSlots() });
 
-    // Acertou: a tela já trocou de questão. Não há nada a fazer aqui.
     if (!response || response.correct) return;
 
     setLstWrongSlots(response.lstWrongSlots);
 
-    // Toda peça que foi pro grupo errado volta pra fileira de baixo.
     placements
       .filter((placement) =>
         response.lstWrongSlots.includes(placement.slotName),
@@ -92,7 +64,6 @@ export default function GroupsActivity({
       .forEach((placement) => returnToBox(placement.pieceId));
   };
 
-  /** O que a criança montou, no formato que o backend espera. */
   function buildFilledSlots(): FilledSlot[] {
     return placements.map((placement) => ({
       name: placement.slotName,
@@ -100,12 +71,6 @@ export default function GroupsActivity({
     }));
   }
 
-  /**
-   * Quantas peças estão neste grupo.
-   *
-   * Nas outras atividades bastava saber "tem peça ou não". Aqui o número
-   * importa: é ele que mostra à criança que o mar já recebeu dois.
-   */
   function countIn(groupName: string) {
     return placements.filter((placement) => placement.slotName === groupName)
       .length;
@@ -124,7 +89,6 @@ export default function GroupsActivity({
         autoOpen={false}
       />
 
-      {/* OS GRUPOS — o alvo já é uma View, então ele mesmo é o DropTarget */}
       <View style={styles.groupsGrid}>
         {groups.map((group, position) => {
           const palette = GROUP_PALETTE[position % GROUP_PALETTE.length];
@@ -139,9 +103,6 @@ export default function GroupsActivity({
               style={[
                 styles.group,
                 { height: scaled(112) },
-                // O vermelho não espera o grupo esvaziar: ele recebe várias
-                // peças, então "vazio" não é sinal de nada. O aviso sai no
-                // próximo Confirmar.
                 isWrong ? styles.groupWrong : null,
               ]}
             >
@@ -175,7 +136,6 @@ export default function GroupsActivity({
         *Arraste cada item para o seu grupo!
       </Text>
 
-      {/* AS PEÇAS */}
       <View style={styles.piecesGrid}>
         {items.map((item) => (
           <DraggablePiece
@@ -185,10 +145,7 @@ export default function GroupsActivity({
             pieces={pieces}
             onDrop={place}
             onMiss={remove}
-            // Um grupo recebe várias peças: com snap elas empilhariam todas
-            // no centro do cartão.
             snap={false}
-            // O cartão inteiro é a área de toque; só o emoji sai andando.
             frameStyle={[
               styles.piece,
               { width: scaled(66), height: scaled(78) },
@@ -213,7 +170,7 @@ export default function GroupsActivity({
           disabled={answering || !isComplete}
           style={[
             mainStyles.primaryButton,
-            !isComplete ? styles.buttonDisabled : null,
+            !isComplete ? mainStyles.primaryButtonDisabled : null,
           ]}
           onPress={handleConfirm}
         >
@@ -229,7 +186,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // OS GRUPOS
   groupsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -262,8 +218,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 0.8,
   },
-  // Quantas peças já caíram aqui. Fica no canto pra não brigar com as peças,
-  // que pousam soltas por cima do cartão.
   groupCount: {
     position: "absolute",
     right: 10,
@@ -283,7 +237,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
 
-  // AS PEÇAS
   piecesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -316,8 +269,5 @@ const styles = StyleSheet.create({
 
   footer: {
     marginTop: 20,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
   },
 });

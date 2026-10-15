@@ -38,8 +38,6 @@ export default function TipActivity({
       animationType="fade"
     >
       <View style={styles.overlay}>
-        {/* Fundo clicável, atrás do painel: tocar fora da dica fecha ela.
-            Como é irmão do painel, e não pai, o toque no painel não chega aqui. */}
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
 
         <View style={[styles.tipPanel, { backgroundColor: colors.CARD }]}>
@@ -122,7 +120,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
 
-  // Painel
   tipPanel: {
     width: "100%",
     maxWidth: 380,
@@ -153,7 +150,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
-  // Ações
   actions: {
     flexDirection: "row",
     alignItems: "center",

@@ -29,7 +29,6 @@ export default function ProfileScreen() {
 
   const { getSummary, summary } = useProgress();
 
-  // Os três números chegam juntos, numa chamada só.
   useFocusEffect(
     useCallback(() => {
       getSummary();
@@ -54,7 +53,6 @@ export default function ProfileScreen() {
       >
         <Header title="Meu perfil" showBack={false} />
 
-        {/* Profile Card */}
         <View style={[styles.profileCard, { backgroundColor: colors.CARD }]}>
           <View style={[styles.avatarCircle, { borderColor: colors.PRIMARY }]}>
             <Image
@@ -74,9 +72,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Stats Row */}
         <View style={styles.statsRow}>
-          {/* Sequência: dias seguidos em que a criança jogou */}
           <View style={[styles.statCard, { backgroundColor: colors.CARD }]}>
             <View style={styles.statValueRow}>
               <Text
@@ -142,7 +138,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Conquistas — em destaque, fora do menu de configurações */}
         <TouchableOpacity
           style={[
             styles.achievementsCard,
@@ -192,7 +187,6 @@ export default function ProfileScreen() {
           />
         </TouchableOpacity>
 
-        {/* Menu Card */}
         <View style={[styles.menuCard, { backgroundColor: colors.CARD }]}>
           <TouchableOpacity
             style={styles.menuItem}
@@ -325,7 +319,6 @@ const styles = StyleSheet.create({
     paddingTop: 52,
   },
 
-  // Profile card
   profileCard: {
     borderRadius: 20,
     padding: 16,
@@ -353,7 +346,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // Stats
   statsRow: {
     flexDirection: "row",
     gap: 10,
@@ -369,7 +361,6 @@ const styles = StyleSheet.create({
   statValue: {
     fontWeight: "800",
   },
-  // Alinha o número e o ícone de fogo na mesma linha do card de stat
   statValueRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -380,7 +371,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
 
-  // Conquistas
   achievementsCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -408,7 +398,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  // Menu
   menuCard: {
     borderRadius: 20,
     paddingHorizontal: 16,
@@ -419,8 +408,6 @@ const styles = StyleSheet.create({
     gap: 14,
     paddingVertical: 18,
   },
-  // Largura fixa: os ícones do FontAwesome têm larguras diferentes entre si,
-  // sem isso os textos do menu ficam desalinhados um do outro.
   menuIcon: {
     width: 22,
     textAlign: "center",

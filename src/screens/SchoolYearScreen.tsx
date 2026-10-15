@@ -27,8 +27,7 @@ export default function SchoolYearScreen() {
 
   const { login, register, userLogin, userRegister, error, loading } = useAuth();
 
-
-  return (
+return (
     <View style={mainStyles.component}>
       <Header title="Seu ano escolar" />
 
@@ -113,19 +112,11 @@ export default function SchoolYearScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* <View style={styles.footer}>
-        <TouchableOpacity style={styles.nextButton} activeOpacity={0.88} onPress={handleSubmit}>
-          <Text style={styles.nextButtonText}>Próximo →</Text>
-        </TouchableOpacity>
-      </View> */}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // Header
-
-  // Step dots
   dotsRow: {
     flexDirection: "row",
     justifyContent: "center",
@@ -146,9 +137,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
 
-  // Scroll
-
-  // Bubble
   bubble: {
     backgroundColor: "#fff",
     borderRadius: 18,
@@ -165,7 +153,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  // Card
   card: {
     backgroundColor: "#fff",
     borderRadius: 18,
@@ -203,7 +190,6 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
 
-  // Checkbox
   checkbox: {
     width: 24,
     height: 24,
@@ -219,7 +205,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.INFO,
   },
 
-  // Footer
   footer: {
     paddingHorizontal: 16,
     paddingBottom: 32,

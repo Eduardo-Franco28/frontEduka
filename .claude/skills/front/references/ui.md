@@ -160,18 +160,17 @@ usados por ninguém.
 
 ## Organização do `StyleSheet`
 
-Sempre no fim do arquivo, em `const styles`, com comentários de seção na mesma
-ordem do JSX:
+Sempre no fim do arquivo, em `const styles`, na mesma ordem do JSX e **sem
+comentários**: os nomes dos estilos já dizem a que parte da tela pertencem. Uma
+linha em branco separa os grupos:
 
 ```tsx
 const styles = StyleSheet.create({
   scrollContent: { paddingTop: 52 },
 
-  // Profile card
   profileCard: { ... },
   avatarCircle: { ... },
 
-  // Stats row
   statsRow: { ... },
 });
 ```

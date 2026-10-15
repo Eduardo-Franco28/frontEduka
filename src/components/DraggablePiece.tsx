@@ -10,33 +10,15 @@ import Animated, {
 import { PieceRegistry, Rect, TargetRegistry } from "../types/dragAndDrop";
 
 interface DraggablePieceProps {
-  /** Id da peça — volta no `onDrop` junto com o slot onde ela caiu. */
   id: number;
   targets: TargetRegistry;
-  /** Chamado quando a peça cai dentro de um alvo. */
   onDrop: (pieceId: number, slotName: string) => void;
-  /** Chamado quando ela é solta fora de qualquer alvo. */
   onMiss?: (pieceId: number) => void;
-  /**
-   * `true` (padrão): a peça pula pro centro do alvo.
-   * `false`: fica onde o dedo soltou — melhor quando um alvo recebe várias
-   * peças, senão elas empilham no mesmo ponto.
-   */
   snap?: boolean;
-  /**
-   * Onde a peça cadastra a função que a manda de volta pra caixa. É o que
-   * permite o `returnToBox` do useDragAndDrop mover a peça daqui de fora.
-   */
   pieces?: PieceRegistry;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
-  /**
-   * Estilo de um cartão em volta da peça. Quando existe, o cartão INTEIRO vira
-   * a área de toque, mas só a peça (o `children`) sai andando: o cartão fica no
-   * lugar, marcando de onde ela saiu. Sem ele, só a peça responde ao toque.
-   */
   frameStyle?: StyleProp<ViewStyle>;
-  /** O que vai no cartão embaixo da peça e não se move junto, como o nome. */
   footer?: ReactNode;
   children: ReactNode;
 }
@@ -58,22 +40,17 @@ export default function DraggablePiece({
 }: DraggablePieceProps) {
   const ref = useRef<View | null>(null);
 
-  // Onde a peça mora quando não está deslocada. Ref (não shared value) porque
-  // só é lida na thread do JS, na hora de decidir o encaixe.
   const home = useRef<Rect>(EMPTY_RECT);
 
   const dx = useSharedValue(0);
   const dy = useSharedValue(0);
   const isDragging = useSharedValue(false);
 
-  /** Volta a peça pro lugar de origem, com uma mola. */
   const returnHome = () => {
     dx.value = withSpring(0);
     dy.value = withSpring(0);
   };
 
-  // Se cadastra no registro pra poder ser mandada de volta daqui de fora,
-  // e se descadastra quando some da tela (ex.: trocou de questão).
   useEffect(() => {
     if (!pieces) return;
 
@@ -86,30 +63,20 @@ export default function DraggablePiece({
 
   const measureHome = () => {
     ref.current?.measureInWindow((x, y, width, height) => {
-      // Desconta o deslocamento atual: queremos a posição de origem, não a de agora.
       home.current = { x: x - dx.value, y: y - dy.value, width, height };
     });
   };
 
-  /**
-   * Mede de novo a peça e todos os alvos. A tela pode ter rolado desde a última
-   * medida, e aí as posições guardadas já não batem com as de agora.
-   */
   const measureAll = () => {
     measureHome();
     Object.values(targets.current).forEach((target) => target.remeasure());
   };
 
-  /**
-   * Roda na thread do JS (via runOnJS). Fazer a geometria aqui evita ler o
-   * registro de alvos — que é um objeto comum — de dentro de um worklet.
-   */
   const resolveDrop = (offsetX: number, offsetY: number) => {
     const origin = home.current;
     const cx = origin.x + origin.width / 2 + offsetX;
     const cy = origin.y + origin.height / 2 + offsetY;
 
-    // Todos os alvos que contêm o centro da peça.
     const candidates = Object.entries(targets.current).filter(
       ([, a]) =>
         cx >= a.x && cx <= a.x + a.width && cy >= a.y && cy <= a.y + a.height,
@@ -121,7 +88,6 @@ export default function DraggablePiece({
       return;
     }
 
-    // Sobreposição de alvos: ganha o de centro mais próximo.
     const [slotId, target] = candidates.reduce((best, current) => {
       const distance = ([, a]: [string, Rect]) =>
         Math.hypot(a.x + a.width / 2 - cx, a.y + a.height / 2 - cy);
@@ -142,12 +108,9 @@ export default function DraggablePiece({
 
   const gesture = Gesture.Pan()
     .enabled(!disabled)
-    // Ativa no primeiro movimento do dedo. Dentro de uma tela que rola, isso faz
-    // o arrasto da peça ganhar da rolagem: tocou na peça, é a peça que se move.
     .minDistance(0)
     .onBegin(() => {
       isDragging.value = true;
-      // Mede de novo a cada arrasto: a tela pode ter rolado ou mudado de layout.
       runOnJS(measureAll)();
     })
     .onChange((e) => {
@@ -163,13 +126,10 @@ export default function DraggablePiece({
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: dx.value }, { translateY: dy.value }],
-    // Enquanto arrasta, a peça passa por cima de tudo.
     zIndex: isDragging.value ? 100 : 1,
     elevation: isDragging.value ? 8 : 0,
   }));
 
-  // O cartão precisa subir junto enquanto arrasta: o zIndex só vale entre
-  // irmãos, então sem isso a peça passaria por baixo dos cartões vizinhos.
   const frameAnimatedStyle = useAnimatedStyle(() => ({
     zIndex: isDragging.value ? 100 : 1,
   }));

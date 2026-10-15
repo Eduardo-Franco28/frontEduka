@@ -3,14 +3,10 @@ import { SubjectIconName } from "./subjectVisuals";
 export interface AchievementLevel {
   name: string;
   meaning: string;
-  // Percentual mínimo da matéria para alcançar este nível.
   minPercent: number;
   icon: SubjectIconName;
 }
 
-// O termômetro é sempre o mesmo para toda matéria, por percentual e não por
-// número de tópicos: assim uma matéria de 2 tópicos e outra de 4 chegam aos
-// mesmos níveis.
 export const ACHIEVEMENT_LEVELS: Array<AchievementLevel> = [
   {
     name: "Corajoso",
@@ -44,7 +40,6 @@ export const ACHIEVEMENT_LEVELS: Array<AchievementLevel> = [
   },
 ];
 
-/** Índice do nível atual. -1 quando o aluno ainda não começou a matéria. */
 export function getLevelIndex(percent: number): number {
   let index = -1;
 

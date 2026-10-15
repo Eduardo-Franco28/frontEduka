@@ -24,7 +24,6 @@ export default function AccessibilityScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Tema */}
         <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY, fontSize: 16 * fontScale }]}>
           Aparência
         </Text>
@@ -62,7 +61,6 @@ export default function AccessibilityScreen() {
           </View>
         </TouchableOpacity>
 
-        {/* Tamanho da fonte */}
         <Text
           style={[
             styles.sectionTitle,
@@ -108,7 +106,6 @@ export default function AccessibilityScreen() {
           })}
         </View>
 
-        {/* Idioma */}
         <Text
           style={[
             styles.sectionTitle,

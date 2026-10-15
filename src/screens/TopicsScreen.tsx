@@ -88,7 +88,6 @@ export default function TopicsScreen() {
       style={[mainStyles.component, { backgroundColor: colors.BG_APP }]}
       edges={["top"]}
     >
-      {/* Header */}
       <View style={[styles.header, { backgroundColor: subjectVisual.bg }]}>
         <View style={styles.headerTopRow}>
           <BackButton />

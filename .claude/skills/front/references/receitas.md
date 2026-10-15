@@ -99,7 +99,7 @@ export default function MinhaTelaScreen() {
 }
 
 const styles = StyleSheet.create({
-  // seções comentadas aqui
+  // estilos na ordem do JSX, sem comentários
 });
 ```
 
@@ -353,7 +353,7 @@ Padrão usado nas duas telas:
   volta pra 0.
 - Para chamar `setState` de dentro de um gesto, use `runOnJS(setX)(valor)`.
 - **Shared values não zeram sozinhos entre questões** — zere manualmente no
-  `handleAnswer` (tem comentário no código dizendo isso).
+  `handleAnswer`.
 
 ### Ao criar a terceira atividade
 
@@ -364,7 +364,7 @@ Padrão usado nas duas telas:
    `App.tsx`.
 4. Aponte a navegação em `TopicsScreen.handleActivity`.
 5. Combine com quem faz o mock/backend qual formato o `content` vai ter, e
-   documente com um comentário no topo do arquivo (como o `STATIC_PUZZLE` faz).
+   documente esse formato como um tipo em `src/types/` (não em comentário).
 
 > Hoje `TopicsScreen` escolhe a tela de atividade com uma linha comentada e outra
 > ativa. O caminho certo, quando existirem 3+ tipos, é rotear por

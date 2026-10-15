@@ -12,30 +12,10 @@ import svgBoard from "../utils/svgBoard";
 import { ActivityProps } from "../types/activity";
 import { BoardSlot, FilledSlot, QuestionSlotContent } from "../types/subject";
 
-/**
- * DRAG_TO_SLOTS — encaixar formas.
- *
- * Serve pra qualquer desenho: mapa do Brasil, corpo humano, e o que vier. O
- * desenho vem do board; o content diz quais partes estão vazias. Cada peça tem
- * o formato do buraco onde ela encaixa.
- *
- * Recebe UMA questão pronta da ActivityScreen. Não busca nada, não troca de
- * questão e não navega: só desenha, deixa arrastar e manda a resposta.
- *
- * Duas camadas no tabuleiro: o SVG embaixo e os buracos invisíveis em cima.
- * Precisa disso porque o buraco é um <Path> dentro do <Svg>, e o DropTarget é
- * uma View — View não pode envolver um Path.
- */
-
-// Altura do desenho na tela. É o único número a mexer se não couber.
 const BOARD_HEIGHT = 230;
 
-// Pixels a mais em volta do buraco. O desenho não muda: só a área que aceita a
-// peça fica maior, porque partes estreitas (um braço, o Sul) são difíceis de
-// acertar com o dedo de uma criança.
 const SLOT_HIT_PADDING = 8;
 
-// Espaço que o desenho da peça tem dentro do cartãozinho.
 const PIECE_WIDTH = 42;
 const PIECE_HEIGHT = 44;
 
@@ -56,18 +36,14 @@ export default function ShapesActivity({
     isPiecePlaced,
   } = useDragAndDrop();
   const [lstWrongSlots, setLstWrongSlots] = useState<string[]>([]);
-  // Peças e alvos crescem com o tamanho escolhido na Acessibilidade.
   const scaled = usePieceScale();
 
-  // Encaixar formas sem desenho não tem o que mostrar. Esta checagem vem
-  // depois dos hooks: nenhum hook pode ficar abaixo de um return.
   if (!question.board) {
     return (
       <Text style={styles.missing}>Esta atividade está sem desenho.</Text>
     );
   }
 
-  // O board traz o DESENHO de cada parte; o content diz quais estão vazias.
   const designs: BoardSlot[] = JSON.parse(question.board.slots);
   const content: QuestionSlotContent = JSON.parse(question.content);
 
@@ -81,7 +57,6 @@ export default function ShapesActivity({
   const alternatives = question.lstAlternative ?? [];
   const board = svgBoard(question.board.viewBox, BOARD_HEIGHT);
 
-  // Um buraco, uma peça: terminou quando todo buraco vazio foi preenchido.
   const isComplete = placedCount === blankSlots.length;
 
   const handleConfirm = async () => {
@@ -89,18 +64,15 @@ export default function ShapesActivity({
 
     const response = await onAnswer({ lstFilledSlots: buildFilledSlots() });
 
-    // Acertou: a tela já trocou de questão. Não há nada a fazer aqui.
     if (!response || response.correct) return;
 
     setLstWrongSlots(response.lstWrongSlots);
 
-    // Toda peça que caiu num lugar errado volta pra caixa.
     placements
       .filter((placement) => response.lstWrongSlots.includes(placement.slotName))
       .forEach((placement) => returnToBox(placement.pieceId));
   };
 
-  /** O que a criança montou, no formato que o backend espera. */
   function buildFilledSlots(): FilledSlot[] {
     return placements.map((placement) => ({
       name: placement.slotName,
@@ -108,19 +80,11 @@ export default function ShapesActivity({
     }));
   }
 
-  /**
-   * Em que tamanho desenhar a peça dentro do cartão.
-   *
-   * As partes têm proporções bem diferentes — a cabeça é quase quadrada e o
-   * braço é comprido. Forçadas no mesmo quadrado, umas ficariam esticadas.
-   * Então cada uma encolhe pelo lado que limita primeiro.
-   */
   function pieceSize(bbox: string) {
     const numbers = bbox.trim().split(/\s+/).map(Number);
     const drawingWidth = numbers[2];
     const drawingHeight = numbers[3];
 
-    // A menor das duas é a que faz caber nos dois sentidos.
     const scale = Math.min(
       scaled(PIECE_WIDTH) / drawingWidth,
       scaled(PIECE_HEIGHT) / drawingHeight,
@@ -149,7 +113,6 @@ export default function ShapesActivity({
             { width: board.width, height: board.height },
           ]}
         >
-          {/* Camada de baixo: o desenho */}
           <Svg
             viewBox={question.board.viewBox}
             width={board.width}
@@ -157,8 +120,6 @@ export default function ShapesActivity({
             preserveAspectRatio="xMidYMid meet"
           >
             {completeSlots.map((slot) => {
-              // Só fica vermelho enquanto o buraco continuar vazio: assim que
-              // a criança põe uma peça de novo, ele volta a ser laranja.
               const isWrong =
                 lstWrongSlots.includes(slot.name) && !isSlotFilled(slot.name);
               const isSlotEmpty = slot.blank && !isSlotFilled(slot.name);
@@ -176,7 +137,6 @@ export default function ShapesActivity({
                 );
               }
 
-              // Buraco vazio: contorno tracejado roxo, fundo branco.
               if (isSlotEmpty) {
                 return (
                   <Path
@@ -191,7 +151,6 @@ export default function ShapesActivity({
                 );
               }
 
-              // Já preenchido (ou veio pronto): laranja sólido.
               return (
                 <Path
                   key={slot.name}
@@ -205,8 +164,6 @@ export default function ShapesActivity({
             })}
           </Svg>
 
-          {/* Camada de cima: os buracos invisíveis, um em cima de cada parte
-              vazia. Quem a criança vê é o tracejado do SVG. */}
           {blankSlots.map((slot) => (
             <DropTarget
               key={slot.name}
@@ -239,10 +196,7 @@ export default function ShapesActivity({
               pieces={pieces}
               onDrop={place}
               onMiss={remove}
-              // Cada peça vai num lugar só, então ela pula pro centro do
-              // buraco quando é solta.
               snap
-              // O cartão inteiro é a área de toque; só o desenho sai andando.
               frameStyle={[
                 styles.piece,
                 { width: scaled(70), height: scaled(80) },
@@ -272,7 +226,7 @@ export default function ShapesActivity({
           disabled={answering || !isComplete}
           style={[
             mainStyles.primaryButton,
-            !isComplete ? styles.buttonDisabled : null,
+            !isComplete ? mainStyles.primaryButtonDisabled : null,
           ]}
           onPress={handleConfirm}
         >
@@ -302,13 +256,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  // A caixa que segura as duas camadas. O `relative` faz os buracos se
-  // posicionarem em relação a ela, e não à tela inteira. Largura e altura vêm
-  // do board (dependem do viewBox da API), por isso ficam inline no JSX.
   boardWrapper: {
     position: "relative",
   },
-  // Invisível de propósito.
   dropZone: {
     position: "absolute",
   },
@@ -352,8 +302,5 @@ const styles = StyleSheet.create({
 
   footer: {
     marginTop: 20,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
   },
 });

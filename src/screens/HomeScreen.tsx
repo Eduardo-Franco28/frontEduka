@@ -22,8 +22,6 @@ export default function HomeScreen() {
 
   const { getAll, subjects, error } = useSubjectProgress();
 
-  // Recarrega sempre que a tela volta ao foco: o aluno pode ter concluído uma
-  // atividade e voltado pra Home, e o carrossel tem que acompanhar.
   useFocusEffect(
     useCallback(() => {
       getAll();
@@ -31,7 +29,6 @@ export default function HomeScreen() {
   );
 
   const handleSelectSubject = (item: SubjectWithProgress) => {
-    // Com tópico pendente vai direto para a atividade; sem ele, mostra a lista.
     if (item.currentTopic) {
       navigation.navigate("ActivityScreen", { topicId: item.currentTopic.id });
       return;
@@ -49,7 +46,6 @@ export default function HomeScreen() {
         contentContainerStyle={[mainStyles.scrollContent, styles.scrollContent]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={[styles.avatarCircle, { borderColor: colors.PRIMARY, backgroundColor: colors.CARD }]}
@@ -78,7 +74,6 @@ export default function HomeScreen() {
 
         <SubjectCarousel subjects={subjects} onPressSubject={handleSelectSubject} />
 
-        {/* Continue seus estudos */}
         <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY, fontSize: 18 * fontScale }]}>
           Continue seus estudos
         </Text>
@@ -119,7 +114,6 @@ const styles = StyleSheet.create({
     paddingTop: 92,
   },
 
-  // Header
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -155,15 +149,11 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  // Section title
   sectionTitle: {
     fontWeight: "700",
     marginBottom: 12,
   },
 
-  // Continue seus estudos
-  // Mesmo tamanho do card do carrossel: as medidas vêm dele, então se o
-  // carrossel mudar, este card acompanha.
   continueCard: {
     height: CARD_HEIGHT,
     borderRadius: CARD_RADIUS,
@@ -173,7 +163,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 14,
   },
-  // O mascote ocupa o espaço que sobra acima do botão.
   mascot: {
     flex: 1,
     width: 160,

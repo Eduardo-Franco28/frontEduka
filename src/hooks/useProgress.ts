@@ -11,7 +11,6 @@ export default function useProgress() {
   const [unfinishedQuestions, setUnfinishedQuestions] = useState<
     Array<QuestionResponse>
   >([]);
-  // null = ainda não chegou. A tela mostra "–" em vez de um 0 que não é verdade.
   const [summary, setSummary] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

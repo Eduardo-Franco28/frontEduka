@@ -12,7 +12,6 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../styles/colors";
 
-// Quanto a abertura fica na tela antes de ir pra Home (ou pro login).
 export const SPLASH_DURATION_MS = 5500;
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -152,7 +151,6 @@ export default function SplashLoading({ onSkip }: SplashLoadingProps) {
       }),
     ]);
 
-    // A barra anima a largura, e largura nao roda no driver nativo.
     const bar = Animated.timing(barProgress, {
       toValue: 1,
       duration: SPLASH_DURATION_MS,
@@ -194,7 +192,6 @@ export default function SplashLoading({ onSkip }: SplashLoadingProps) {
               transform: [{ scale: mascotScale }],
             }}
           >
-            {/* O balanco e o brilho ja estao no GIF: nao animar de novo aqui. */}
             <Image
               source={require("../../assets/pinguim_transparente.gif")}
               style={styles.mascot}

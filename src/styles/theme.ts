@@ -6,8 +6,6 @@ const mainStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.BG_APP,
   },
-  // Base de toda ScrollView do app. Telas que precisam de um espaçamento
-  // diferente compõem: [mainStyles.scrollContent, styles.scrollContent]
   scroll: {
     flex: 1,
   },
@@ -23,6 +21,9 @@ const mainStyles = StyleSheet.create({
     borderRadius: 26,
     alignItems: "center",
     justifyContent: "center",
+  },
+  primaryButtonDisabled: {
+    opacity: 0.5,
   },
   primaryButtonText: {
     color: "#fff",
@@ -45,11 +46,9 @@ const mainStyles = StyleSheet.create({
   },
   tipButton: {
     alignSelf: "flex-end",
-    marginBottom: 8,
+    marginVertical: 10,
   },
 
-  // Título e subtítulo de toda atividade. O subtítulo é a linha pequena logo
-  // abaixo do título: um contador ("2 DE 5 PEÇAS") ou uma instrução curta.
   activityTitle: {
     fontSize: 24,
     fontWeight: "700",

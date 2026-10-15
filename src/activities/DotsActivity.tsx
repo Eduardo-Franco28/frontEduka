@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
@@ -13,22 +13,12 @@ import { COLORS } from "../styles/colors";
 import { ActivityProps } from "../types/activity";
 import TipButton from "../components/TipButton";
 
-/**
- * DRAG_DOTS — arrastar as bolinhas e marcar o resultado da conta.
- *
- * Recebe UMA questão pronta da ActivityScreen. Não busca nada, não troca de
- * questão e não navega.
- *
- * É a única que não é corrigida por lugar: a resposta é a alternativa marcada
- * (`lstAlternativeId`), não onde as peças caíram. O arrastar aqui ainda é o
- * antigo, feito na mão — não usa o useDragAndDrop.
- *
- * As bolinhas não encaixam no alvo: quando um grupo cai perto dele, o grupo
- * some de onde estava e o alvo desenha as bolinhas dele dentro. Assim funciona
- * com qualquer par de números, sem calcular posição.
- */
-
 const DISTANCE = 60;
+
+const DOTS_PER_COLUMN = 4;
+
+const RESULT_MIN_COLUMNS = 3;
+const RESULT_MAX_DOTS_PER_COLUMN = 5;
 
 export default function DotsActivity({
   question,
@@ -36,22 +26,20 @@ export default function DotsActivity({
   onAnswer,
 }: ActivityProps) {
   const [alternativeId, setAlternativeId] = useState<number | null>(null);
-  // Peças e alvos crescem com o tamanho escolhido na Acessibilidade.
+  const [wrongAlternativeId, setWrongAlternativeId] = useState<number | null>(null);
   const scaled = usePieceScale();
   const dotSize = { width: scaled(16), height: scaled(16), borderRadius: scaled(8) };
+  const dotGap = scaled(6);
 
-  // Cada grupo já caiu no alvo? Só dá pra marcar a resposta com os dois lá.
   const [placedFirst, setPlacedFirst] = useState(false);
   const [placedSecond, setPlacedSecond] = useState(false);
   const canAnswer = placedFirst && placedSecond;
 
-  // Animações dos blocos
   const translateX4 = useSharedValue(0);
   const translateY4 = useSharedValue(0);
   const translateX3 = useSharedValue(0);
   const translateY3 = useSharedValue(0);
 
-  // Shared values pra evitar re-render no cálculo de distância
   const finalPositionDotX4 = useSharedValue(0);
   const finalPositionDotY4 = useSharedValue(0);
   const finalPositionDotX3 = useSharedValue(0);
@@ -61,17 +49,22 @@ export default function DotsActivity({
   const dotsRef4 = useRef<View | null>(null);
   const dotsRef3 = useRef<View | null>(null);
 
-  // O content desta atividade tem outro formato: os dois números da conta.
   const content = JSON.parse(question.content);
   const alternatives = question.lstAlternative ?? [];
 
-  /** Volta as bolinhas pro lugar e limpa a escolha. */
+  const resultTotal =
+    (placedFirst ? content.teste1 : 0) + (placedSecond ? content.teste2 : 0);
+
+  const resultPerColumn = Math.min(
+    RESULT_MAX_DOTS_PER_COLUMN,
+    Math.ceil(resultTotal / RESULT_MIN_COLUMNS),
+  );
+
   const resetDots = () => {
     setAlternativeId(null);
     setPlacedFirst(false);
     setPlacedSecond(false);
 
-    // Shared values não zeram sozinhos.
     translateX3.value = 0;
     translateY3.value = 0;
     translateX4.value = 0;
@@ -83,17 +76,16 @@ export default function DotsActivity({
 
     const response = await onAnswer({ lstAlternativeId: [alternativeId] });
 
-    // Acertou: a tela já trocou de questão. Não há nada a fazer aqui.
     if (!response || response.correct) return;
 
+    setWrongAlternativeId(alternativeId);
+    setTimeout(() => setWrongAlternativeId(null), 2000);
     resetDots();
-    Alert.alert("Resposta errada", "Você marcou a resposta errada");
   };
 
   const calculateDistance = () => {
     if (!targetRef.current) return;
 
-    // Pequeno delay só pra garantir que a UI nativa se estabilizou
     setTimeout(() => {
       targetRef.current?.measure((_x, _y, _w, _h, pageXTarget, pageYTarget) => {
         dotsRef4.current?.measure(
@@ -114,7 +106,6 @@ export default function DotsActivity({
   };
 
   const dragGesture4 = Gesture.Pan()
-    // Ganha da rolagem da tela: tocou nas bolinhas, são elas que se movem.
     .minDistance(0)
     .onChange((event) => {
       translateX4.value = event.translationX;
@@ -126,7 +117,6 @@ export default function DotsActivity({
           Math.pow(translateY4.value - finalPositionDotY4.value, 2),
       );
       if (distance < DISTANCE) {
-        // O grupo some daqui e o alvo desenha as bolinhas dele.
         translateX4.value = 0;
         translateY4.value = 0;
         runOnJS(setPlacedFirst)(true);
@@ -137,7 +127,6 @@ export default function DotsActivity({
     });
 
   const dragGesture3 = Gesture.Pan()
-    // Ganha da rolagem da tela: tocou nas bolinhas, são elas que se movem.
     .minDistance(0)
     .onChange((event) => {
       translateX3.value = event.translationX;
@@ -185,7 +174,6 @@ export default function DotsActivity({
 
       <View style={styles.questionCard}>
         <View style={styles.questionEquation}>
-          {/* Primeiro número */}
           <View style={styles.numberGroup}>
             <Text style={styles.questionText}>{content.teste1}</Text>
             <View
@@ -196,8 +184,8 @@ export default function DotsActivity({
             >
               {!placedFirst && (
                 <GestureDetector gesture={dragGesture4}>
-                  <Animated.View style={[animatedStyle4, styles.dotsVertical, { gap: scaled(6) }]}>
-                    {renderDots(content.teste1, dotSize)}
+                  <Animated.View style={[animatedStyle4, styles.dotsColumns, { gap: dotGap }]}>
+                    {renderDots(content.teste1, dotSize, dotGap, DOTS_PER_COLUMN)}
                   </Animated.View>
                 </GestureDetector>
               )}
@@ -206,14 +194,13 @@ export default function DotsActivity({
 
           <Text style={styles.operatorText}>+</Text>
 
-          {/* Segundo número */}
           <View style={styles.numberGroup}>
             <Text style={styles.questionText}>{content.teste2}</Text>
             <View ref={dotsRef3} collapsable={false} style={[styles.dotsWrapper, { minHeight: scaled(70) }]}>
               {!placedSecond && (
                 <GestureDetector gesture={dragGesture3}>
-                  <Animated.View style={[animatedStyle3, styles.dotsVertical, { gap: scaled(6) }]}>
-                    {renderDots(content.teste2, dotSize)}
+                  <Animated.View style={[animatedStyle3, styles.dotsColumns, { gap: dotGap }]}>
+                    {renderDots(content.teste2, dotSize, dotGap, DOTS_PER_COLUMN)}
                   </Animated.View>
                 </GestureDetector>
               )}
@@ -222,23 +209,21 @@ export default function DotsActivity({
 
           <Text style={styles.operatorText}>=</Text>
 
-          {/* O alvo */}
           <View style={styles.targetGroup}>
-            {/* Largura fixa pras bolinhas quebrarem linha; a altura cresce se precisar. */}
             <View
               ref={targetRef}
               collapsable={false}
               style={[
                 styles.targetBox,
                 styles.targetDots,
-                { width: scaled(60), minHeight: scaled(60) },
+                {
+                  gap: dotGap,
+                  minWidth: scaled(60),
+                  minHeight: scaled(60),
+                },
               ]}
             >
-              {renderDots(
-                (placedFirst ? content.teste1 : 0) +
-                  (placedSecond ? content.teste2 : 0),
-                dotSize,
-              )}
+              {renderDots(resultTotal, dotSize, dotGap, resultPerColumn)}
             </View>
           </View>
         </View>
@@ -251,6 +236,7 @@ export default function DotsActivity({
             style={[
               styles.optionCard,
               alternativeId === alt.id && styles.optionCardSelected,
+              wrongAlternativeId === alt.id && styles.optionCardWrong,
             ]}
             onPress={() => setAlternativeId(alt.id)}
             activeOpacity={0.8}
@@ -260,6 +246,7 @@ export default function DotsActivity({
               style={[
                 styles.optionText,
                 alternativeId === alt.id && styles.optionTextSelected,
+                wrongAlternativeId === alt.id && styles.optionTextWrong,
               ]}
             >
               {alt.description}
@@ -269,9 +256,12 @@ export default function DotsActivity({
       </View>
 
       <TouchableOpacity
-        style={mainStyles.primaryButton}
+        style={[
+          mainStyles.primaryButton,
+          alternativeId === null ? mainStyles.primaryButtonDisabled : null,
+        ]}
         onPress={handleConfirm}
-        disabled={answering}
+        disabled={answering || alternativeId === null}
       >
         <Text style={mainStyles.primaryButtonText}>Confirmar</Text>
       </TouchableOpacity>
@@ -279,11 +269,22 @@ export default function DotsActivity({
   );
 }
 
-/** Desenha `amount` bolinhas. */
-function renderDots(amount: number, dotSize: object) {
-  return Array.from({ length: amount }).map((dot, index) => (
-    <View key={index} style={[styles.dotV, styles.dotVActive, dotSize]} />
-  ));
+function renderDots(amount: number, dotSize: object, gap: number, perColumn: number) {
+  const columns = [];
+
+  for (let start = 0; start < amount; start += perColumn) {
+    const dotsInColumn = Math.min(perColumn, amount - start);
+
+    columns.push(
+      <View key={start} style={{ gap }}>
+        {Array.from({ length: dotsInColumn }).map((dot, index) => (
+          <View key={index} style={[styles.dotV, styles.dotVActive, dotSize]} />
+        ))}
+      </View>,
+    );
+  }
+
+  return columns;
 }
 
 const styles = StyleSheet.create({
@@ -311,7 +312,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     justifyContent: "center",
     width: "100%",
-    gap: 16,
+    gap: 10,
     marginBottom: 34,
   },
   numberGroup: {
@@ -343,9 +344,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 70,
   },
-  dotsVertical: {
-    gap: 6,
-    alignItems: "center",
+  dotsColumns: {
+    flexDirection: "row",
+    alignItems: "flex-start",
   },
   dotV: {
     width: 16,
@@ -358,13 +359,10 @@ const styles = StyleSheet.create({
   targetBox: {
     borderRadius: 12,
   },
-  // Sem height fixa: começa no minHeight e cresce se as bolinhas não couberem.
   targetDots: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    alignContent: "center",
+    alignItems: "flex-start",
     justifyContent: "center",
-    gap: 4,
   },
   instruction: {
     fontSize: 12,
@@ -400,5 +398,12 @@ const styles = StyleSheet.create({
   },
   optionTextSelected: {
     color: COLORS.PRIMARY_LIGHT,
+  },
+  optionCardWrong: {
+    borderColor: COLORS.DANGER,
+    backgroundColor: "#fdecec",
+  },
+  optionTextWrong: {
+    color: COLORS.DANGER,
   },
 });

@@ -15,13 +15,11 @@ export default function FirstScreen() {
           <Image source={require("../../assets/mascote.png")} />
         </View>
 
-        {/* Textos */}
         <Text style={styles.title}>Bem-vindo ao</Text>
         <Text style={styles.logo}>IntegraMente!</Text>
         <Text style={styles.subtitle}>Aprender do seu jeito,</Text>
         <Text style={styles.subtitle}>no seu ritmo.</Text>
 
-        {/* Botões */}
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
             onPress={() =>
@@ -52,7 +50,6 @@ export default function FirstScreen() {
 }
 
 const styles = StyleSheet.create({
-  // Texto + seta do botão, lado a lado.
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",

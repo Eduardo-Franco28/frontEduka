@@ -7,8 +7,8 @@ description: Padrões do app React Native/Expo do IntegraMente (TCC) — como cr
 
 App React Native + Expo (TypeScript, `strict: true`), navegação por stack nativa,
 axios para API, Context só para autenticação. Tudo em português no código voltado
-ao usuário e nos comentários; nomes de código em inglês (com exceções herdadas,
-veja "Inconsistências aceitas").
+ao usuário (e nos raros comentários); nomes de código em inglês (com exceções
+herdadas, veja "Inconsistências aceitas").
 
 **Regra de ouro: copie o padrão do arquivo vizinho.** Este projeto é de TCC,
 mexido por 6 pessoas com níveis diferentes. Consistência vale mais do que
@@ -92,11 +92,34 @@ O único lugar que fura isso é o `AuthContext`, e é de propósito: ele é um
 - **Toda rota nova precisa entrar em três lugares**: `RootStackParamList`
   (`src/types/navigation.ts`), `<Stack.Screen>` no `App.tsx`, e o arquivo da tela.
   Esquecer o primeiro faz o `navigate()` virar erro de tipo.
-- **Hooks antes de qualquer `return` condicional.** As telas de atividade têm um
-  comentário explícito sobre isso — o `if (loading) return <LoadingPage />` fica
-  depois de todos os `useSharedValue`/`useRef`.
+- **Hooks antes de qualquer `return` condicional.** Nas telas de atividade, o
+  `if (loading) return <LoadingPage />` fica depois de todos os
+  `useSharedValue`/`useRef`.
 - **Depois de login/logout use `navigation.reset`**, não `navigate`, para o
   usuário não conseguir voltar com o gesto.
+
+## Comentários: só em caso extremamente necessário
+
+O código do projeto **não leva comentários**. O padrão é código que se explica
+pelos nomes. Só adicione um comentário quando, sem ele, alguém do grupo
+provavelmente **apagaria ou "consertaria" uma linha e quebraria o app** — por
+exemplo, um contorno de bug de plataforma que parece desnecessário:
+
+```tsx
+// O Android ignora o foco se ele vier junto com a abertura do modal,
+// então esperamos um instante antes de abrir o teclado.
+onShow={() => setTimeout(() => inputRef.current?.focus(), 100)}
+```
+
+Quando for necessário: curto (1–2 linhas), em português, explicando **por quê**,
+nunca o quê.
+
+Não escreva:
+- comentário de seção (`// Header`, `// Card`, `// Painel`), nem no `StyleSheet`;
+- comentário que repete o código (`// abre o modal` em cima de `setVisible(true)`);
+- JSDoc em props (`/** ... */`) — o nome e o tipo da prop bastam;
+- comentário no JSX (`{/* ... */}`);
+- código comentado — apague; ele continua no histórico do git.
 
 ## Estilo de UI (resumo)
 
@@ -104,8 +127,8 @@ Detalhes e paleta completa em `references/ui.md`.
 
 - Cor **sempre** de `COLORS` (`src/styles/colors.ts`). Nunca hex solto em código
   novo — mesmo que arquivos antigos ainda tenham (`#fff` e `#000` são tolerados).
-- `StyleSheet.create` no **fim** do arquivo, `const styles = ...`, agrupado com
-  comentários de seção (`// Header`, `// Card`).
+- `StyleSheet.create` no **fim** do arquivo, `const styles = ...`, na mesma ordem
+  do JSX e **sem comentários** (nada de `// Header`, `// Card`).
 - Estilo compartilhado vem de `mainStyles` (`src/styles/theme.ts`):
   `component`, `scroll`, `scrollContent`, `primaryButton`, `primaryButtonText`,
   `secondaryButton`, `secondaryButtonText`.

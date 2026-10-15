@@ -9,9 +9,7 @@ import useAppNavigation from "../hooks/useNavigation";
 import useTheme from "../hooks/useTheme";
 
 interface BackButtonProps {
-  /** Por padrão volta pra tela anterior. Passe para sobrescrever. */
   onPress?: () => void;
-  /** Posicionamento — a aparência fica aqui dentro. */
   style?: StyleProp<ViewStyle>;
 }
 
@@ -24,7 +22,6 @@ export default function BackButton({ onPress, style }: BackButtonProps) {
       onPress();
       return;
     }
-    // Sem o guard, chamar goBack na primeira tela da pilha gera warning.
     if (navigation.canGoBack()) navigation.goBack();
   };
 

@@ -8,8 +8,6 @@ export interface SubjectVisual {
   icon: SubjectIconName;
   bg: string;
   color: string;
-  // Dois tons da mesma cor para o gradiente do card. São fixos de propósito:
-  // a identidade da matéria não muda entre tema claro e escuro.
   gradient: [string, string];
 }
 

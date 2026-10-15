@@ -10,22 +10,6 @@ import usePieceScale from "../hooks/usePieceScale";
 import { ActivityProps } from "../types/activity";
 import { FilledSlot, QuestionSlotContent } from "../types/subject";
 
-/**
- * DRAG_LETTERS — completar a palavra.
- *
- * Recebe UMA questão pronta da ActivityScreen. Não busca nada, não troca de
- * questão e não navega: só desenha, deixa arrastar e manda a resposta.
- *
- * 1. NÃO TEM BOARD. Não há desenho: tudo que a tela precisa está no `content`.
- *    Por isso aqui não aparecem svgBoard, viewBox, path nem bbox.
- *
- * 2. TEM LETRA DISTRATORA. A UVA oferece 4 letras pra 2 buracos: o E e o O
- *    existem pra estar errados. No banco elas são alternativas com
- *    `correct: false` e sem `correctSlot`.
- *
- * O `name` do slot é a POSIÇÃO ("1", "2", "3"), não a letra. Se fosse a letra,
- * uma palavra como BANANA teria três lugares chamados "A".
- */
 export default function LettersActivity({
   question,
   answering,
@@ -43,7 +27,6 @@ export default function LettersActivity({
     isPiecePlaced,
   } = useDragAndDrop();
   const [lstWrongSlots, setLstWrongSlots] = useState<string[]>([]);
-  // Peças e alvos crescem com o tamanho escolhido na Acessibilidade.
   const scaled = usePieceScale();
 
   const content: QuestionSlotContent = JSON.parse(question.content);
@@ -52,8 +35,6 @@ export default function LettersActivity({
   const blankSlots = slots.filter((slot) => slot.blank);
   const alternatives = question.lstAlternative ?? [];
 
-  // O backend recusa tentativa incompleta como erro de requisição, não como
-  // resposta errada. Então não deixa enviar antes de completar.
   const isComplete = placedCount === blankSlots.length;
 
   const handleConfirm = async () => {
@@ -61,18 +42,15 @@ export default function LettersActivity({
 
     const response = await onAnswer({ lstFilledSlots: buildFilledSlots() });
 
-    // Acertou: a tela já trocou de questão. Não há nada a fazer aqui.
     if (!response || response.correct) return;
 
     setLstWrongSlots(response.lstWrongSlots);
 
-    // Toda letra que caiu no lugar errado volta pra fileira de baixo.
     placements
       .filter((placement) => response.lstWrongSlots.includes(placement.slotName))
       .forEach((placement) => returnToBox(placement.pieceId));
   };
 
-  /** O que a criança montou, no formato que o backend espera. */
   function buildFilledSlots(): FilledSlot[] {
     return placements.map((placement) => ({
       name: placement.slotName,
@@ -93,8 +71,6 @@ export default function LettersActivity({
         autoOpen={false}
       />
 
-      {/* A PALAVRA — aqui não há duas camadas: o buraco JÁ é a View que
-          recebe a peça, então ele mesmo é o DropTarget. */}
       <View style={styles.questionCard}>
         <View style={styles.answerRow}>
           {content.hint ? (
@@ -102,7 +78,6 @@ export default function LettersActivity({
           ) : null}
 
           {slots.map((slot) => {
-            // Letra que já vem pronta: só texto, não recebe nada.
             if (!slot.blank) {
               return (
                 <Text
@@ -122,8 +97,6 @@ export default function LettersActivity({
               );
             }
 
-            // Só fica vermelho enquanto o buraco continuar vazio: assim que a
-            // criança põe uma letra de novo, ele volta ao normal.
             const isWrong =
               lstWrongSlots.includes(slot.name) && !isSlotFilled(slot.name);
 
@@ -150,7 +123,6 @@ export default function LettersActivity({
         *Arraste as letras para completar a palavra!
       </Text>
 
-      {/* AS LETRAS — todas arrastáveis, inclusive as que não entram na palavra */}
       <View style={styles.tilesGrid}>
         {alternatives.map((alternative) => (
           <DraggablePiece
@@ -160,8 +132,6 @@ export default function LettersActivity({
             pieces={pieces}
             onDrop={place}
             onMiss={remove}
-            // Cada letra vai num lugar só, então ela pula pro centro do
-            // buraco quando é solta.
             snap
           >
             <View
@@ -185,7 +155,7 @@ export default function LettersActivity({
           disabled={answering || !isComplete}
           style={[
             mainStyles.primaryButton,
-            !isComplete ? styles.buttonDisabled : null,
+            !isComplete ? mainStyles.primaryButtonDisabled : null,
           ]}
           onPress={handleConfirm}
         >
@@ -201,7 +171,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // A PALAVRA
   questionCard: {
     backgroundColor: "#fff",
     borderRadius: 24,
@@ -213,17 +182,18 @@ const styles = StyleSheet.create({
   },
   answerRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
+    alignSelf: "stretch",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
+    rowGap: 12,
   },
   answerHint: {
     fontSize: 40,
     lineHeight: 46,
     marginRight: 4,
   },
-  // O buraco. Um pouco maior que a letra pronta porque é ele que recebe o
-  // dedo da criança — e um alvo apertado é frustrante.
   answerSlot: {
     width: 52,
     height: 56,
@@ -259,7 +229,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  // AS LETRAS
   tilesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -267,8 +236,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 14,
   },
-  // 56 e não maior: a peça pousa em cima do buraco, e uma peça muito maior que
-  // ele cobriria as letras vizinhas.
   tile: {
     width: 56,
     height: 56,
@@ -291,8 +258,5 @@ const styles = StyleSheet.create({
 
   footer: {
     marginTop: 32,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
   },
 });

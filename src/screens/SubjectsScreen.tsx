@@ -52,7 +52,6 @@ export default function SubjectsScreen() {
       >
         <ErrorMessage message={error} />
 
-        {/* Icon + Title */}
         <View
           style={[
             styles.titleIconBox,
@@ -74,7 +73,6 @@ export default function SubjectsScreen() {
           O que vamos{"\n"}aprender hoje?
         </Text>
 
-        {/* Grid */}
         <View style={styles.grid}>
           {subject?.map((item) => {
             const visual = getSubjectVisual(item.name);
@@ -121,7 +119,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // Step dots
   dotsRow: {
     flexDirection: "row",
     gap: 8,
@@ -137,7 +134,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
 
-  // Title
   titleIconBox: {
     width: 80,
     height: 80,
@@ -153,7 +149,6 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
 
-  // Grid
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -162,7 +157,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // Card
   card: {
     width: "47%",
     borderRadius: 20,

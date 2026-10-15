@@ -18,9 +18,7 @@ interface PinModalProps {
   operation: PinOperation;
   onClose: () => void;
   onConfirm: (pin: string) => void;
-  /** Mensagem de erro, ex.: "PIN incorreto". Aparece no lugar do subtítulo. */
   error?: string | null;
-  /** Enquanto o PIN é verificado: trava a digitação e mostra "Verificando...". */
   loading?: boolean;
 }
 
@@ -63,7 +61,6 @@ export default function PinModal({
     if (text.length === PIN_LENGTH) onConfirm(text);
   };
 
-  // O que aparece embaixo do título. Quem vem depois tem prioridade.
   let subtitle = isCreate
     ? "Escolha 4 números fáceis de lembrar"
     : "Digite seu PIN";
@@ -122,7 +119,6 @@ export default function PinModal({
                 style={[
                   styles.pinBox,
                   { backgroundColor: colors.SURFACE_PRIMARY },
-                  // A próxima caixa a ser preenchida fica em foco.
                   index === pin.length && [
                     styles.pinBoxFocused,
                     { borderColor: colors.PRIMARY },
@@ -178,7 +174,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
 
-  // Painel
   panel: {
     width: "100%",
     maxWidth: 380,
@@ -204,7 +199,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
-  // Caixas do PIN
   pinRow: {
     flexDirection: "row",
     gap: 12,
@@ -228,7 +222,6 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
   },
-  // Fica invisível, mas continua recebendo o foco e o teclado.
   hiddenInput: {
     position: "absolute",
     width: 1,
@@ -236,7 +229,6 @@ const styles = StyleSheet.create({
     opacity: 0,
   },
 
-  // Rodapé
   actionText: {
     fontWeight: "600",
     paddingVertical: 4,

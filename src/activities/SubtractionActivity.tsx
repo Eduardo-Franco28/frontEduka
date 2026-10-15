@@ -10,37 +10,12 @@ import useDragAndDrop from "../hooks/useDragAndDrop";
 import usePieceScale from "../hooks/usePieceScale";
 import { ActivityProps } from "../types/activity";
 
-/**
- * DRAG_SUBTRACTION — subtrair entregando itens a um amigo.
- *
- * Recebe UMA questão pronta da ActivityScreen. Não busca nada, não troca de
- * questão e não navega.
- *
- * A criança tem `total` itens e o amigo pede `asked`. Ela arrasta os itens
- * pedidos até ele e conta os que ficaram na cesta — esse é o resultado.
- *
- * Duas coisas diferentes das outras atividades:
- *
- * 1. AS PEÇAS NÃO SÃO ALTERNATIVAS. Cada item é só uma posição (0, 1, 2...);
- *    as alternativas são os números da resposta, como no DotsActivity.
- *
- * 2. O NÚMERO QUE SOBRA NUNCA APARECE ESCRITO. Os itens restantes ficam na
- *    cesta pra criança contar. É o exercício, não uma informação a esconder.
- *
- * A área de entrega é um alvo só, embora mostre um círculo por item pedido:
- * alvo grande é mais fácil de acertar, e os círculos enchem em ordem.
- */
-
 const DELIVERY_SLOT = "entrega";
 
 interface SubtractionContent {
-  /** Quantos itens a criança tem no começo. */
   total: number;
-  /** Quantos o amigo pede. */
   asked: number;
-  /** Emoji do item. Sem ele, usa maçã. */
   item?: string;
-  /** Nome do amigo que pede. Sem ele, usa o mascote sem nome. */
   friend?: string;
 }
 
@@ -53,7 +28,6 @@ export default function SubtractionActivity({
     useDragAndDrop();
 
   const [alternativeId, setAlternativeId] = useState<number | null>(null);
-  // Peças e alvos crescem com o tamanho escolhido na Acessibilidade.
   const scaled = usePieceScale();
   const [wrong, setWrong] = useState<boolean>(false);
 
@@ -210,7 +184,7 @@ export default function SubtractionActivity({
         activeOpacity={0.85}
         style={[
           mainStyles.primaryButton,
-          alternativeId === null ? styles.buttonDisabled : null,
+          alternativeId === null ? mainStyles.primaryButtonDisabled : null,
         ]}
         onPress={handleConfirm}
         disabled={answering || alternativeId === null}
@@ -234,7 +208,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
 
-  // O AMIGO
   friendCard: {
     backgroundColor: "#fff",
     borderRadius: 22,
@@ -290,7 +263,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
 
-  // A ÁREA DE ENTREGA
   deliveryRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -329,7 +301,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
 
-  // A CESTA
   basketLabel: {
     fontSize: 11,
     fontWeight: "800",
@@ -410,8 +381,5 @@ const styles = StyleSheet.create({
     color: COLORS.DANGER,
     textAlign: "center",
     marginBottom: 12,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
   },
 });

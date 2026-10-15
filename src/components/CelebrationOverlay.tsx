@@ -12,17 +12,10 @@ import {
 import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 import useTheme from "../hooks/useTheme";
 
-/**
- * Quanto a comemoração fica na tela antes de seguir sozinha. O GIF do pulo
- * dura 2,6s, então este número tem que ser maior que isso para a criança ver
- * o pulo inteiro e o repique.
- */
 export const CELEBRATION_DURATION_MS = 2900;
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// Papéis picados fixos em vez de sorteados: a criança vê a mesma comemoração
-// toda vez, e repetição previsível acalma em vez de surpreender.
 const CONFETTI = [
   {
     left: "6%",
@@ -145,7 +138,6 @@ const SPARKS = [
 ];
 
 interface CelebrationOverlayProps {
-  /** Chamado quando a comemoração acaba ou a criança toca para seguir. */
   onDone: () => void;
 }
 
@@ -282,12 +274,9 @@ export default function CelebrationOverlay({
   const mascotOpacity = useRef(new Animated.Value(0)).current;
   const textOpacity = useRef(new Animated.Value(0)).current;
 
-  // Segura o callback numa ref: sem isso o timer reiniciaria toda vez que a
-  // tela de cima renderizasse de novo.
   const done = useRef(onDone);
   done.current = onDone;
 
-  // Tocar e o tempo acabar chamam o mesmo fim: a trava impede os dois juntos.
   const finished = useRef(false);
 
   const finish = () => {
@@ -348,7 +337,6 @@ export default function CelebrationOverlay({
             transform: [{ scale: mascotScale }],
           }}
         >
-          {/* A proporção segue a do GIF (340x434): esticar deforma o pinguim. */}
           <Image
             source={require("../../assets/pinguim_sorrindo_ciclo.gif")}
             style={styles.mascot}

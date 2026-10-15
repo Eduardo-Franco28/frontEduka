@@ -51,7 +51,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: -0.3,
   },
-  // Espaçador do mesmo tamanho do botão: é o que mantém o título no centro.
   side: {
     width: 36,
   },

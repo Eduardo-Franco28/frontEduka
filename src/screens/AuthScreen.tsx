@@ -48,11 +48,9 @@ export default function AuthScreen() {
       return;
     }
 
-    // Cadastro: com o formulário ok, pede o PIN antes de criar a conta.
     setShowPin(true);
   };
 
-  // Chamado pelo PinModal com o PIN digitado.
   const handleRegister = async (pin: string) => {
     if (isRegistering.current) return;
 
@@ -221,7 +219,6 @@ export default function AuthScreen() {
 }
 
 const styles = StyleSheet.create({
-  // Texto + seta do botão, lado a lado.
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",

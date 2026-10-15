@@ -123,8 +123,6 @@ function SubjectRow({
   const nextLevel = ACHIEVEMENT_LEVELS[levelIndex + 1] ?? null;
   const explainedLevel = currentLevel ?? ACHIEVEMENT_LEVELS[0];
 
-  // Quantos tópicos ainda faltam para o próximo nível. Contar tópicos é mais
-  // concreto do que falar em porcentagem.
   const topicsForNext = nextLevel
     ? Math.max(
         1,
@@ -191,7 +189,6 @@ function SubjectRow({
 
       {isOpen && (
         <View style={[styles.detail, { backgroundColor: tint }]}>
-          {/* Um selo por tópico: cheio = concluído, vazio = a conquistar */}
           <View style={styles.medalRow}>
             {Array.from({ length: subject.totalTopics }).map((_, index) => {
               const earned = index < subject.concludedTopics;
@@ -216,7 +213,6 @@ function SubjectRow({
             })}
           </View>
 
-          {/* Significado da palavra do nível atual */}
           <Text
             style={[styles.meaning, { color: textColor, fontSize: 13 * fontScale }]}
           >
@@ -225,7 +221,6 @@ function SubjectRow({
               explainedLevel.meaning.slice(1)}
           </Text>
 
-          {/* Próximo nível como recompensa concreta */}
           {nextLevel ? (
             <View style={[styles.nextCard, { backgroundColor: cardColor }]}>
               <View style={[styles.nextIcon, { borderColor: accent }]}>
@@ -260,7 +255,6 @@ function SubjectRow({
 }
 
 const styles = StyleSheet.create({
-  // Resumo
   summaryCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -279,7 +273,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  // Card da matéria
   card: {
     borderRadius: 18,
     marginBottom: 10,
@@ -324,7 +317,6 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
 
-  // Detalhe
   detail: {
     paddingHorizontal: 14,
     paddingVertical: 14,

@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { RouteProp, useRoute } from "@react-navigation/native";
-// A ScrollView do gesture-handler, e não a do react-native: ela participa do
-// mesmo sistema de gestos das peças, então arrastar e rolar não brigam.
 import { ScrollView } from "react-native-gesture-handler";
 import mainStyles from "../styles/theme";
 import { COLORS } from "../styles/colors";
@@ -20,15 +18,6 @@ import ShapesActivity from "../activities/ShapesActivity";
 import LettersActivity from "../activities/LettersActivity";
 import GroupsActivity from "../activities/GroupsActivity";
 
-/**
- * A tela de qualquer tópico.
- *
- * Ela não sabe desenhar atividade nenhuma: carrega o tópico, pega a questão
- * atual e entrega pro componente do tipo certo. Quando a criança acerta, é ela
- * que decide se vem outra questão ou se o tópico acabou.
- *
- * Quem arrasta, pinta os erros e devolve as peças é o componente.
- */
 export default function ActivityScreen() {
   const route = useRoute<RouteProp<RootStackParamList, "ActivityScreen">>();
   const navigation = useAppNavigation();
@@ -37,8 +26,6 @@ export default function ActivityScreen() {
   const [index, setIndex] = useState<number>(0);
   const [celebrating, setCelebrating] = useState<boolean>(false);
 
-  // O que fazer quando a comemoração terminar. Fica guardado aqui porque quem
-  // decide o próximo passo é o acerto, mas quem executa é o fim da animação.
   const afterCelebration = useRef<(() => void) | null>(null);
 
   const { topicId } = route.params;
@@ -50,7 +37,6 @@ export default function ActivityScreen() {
       const start = data.lstQuestions.findIndex(
         (q) => q.id === data.resumeQuestionId,
       );
-      // Se a criança já terminou tudo, não acha nenhuma e começa do início.
       setIndex(start === -1 ? 0 : start);
     });
   }, [topicId]);
@@ -58,14 +44,10 @@ export default function ActivityScreen() {
   const currentActivity = activity?.lstQuestions[index];
   const totalQuestions = activity?.lstQuestions.length ?? 0;
 
-  // Só checa o que TODA atividade precisa. O board não entra aqui: palavra e
-  // grupos não têm, e quem precisa dele (ShapesActivity) confere sozinho.
   if (loading || !currentActivity?.content) {
     return <LoadingPage message="Carregando atividade..." />;
   }
 
-  // Daqui pra baixo a questão existe. Guardar numa const nova fixa isso pro
-  // TypeScript também dentro das funções abaixo.
   const question = currentActivity;
 
   const handleAnswer = async (
@@ -73,21 +55,12 @@ export default function ActivityScreen() {
   ) => {
     const response = await answer({ ...attempt, questionId: question.id });
 
-    // Errou (ou falhou a rede): devolve pro componente, que sabe pintar os
-    // lugares errados e mandar as peças de volta.
     if (!response || !response.correct) return response;
 
-    // O `concluded` do backend fala da QUESTÃO, não do tópico: vem true em
-    // todo acerto. Quem sabe se o tópico acabou é a posição na lista.
     const isLastQuestion = index === totalQuestions - 1;
 
-    // Comemora primeiro e só depois anda: trocar a questão junto com a
-    // animação tiraria a resposta certa da tela antes da criança ver.
     afterCelebration.current = () => {
       if (isLastQuestion) {
-        // `replace`, e não `navigate`: a atividade sai da pilha e o resultado
-        // ocupa o lugar dela. Assim o voltar do celular leva pro tópico, e não
-        // de volta pra uma atividade que já terminou.
         navigation.replace("ResultScreen", { topicId });
         return;
       }
@@ -107,7 +80,6 @@ export default function ActivityScreen() {
     next?.();
   };
 
-  /** Escolhe o componente pela mecânica da questão atual. */
   function renderActivity() {
     const props = { question, answering, onAnswer: handleAnswer };
 
@@ -123,6 +95,12 @@ export default function ActivityScreen() {
     if (question.type === QuestionType.DRAG_SLOTS_TO_GROUP)
       return <GroupsActivity key={question.id} {...props} />;
 
+    // TODO: ligar a atividade de subtração. O componente já existe, só falta
+    // importar o SubtractionActivity e acrescentar:
+    //   if (question.type === QuestionType.DRAG_SUBTRACTION)
+    //     return <SubtractionActivity key={question.id} {...props} />;
+    // Sem isso, o tópico Subtração mostra "ainda não está disponível".
+
     return (
       <Text style={styles.unsupported}>
         Esta atividade ainda não está disponível.
@@ -136,8 +114,6 @@ export default function ActivityScreen() {
         <BackButton />
       </View>
 
-      {/* Rola quando a atividade não cabe na tela, por exemplo com as peças
-          maiores do tamanho "Muito grande" da Acessibilidade. */}
       <ScrollView
         style={mainStyles.scroll}
         contentContainerStyle={styles.content}
@@ -160,9 +136,6 @@ const styles = StyleSheet.create({
     paddingTop: 52,
     paddingBottom: 16,
   },
-  // flexGrow, e não flex: numa ScrollView, flex: 1 impediria o conteúdo de
-  // passar da altura da tela. Com flexGrow, a atividade curta ainda ocupa a
-  // tela inteira, e a comprida cresce e rola.
   content: {
     flexGrow: 1,
     paddingHorizontal: 16,

@@ -26,7 +26,6 @@ export default function useSubjectProgress() {
     try {
       const subjectList = await subjectService.getAll();
 
-      // Primeiro render: só o que já temos. O carrossel aparece na hora.
       setSubjects(
         subjectList.map((item) => ({
           id: item.id,
@@ -38,13 +37,10 @@ export default function useSubjectProgress() {
         }))
       );
 
-      // Depois, os tópicos de cada matéria, todas as buscas em paralelo.
       const withProgress = await Promise.all(
         subjectList.map(async (item) => {
           const topics = await activityService.getTopicsBySubject(item.id);
 
-          // O tópico "atual" é o que está em andamento; se não houver,
-          // o primeiro que o aluno ainda não começou.
           const inProgress = topics.find(
             (topic) => topic.status === TopicStatus.EM_ANDAMENTO
           );

@@ -23,10 +23,6 @@ const Stack = createNativeStackNavigator();
 function Routes() {
   const { user } = useAuth();
 
-  // Estas rotas só montam depois da abertura (SplashLoading, no AuthProvider),
-  // e a abertura só termina quando a sessão já foi verificada. Então aqui o
-  // `user` já é a resposta final: logado vai pra Home, senão pra tela que
-  // oferece entrar ou criar conta.
   return (
     <Stack.Navigator
       initialRouteName={user ? "HomeScreen" : "FirstScreen"}

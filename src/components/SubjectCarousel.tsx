@@ -18,22 +18,15 @@ import useTheme from "../hooks/useTheme";
 const { width } = Dimensions.get("window");
 const CARD_GAP = 12;
 const CARD_WIDTH = width - 32;
-// Exportados pra outros cards da Home terem o mesmo tamanho do carrossel.
 export const CARD_HEIGHT = 290;
 export const CARD_RADIUS = 24;
 const SNAP_INTERVAL = CARD_WIDTH + CARD_GAP;
 
-// As setas ficam por cima do card, na altura do meio dele. O quadro do tópico é
-// o que está nessa altura, então ele recua dos lados o suficiente pra seta não
-// cobrir o texto: CARD_PADDING + TOPIC_INSET tem que passar de ARROW_INSET + ARROW_SIZE.
 const ARROW_SIZE = 34;
 const ARROW_INSET = 4;
 export const CARD_PADDING = 22;
 const TOPIC_INSET = 20;
 
-// Enquanto as matérias não chegam, o carrossel mostra um card com esta matéria
-// de mentira: mesmo visual, sem dados. Sem nome conhecido, ela usa o visual
-// padrão, nas cores do app.
 const LOADING_SUBJECT: SubjectWithProgress = {
   id: 0,
   name: "Carregando...",
@@ -132,7 +125,6 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
                 <View style={styles.blobLarge} pointerEvents="none" />
                 <View style={styles.blobSmall} pointerEvents="none" />
 
-                {/* Matéria */}
                 <View style={styles.subjectRow}>
                   <View style={styles.iconBox}>
                     <FontAwesomeFreeSolid name={visual.icon} size={26} color="#fff" />
@@ -149,7 +141,6 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
                   </View>
                 </View>
 
-                {/* Tópico atual */}
                 <View style={styles.topicBox}>
                   {waiting && (
                     <View style={styles.waitingRow}>
@@ -203,7 +194,6 @@ export default function SubjectCarousel({ subjects, onPressSubject }: SubjectCar
                   activeOpacity={0.85}
                   accessibilityRole="button"
                   accessibilityLabel={`Abrir ${item.name}`}
-                  // A matéria de mentira não abre nada.
                   disabled={isLoading}
                   onPress={() => onPressSubject(item)}
                 >
@@ -309,7 +299,6 @@ const styles = StyleSheet.create({
     left: -30,
   },
 
-  // Matéria
   subjectRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -338,7 +327,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // Tópico
   topicBox: {
     backgroundColor: "rgba(255,255,255,0.15)",
     borderRadius: 16,
@@ -395,7 +383,6 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 
-  // Mesma largura do quadro do tópico: os dois recuam igual dos lados.
   button: {
     marginHorizontal: TOPIC_INSET,
     height: 54,

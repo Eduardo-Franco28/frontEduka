@@ -8,8 +8,6 @@ export default function usePin() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Guarda o que fazer quando o PIN estiver certo. É ref porque só precisa
-  // ser lembrado até a validação, sem redesenhar a tela.
   const onSuccessRef = useRef<(() => void) | null>(null);
 
   const openPin = (onSuccess: () => void) => {

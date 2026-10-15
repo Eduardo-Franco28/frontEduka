@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   TouchableOpacity,
+  Text,
   StyleSheet,
   StyleProp,
   ViewStyle,
@@ -8,12 +9,11 @@ import {
 import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
 import { COLORS } from "../styles/colors";
 import TipActivity from "./TipActivity";
+import useTheme from "../hooks/useTheme";
 
 interface TipButtonProps {
   tip: string;
-  /** Abre a dica sozinho assim que a atividade aparece. */
   autoOpen?: boolean;
-  /** Posicionamento — cada atividade decide onde o botão fica. */
   style?: StyleProp<ViewStyle>;
 }
 
@@ -23,6 +23,7 @@ export default function TipButton({
   style,
 }: TipButtonProps) {
   const [visible, setVisible] = useState<boolean>(false);
+  const { fontScale } = useTheme();
 
   useEffect(() => {
     if (autoOpen) setVisible(true);
@@ -44,9 +45,10 @@ export default function TipButton({
       >
         <FontAwesomeFreeSolid
           name="lightbulb"
-          size={24}
+          size={18 * fontScale}
           color={COLORS.PRIMARY}
         />
+        <Text style={[styles.label, { fontSize: 15 * fontScale }]}>Dica</Text>
       </TouchableOpacity>
     </>
   );
@@ -54,11 +56,23 @@ export default function TipButton({
 
 const styles = StyleSheet.create({
   button: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: COLORS.SURFACE_PRIMARY,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 999,
+    backgroundColor: COLORS.SURFACE_PRIMARY,
+    borderWidth: 1.5,
+    borderColor: COLORS.PRIMARY_LIGHT,
+    shadowColor: COLORS.PRIMARY,
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
+  },
+  label: {
+    color: COLORS.PRIMARY,
+    fontWeight: "800",
   },
 });
