@@ -18,12 +18,15 @@ import useProgress from "../hooks/useProgress";
 import { useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import usePin from "../hooks/usePin";
+import useTeo from "../hooks/useTeo";
 import PinModal from "../components/PinModal";
+import { TEO_ENABLED } from "../constants/constant";
 
 export default function ProfileScreen() {
   const { logOut, user } = useAuth();
   const { colors, fontScale, isDark } = useTheme();
   const { openPin, pinModalProps } = usePin();
+  const { openTeo, teoPinModalProps } = useTeo();
 
   const navigation = useAppNavigation();
 
@@ -188,6 +191,40 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
         <View style={[styles.menuCard, { backgroundColor: colors.CARD }]}>
+          {TEO_ENABLED && (
+            <>
+              <TouchableOpacity
+                style={styles.menuItem}
+                activeOpacity={0.7}
+                onPress={openTeo}
+              >
+                <FontAwesomeFreeSolid
+                  name="robot"
+                  size={19 * fontScale}
+                  color={colors.PRIMARY_LIGHT}
+                  style={styles.menuIcon}
+                />
+                <Text
+                  style={[
+                    styles.menuLabel,
+                    { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale },
+                  ]}
+                >
+                  Teo
+                </Text>
+                <FontAwesomeFreeSolid
+                  name="chevron-right"
+                  size={14 * fontScale}
+                  color={colors.TEXT_MUTED}
+                />
+              </TouchableOpacity>
+
+              <View
+                style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]}
+              />
+            </>
+          )}
+
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
@@ -310,6 +347,8 @@ export default function ProfileScreen() {
       <TabBar />
 
       <PinModal {...pinModalProps} />
+
+      <PinModal {...teoPinModalProps} />
     </View>
   );
 }

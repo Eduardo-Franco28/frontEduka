@@ -6,7 +6,11 @@ import { PinOperation } from "../enums/PinOperationEnum";
 
 const DEFAULT_LOCK_SECONDS = 120;
 
-export default function usePin() {
+async function verifyAppPin(pin: string): Promise<boolean> {
+  return Boolean(await authService.verifyPin({ pin }));
+}
+
+export default function usePin(verifier: (pin: string) => Promise<boolean> = verifyAppPin) {
   const [visible, setVisible] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +47,7 @@ export default function usePin() {
     setError(null);
 
     try {
-      const isValid = await authService.verifyPin({ pin });
+      const isValid = await verifier(pin);
 
       if (!isValid) {
         setError("PIN incorreto");
