@@ -35,3 +35,7 @@ export interface NewPasswordRequest {
 export interface PinRequest {
     pin: string;
 }
+
+export interface TeoCodeResponse {
+    code: string;
+}

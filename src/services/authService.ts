@@ -1,5 +1,5 @@
 import { api } from "../configs/api";
-import {LoginRequest, RegisterRequest, AuthResponse, User, NewProfileRequest, NewPasswordRequest, PinRequest} from "../types/auth";
+import {LoginRequest, RegisterRequest, AuthResponse, User, NewProfileRequest, NewPasswordRequest, PinRequest, TeoCodeResponse} from "../types/auth";
 
 export async function login(data: LoginRequest): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>('/auth/login', data);
@@ -13,6 +13,11 @@ export async function register(data: RegisterRequest): Promise<AuthResponse>{
 
 export async function verifyPin(data: PinRequest): Promise<Boolean> {
     const response = await api.post<Boolean>('/auth/pin', data);
+    return response.data;
+}
+
+export async function createTeoCode(data: PinRequest): Promise<TeoCodeResponse> {
+    const response = await api.post<TeoCodeResponse>('/auth/teo/code', data);
     return response.data;
 }
 

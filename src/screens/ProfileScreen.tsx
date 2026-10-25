@@ -18,12 +18,15 @@ import useProgress from "../hooks/useProgress";
 import { useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import usePin from "../hooks/usePin";
+import useTeo from "../hooks/useTeo";
 import PinModal from "../components/PinModal";
+import { TEO_ENABLED } from "../constants/constant";
 
 export default function ProfileScreen() {
   const { logOut, user } = useAuth();
   const { colors, fontScale, isDark } = useTheme();
   const { openPin, pinModalProps } = usePin();
+  const { openTeo, teoPinModalProps } = useTeo();
 
   const navigation = useAppNavigation();
 
@@ -137,6 +140,43 @@ export default function ProfileScreen() {
             </Text>
           </View>
         </View>
+
+        {TEO_ENABLED && (
+          <TouchableOpacity
+            style={[
+              styles.teoCard,
+              { backgroundColor: isDark ? colors.SECONDARY : colors.PRIMARY },
+            ]}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="Converse com o Teo"
+            accessibilityHint="Pede o PIN antes de abrir"
+            onPress={openTeo}
+          >
+            <View style={[styles.teoIconBox, { backgroundColor: colors.CARD }]}>
+              <FontAwesomeFreeSolid
+                name="robot"
+                size={22 * fontScale}
+                color={colors.PRIMARY}
+              />
+            </View>
+
+            <View style={styles.teoText}>
+              <Text style={[styles.teoTitle, { fontSize: 17 * fontScale }]}>
+                Converse com o Teo
+              </Text>
+              <Text style={[styles.teoSubtitle, { fontSize: 13 * fontScale }]}>
+                Seu assistente para dúvidas e atividades
+              </Text>
+            </View>
+
+            <FontAwesomeFreeSolid
+              name="chevron-right"
+              size={16 * fontScale}
+              color="#fff"
+            />
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           style={[
@@ -310,6 +350,8 @@ export default function ProfileScreen() {
       <TabBar />
 
       <PinModal {...pinModalProps} />
+
+      <PinModal {...teoPinModalProps} />
     </View>
   );
 }
@@ -369,6 +411,36 @@ const styles = StyleSheet.create({
   statLabel: {
     fontWeight: "700",
     letterSpacing: 0.8,
+  },
+
+  teoCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    borderRadius: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  teoIconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  teoText: {
+    flex: 1,
+    gap: 2,
+  },
+  teoTitle: {
+    color: "#fff",
+    fontWeight: "800",
+  },
+  teoSubtitle: {
+    color: "#fff",
+    fontWeight: "500",
+    opacity: 0.9,
   },
 
   achievementsCard: {

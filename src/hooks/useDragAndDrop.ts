@@ -42,6 +42,12 @@ const isSlotFilled = (slotName: string) =>
   const isPiecePlaced = (pieceId: number) =>
     placements.some((placement) => placement.pieceId === pieceId);
 
+  const isSlotFree = (slotName: string, pieceId: number) =>
+    !placements.some(
+      (placement) =>
+        placement.slotName === slotName && placement.pieceId !== pieceId,
+    );
+
   return {
     targets,
     pieces,
@@ -53,5 +59,6 @@ const isSlotFilled = (slotName: string) =>
     reset,
     isSlotFilled,
     isPiecePlaced,
+    isSlotFree,
   };
 }
