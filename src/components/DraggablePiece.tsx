@@ -14,6 +14,7 @@ interface DraggablePieceProps {
   targets: TargetRegistry;
   onDrop: (pieceId: number, slotName: string) => void;
   onMiss?: (pieceId: number) => void;
+  canDrop?: (slotName: string) => boolean;
   snap?: boolean;
   pieces?: PieceRegistry;
   disabled?: boolean;
@@ -30,6 +31,7 @@ export default function DraggablePiece({
   targets,
   onDrop,
   onMiss,
+  canDrop,
   snap = true,
   pieces,
   disabled = false,
@@ -93,6 +95,12 @@ export default function DraggablePiece({
         Math.hypot(a.x + a.width / 2 - cx, a.y + a.height / 2 - cy);
       return distance(current) < distance(best) ? current : best;
     });
+
+    if (canDrop && !canDrop(slotId)) {
+      returnHome();
+      onMiss?.(id);
+      return;
+    }
 
     if (snap) {
       dx.value = withSpring(

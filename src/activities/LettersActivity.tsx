@@ -24,6 +24,7 @@ export default function LettersActivity({
     remove,
     returnToBox,
     isSlotFilled,
+    isSlotFree,
     isPiecePlaced,
   } = useDragAndDrop();
   const [lstWrongSlots, setLstWrongSlots] = useState<string[]>([]);
@@ -132,6 +133,7 @@ export default function LettersActivity({
             pieces={pieces}
             onDrop={place}
             onMiss={remove}
+            canDrop={(slotName) => isSlotFree(slotName, alternative.id)}
             snap
           >
             <View

@@ -141,6 +141,43 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {TEO_ENABLED && (
+          <TouchableOpacity
+            style={[
+              styles.teoCard,
+              { backgroundColor: isDark ? colors.SECONDARY : colors.PRIMARY },
+            ]}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="Converse com o Teo"
+            accessibilityHint="Pede o PIN antes de abrir"
+            onPress={openTeo}
+          >
+            <View style={[styles.teoIconBox, { backgroundColor: colors.CARD }]}>
+              <FontAwesomeFreeSolid
+                name="robot"
+                size={22 * fontScale}
+                color={colors.PRIMARY}
+              />
+            </View>
+
+            <View style={styles.teoText}>
+              <Text style={[styles.teoTitle, { fontSize: 17 * fontScale }]}>
+                Converse com o Teo
+              </Text>
+              <Text style={[styles.teoSubtitle, { fontSize: 13 * fontScale }]}>
+                Seu assistente para dúvidas e atividades
+              </Text>
+            </View>
+
+            <FontAwesomeFreeSolid
+              name="chevron-right"
+              size={16 * fontScale}
+              color="#fff"
+            />
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity
           style={[
             styles.achievementsCard,
@@ -191,40 +228,6 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
         <View style={[styles.menuCard, { backgroundColor: colors.CARD }]}>
-          {TEO_ENABLED && (
-            <>
-              <TouchableOpacity
-                style={styles.menuItem}
-                activeOpacity={0.7}
-                onPress={openTeo}
-              >
-                <FontAwesomeFreeSolid
-                  name="robot"
-                  size={19 * fontScale}
-                  color={colors.PRIMARY_LIGHT}
-                  style={styles.menuIcon}
-                />
-                <Text
-                  style={[
-                    styles.menuLabel,
-                    { color: colors.TEXT_PRIMARY, fontSize: 15 * fontScale },
-                  ]}
-                >
-                  Teo
-                </Text>
-                <FontAwesomeFreeSolid
-                  name="chevron-right"
-                  size={14 * fontScale}
-                  color={colors.TEXT_MUTED}
-                />
-              </TouchableOpacity>
-
-              <View
-                style={[styles.divider, { backgroundColor: colors.BORDER_LIGHT }]}
-              />
-            </>
-          )}
-
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
@@ -408,6 +411,36 @@ const styles = StyleSheet.create({
   statLabel: {
     fontWeight: "700",
     letterSpacing: 0.8,
+  },
+
+  teoCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    borderRadius: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  teoIconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  teoText: {
+    flex: 1,
+    gap: 2,
+  },
+  teoTitle: {
+    color: "#fff",
+    fontWeight: "800",
+  },
+  teoSubtitle: {
+    color: "#fff",
+    fontWeight: "500",
+    opacity: 0.9,
   },
 
   achievementsCard: {

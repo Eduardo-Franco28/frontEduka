@@ -33,6 +33,7 @@ export default function ShapesActivity({
     remove,
     returnToBox,
     isSlotFilled,
+    isSlotFree,
     isPiecePlaced,
   } = useDragAndDrop();
   const [lstWrongSlots, setLstWrongSlots] = useState<string[]>([]);
@@ -196,6 +197,7 @@ export default function ShapesActivity({
               pieces={pieces}
               onDrop={place}
               onMiss={remove}
+              canDrop={(slotName) => isSlotFree(slotName, alternative.id)}
               snap
               frameStyle={[
                 styles.piece,
