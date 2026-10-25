@@ -20,6 +20,7 @@ interface PinModalProps {
   onConfirm: (pin: string) => void;
   error?: string | null;
   loading?: boolean;
+  locked?: boolean;
 }
 
 const PIN_LENGTH = 4;
@@ -31,6 +32,7 @@ export default function PinModal({
   onConfirm,
   error,
   loading = false,
+  locked = false,
 }: PinModalProps) {
   const { colors, fontScale } = useTheme();
 
@@ -45,9 +47,15 @@ export default function PinModal({
     if (!visible || error) setPin("");
   }, [visible, error]);
 
+  useEffect(() => {
+    if (locked) inputRef.current?.blur();
+  }, [locked]);
+
   // Se o teclado foi fechado pelo botão voltar, o input continua "focado" e o
   // focus() sozinho não reabre. Tirar o foco antes faz o teclado voltar.
   const openKeyboard = () => {
+    if (locked) return;
+
     inputRef.current?.blur();
     inputRef.current?.focus();
   };
@@ -76,7 +84,9 @@ export default function PinModal({
       animationType="fade"
       // O Android ignora o foco se ele vier junto com a abertura do modal,
       // então esperamos um instante antes de abrir o teclado.
-      onShow={() => setTimeout(() => inputRef.current?.focus(), 100)}
+      onShow={() => {
+        if (!locked) setTimeout(() => inputRef.current?.focus(), 100);
+      }}
     >
       <KeyboardAvoidingView behavior="padding" style={styles.overlay}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
@@ -136,7 +146,7 @@ export default function PinModal({
             ref={inputRef}
             value={pin}
             onChangeText={handleChangePin}
-            editable={!loading}
+            editable={!loading && !locked}
             keyboardType="number-pad"
             maxLength={PIN_LENGTH}
             style={styles.hiddenInput}
