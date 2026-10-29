@@ -25,7 +25,14 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.integramente"
     },
-    "web": {},
+    "web": {
+      "output": "single",
+      "name": "IntegraMente",
+      "shortName": "IntegraMente",
+      "themeColor": "#4962D8",
+      "backgroundColor": "#4962D8",
+      "favicon": "./assets/icon/icon.png"
+    },
     "plugins": [
       "expo-secure-store",
       "@react-native-vector-icons/fontawesome-free-solid",
