@@ -35,12 +35,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       try {
-        const token = await storageService.get(STORAGE_KEY);
+          const token = await storageService.get(STORAGE_KEY);
 
-        if (!token) {
-          setUser(null);
-          return;
-        }
+          if (!token) {
+            setUser(null);
+            return;
+          }
 
         const user = await authService.me(token);
 

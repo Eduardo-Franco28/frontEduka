@@ -13,7 +13,8 @@ import { COLORS } from "../styles/colors";
 import { ActivityProps } from "../types/activity";
 import TipButton from "../components/TipButton";
 
-const DISTANCE = 60;
+const DISTANCE = 70;
+const TARGET_OFFSET_X = 40;
 
 const DOTS_PER_COLUMN = 4;
 
@@ -90,14 +91,14 @@ export default function DotsActivity({
       targetRef.current?.measure((_x, _y, _w, _h, pageXTarget, pageYTarget) => {
         dotsRef4.current?.measure(
           (_x2, _y2, _w2, _h2, pageXDots4, pageYDots4) => {
-            finalPositionDotX4.value = pageXTarget - pageXDots4;
+            finalPositionDotX4.value = pageXTarget - pageXDots4 + TARGET_OFFSET_X;
             finalPositionDotY4.value = pageYTarget - pageYDots4;
           },
         );
 
         dotsRef3.current?.measure(
           (_x3, _y3, _w3, _h3, pageXDots3, pageYDots3) => {
-            finalPositionDotX3.value = pageXTarget - pageXDots3;
+            finalPositionDotX3.value = pageXTarget - pageXDots3 + TARGET_OFFSET_X;
             finalPositionDotY3.value = pageYTarget - pageYDots3;
           },
         );

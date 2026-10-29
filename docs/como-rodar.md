@@ -1,4 +1,4 @@
-# Como rodar o IntegraMente + Teo no computador
+    # Como rodar o IntegraMente + Teo no computador
 
 Para testar no celular, tudo roda no seu computador e o celular acessa pelo IP dele na rede Wi-Fi. São 5 peças:
 

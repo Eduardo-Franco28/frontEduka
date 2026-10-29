@@ -32,3 +32,4 @@ Este projeto foi desenvolvido como Trabalho de Conclusão de Curso (TCC) pelos a
 - npx expo install react-native-worklets
 - npx expo install @react-native-vector-icons/fontawesome-free-solid @react-native-vector-icons/evil-icons
 - npx expo install expo-speech
+- npx expo install react-dom react-native-web

@@ -10,6 +10,7 @@ import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-fre
 import * as Speech from "expo-speech";
 import { useEffect } from "react";
 import useTheme from "../hooks/useTheme";
+import useVoice from "../hooks/useVoice";
 
 interface TipActivityProps {
   tip: string;
@@ -23,12 +24,17 @@ export default function TipActivity({
   onClose,
 }: TipActivityProps) {
   const { colors, fontScale } = useTheme();
+  const { voiceEnabled, loaded, toggleVoice } = useVoice();
 
-  const speaker = () => {
-    if (!visible) return;
+  useEffect(() => {
+    if (!visible || !loaded || !voiceEnabled) return;
 
     Speech.speak(tip);
-  };
+
+    return () => {
+      Speech.stop();
+    };
+  }, [visible, loaded, voiceEnabled, tip]);
 
   return (
     <Modal
@@ -79,11 +85,11 @@ export default function TipActivity({
                 { backgroundColor: colors.SURFACE_PRIMARY },
               ]}
               activeOpacity={0.7}
-              accessibilityLabel="Ouvir a dica"
-              onPress={() => speaker()}
+              accessibilityLabel={voiceEnabled ? "Desativar voz" : "Ativar voz"}
+              onPress={toggleVoice}
             >
               <FontAwesomeFreeSolid
-                name="volume-high"
+                name={voiceEnabled ? "volume-high" : "volume-xmark"}
                 size={20}
                 color={colors.PRIMARY}
               />

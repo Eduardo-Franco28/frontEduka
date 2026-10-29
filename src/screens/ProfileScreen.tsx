@@ -117,7 +117,7 @@ export default function ProfileScreen() {
                 { color: colors.TEXT_MUTED, fontSize: 11 * fontScale },
               ]}
             >
-              ATIVIDADES
+              Atividades feitas
             </Text>
           </View>
 
@@ -136,7 +136,7 @@ export default function ProfileScreen() {
                 { color: colors.TEXT_MUTED, fontSize: 11 * fontScale },
               ]}
             >
-              Tópicos
+              Tópicos concluídos
             </Text>
           </View>
         </View>
@@ -155,7 +155,7 @@ export default function ProfileScreen() {
           >
             <View style={[styles.teoIconBox, { backgroundColor: colors.CARD }]}>
               <FontAwesomeFreeSolid
-                name="robot"
+                name="comment-dots"
                 size={22 * fontScale}
                 color={colors.PRIMARY}
               />
@@ -411,6 +411,7 @@ const styles = StyleSheet.create({
   statLabel: {
     fontWeight: "700",
     letterSpacing: 0.8,
+    textAlign: "center",
   },
 
   teoCard: {

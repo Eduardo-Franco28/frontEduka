@@ -125,7 +125,7 @@ export default function AuthScreen() {
           </Text>
         </View>
 
-        <ErrorMessage message={errorMessage ?? error} />
+        <ErrorMessage message={errorMessage} />
 
         {!isLogin && (
           <Input
@@ -194,7 +194,7 @@ export default function AuthScreen() {
 
         <View style={styles.rodape}>
           <Text style={styles.rodapeTexto}>
-            {isLogin ? "Não tem conta?" : "Já tem conta?"}
+            {isLogin ? "Não tem conta? " : "Já tem conta? "}
           </Text>
           <TouchableOpacity
             onPress={() =>
@@ -202,7 +202,7 @@ export default function AuthScreen() {
             }
           >
             <Text style={styles.rodapeLink}>
-              {isLogin ? "Entrar" : "Criar Conta"}
+              {isLogin ? "Criar Conta" : "Entrar"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT_DARK,
   },
   rodape: {
-    marginTop: 12,
+    marginTop: 16,
     flexDirection: "row",
     justifyContent: "center",
   },

@@ -12,7 +12,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../styles/colors";
 
-export const SPLASH_DURATION_MS = 5500;
+export const SPLASH_DURATION_MS = 10000;
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -122,7 +122,6 @@ export default function SplashLoading({ onSkip }: SplashLoadingProps) {
   const mascotOpacity = useRef(new Animated.Value(0)).current;
   const titleOpacity = useRef(new Animated.Value(0)).current;
   const subtitleOpacity = useRef(new Animated.Value(0)).current;
-  const barProgress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const entrance = Animated.stagger(260, [
@@ -151,26 +150,10 @@ export default function SplashLoading({ onSkip }: SplashLoadingProps) {
       }),
     ]);
 
-    const bar = Animated.timing(barProgress, {
-      toValue: 1,
-      duration: SPLASH_DURATION_MS,
-      easing: Easing.linear,
-      useNativeDriver: false,
-    });
-
     entrance.start();
-    bar.start();
 
-    return () => {
-      entrance.stop();
-      bar.stop();
-    };
-  }, [mascotOpacity, mascotScale, titleOpacity, subtitleOpacity, barProgress]);
-
-  const barWidth = barProgress.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0%", "100%"],
-  });
+    return () => entrance.stop();
+  }, [mascotOpacity, mascotScale, titleOpacity, subtitleOpacity]);
 
   return (
     <Pressable style={styles.flex} onPress={onSkip}>
@@ -208,10 +191,6 @@ export default function SplashLoading({ onSkip }: SplashLoadingProps) {
           Aprender do seu jeito
         </Animated.Text>
 
-        <View style={styles.barTrack}>
-          <Animated.View style={[styles.barFill, { width: barWidth }]} />
-        </View>
-
         <Text style={styles.hint}>Toque para começar agora</Text>
       </LinearGradient>
     </Pressable>
@@ -233,7 +212,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   mascotArea: {
-    width: 260,
+    width: 360,
     height: 260,
     alignItems: "center",
     justifyContent: "center",
@@ -246,8 +225,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   mascot: {
-    width: 240,
-    height: 240,
+    width: 360,
+    height: 203,
   },
   title: {
     fontSize: 46,
@@ -263,22 +242,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 4,
   },
-  barTrack: {
-    width: 180,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#ffffff40",
-    overflow: "hidden",
-    marginTop: 40,
-  },
-  barFill: {
-    height: "100%",
-    borderRadius: 3,
-    backgroundColor: "#ffffff",
-  },
   hint: {
     fontSize: 13,
     color: "#ffffff90",
-    marginTop: 18,
+    marginTop: 40,
   },
 });
