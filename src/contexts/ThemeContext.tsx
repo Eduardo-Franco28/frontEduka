@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
-import * as SecureStore from "expo-secure-store";
+import * as storageService from "../services/storageService";
 import { COLORS, DARK_COLORS } from "../styles/colors";
 import { ThemeContextData } from "../types/theme";
 
@@ -19,10 +19,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   useEffect(() => {
     const loadPreferences = async () => {
       try {
-        const storedTheme = await SecureStore.getItemAsync(THEME_KEY);
+        const storedTheme = await storageService.get(THEME_KEY);
         if (storedTheme === "dark") setIsDark(true);
 
-        const storedScale = await SecureStore.getItemAsync(FONT_SCALE_KEY);
+        const storedScale = await storageService.get(FONT_SCALE_KEY);
         if (storedScale) setFontScaleState(Number(storedScale));
       } catch (error) {
         console.error("Theme error:", error);
@@ -36,7 +36,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     const next = !isDark;
     setIsDark(next);
     try {
-      await SecureStore.setItemAsync(THEME_KEY, next ? "dark" : "light");
+      await storageService.save(THEME_KEY, next ? "dark" : "light");
     } catch (error) {
       console.error("Theme error:", error);
     }
@@ -45,7 +45,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const setFontScale = async (scale: number) => {
     setFontScaleState(scale);
     try {
-      await SecureStore.setItemAsync(FONT_SCALE_KEY, String(scale));
+      await storageService.save(FONT_SCALE_KEY, String(scale));
     } catch (error) {
       console.error("Theme error:", error);
     }
